@@ -10,6 +10,7 @@ import { MetodoPago } from './metodosPago/entities/metodo-pago.entity';
 import { Reservation } from './reservations/entities/reservation.entity';
 import { Habitacion } from './habitaciones/entities/habitacion.entity';
 import { Setting } from './settings/entities/setting.entity';
+import { Huesped } from './reservations/entities/huesped.entity';
 
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
@@ -44,6 +45,7 @@ import { SettingsModule } from './settings/settings.module';
           Reservation,
           Habitacion,
           Setting,
+          Huesped,
         ];
 
         if (databaseUrl) {

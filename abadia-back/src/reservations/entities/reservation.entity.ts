@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { Cliente } from '../../clientes/entities/cliente.entity';
 import { Habitacion } from '../../habitaciones/entities/habitacion.entity';
+import { Huesped } from './huesped.entity';
 
 export enum ReservationStatus {
     PENDING = 'pending',
@@ -41,7 +42,10 @@ export class Reservation {
     checkOut: Date;
 
     @Column({ type: 'int', default: 1 })
-    numeroHuespedes: number;
+    numeroAdultos: number;
+
+    @Column({ type: 'int', default: 0 })
+    numeroNinos: number;
 
     @Column({ nullable: true })
     origenReserva: string; // e.g. "Booking", "Directo"
@@ -69,6 +73,9 @@ export class Reservation {
 
     @Column({ nullable: true })
     googleEventId: string;
+
+    @OneToMany(() => Huesped, huesped => huesped.reservation)
+    huespedes: Huesped[];
 
     @CreateDateColumn()
     createdAt: Date;

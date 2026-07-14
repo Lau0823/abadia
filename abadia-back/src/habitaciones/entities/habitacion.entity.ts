@@ -6,6 +6,11 @@ export enum EstadoHabitacion {
   FUERA_DE_SERVICIO = 'FUERA_DE_SERVICIO'
 }
 
+export enum EstadoLimpieza {
+  LIMPIA = 'LIMPIA',
+  POR_ASEAR = 'POR_ASEAR'
+}
+
 @Entity('habitaciones')
 export class Habitacion {
   @PrimaryGeneratedColumn('uuid')
@@ -28,6 +33,9 @@ export class Habitacion {
 
   @Column({ type: 'enum', enum: EstadoHabitacion, default: EstadoHabitacion.DISPONIBLE })
   estado: EstadoHabitacion;
+
+  @Column({ type: 'enum', enum: EstadoLimpieza, default: EstadoLimpieza.LIMPIA })
+  estadoLimpieza: EstadoLimpieza;
 
   @CreateDateColumn()
   createdAt: Date;

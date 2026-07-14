@@ -9,6 +9,8 @@ import getDay from "date-fns/getDay";
 import es from "date-fns/locale/es";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { fetchApi } from "@/lib/api";
+import { UserGroupIcon } from "@heroicons/react/24/outline";
+import HuespedesModal from "@/components/HuespedesModal";
 
 const locales = {
   es: es,
@@ -25,36 +27,43 @@ const localizer = dateFnsLocalizer({
 export default function CalendarioPage() {
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [isHuespedesModalOpen, setIsHuespedesModalOpen] = useState(false);
+
+  const fetchReservas = async () => {
+    try {
+      const data = await fetchApi('/reservations');
+      const mappedEvents = data.map((d: any) => ({ 
+        title: `${d.cliente?.nombre || 'Sin Cliente'} - ${d.habitacion?.titulo || 'Habitación'}`, 
+        start: new Date(d.checkIn), 
+        end: new Date(d.checkOut),
+        resource: d.habitacion?.titulo,
+        reservationDetails: d
+      }));
+      setEvents(mappedEvents);
+    } catch (error) {
+      console.error("Error al cargar reservas del backend, usando mock data:", error);
+      // Mock data fallback
+      setEvents([
+        {
+          title: "María Pérez - Habitación 1",
+          start: new Date(new Date().setHours(15, 0, 0, 0)),
+          end: new Date(new Date(new Date().setDate(new Date().getDate() + 2)).setHours(12, 0, 0, 0)),
+          resource: "Suite Insignia"
+        },
+        {
+          title: "Carlos López - Habitación 2",
+          start: new Date(new Date(new Date().setDate(new Date().getDate() + 1)).setHours(14, 0, 0, 0)),
+          end: new Date(new Date(new Date().setDate(new Date().getDate() + 4)).setHours(11, 0, 0, 0)),
+          resource: "Refugio Rústico"
+        }
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    // Aquí traeríamos las reservaciones del API.
-    // Usaremos datos de ejemplo por ahora para visualizar.
-    const fetchReservas = async () => {
-      try {
-        // const data = await fetchApi('/reservations');
-        // setEvents(data.map(d => ({ title: `${d.cliente.nombre} - ${d.habitacion.titulo}`, start: new Date(d.checkIn), end: new Date(d.checkOut) })));
-        
-        // Mock data
-        setEvents([
-          {
-            title: "María Pérez - Habitación 1",
-            start: new Date(new Date().setHours(15, 0, 0, 0)),
-            end: new Date(new Date(new Date().setDate(new Date().getDate() + 2)).setHours(12, 0, 0, 0)),
-            resource: "Suite Insignia"
-          },
-          {
-            title: "Carlos López - Habitación 2",
-            start: new Date(new Date(new Date().setDate(new Date().getDate() + 1)).setHours(14, 0, 0, 0)),
-            end: new Date(new Date(new Date().setDate(new Date().getDate() + 4)).setHours(11, 0, 0, 0)),
-            resource: "Refugio Rústico"
-          }
-        ]);
-      } catch (error) {
-        console.error("Error al cargar reservas:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchReservas();
   }, []);
 
@@ -113,9 +122,109 @@ export default function CalendarioPage() {
             views={[Views.MONTH, Views.WEEK, Views.AGENDA]}
             defaultView={Views.MONTH}
             popup
+            onSelectEvent={(event) => setSelectedEvent(event)}
             />
         )}
       </div>
+
+      {/* Modal de Detalles del Evento */}
+      {selectedEvent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl relative animate-in fade-in zoom-in duration-200">
+            <button 
+              onClick={() => setSelectedEvent(null)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 p-2"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <h3 className="text-xl font-bold text-[var(--mv-ink)] mb-4 border-b pb-2">Detalles de la Reserva</h3>
+            <div className="space-y-4">
+              <div>
+                <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Cliente</p>
+                <p className="text-gray-800 font-medium">{selectedEvent.reservationDetails?.cliente?.nombre || 'N/A'}</p>
+                <p className="text-sm text-gray-500">{selectedEvent.reservationDetails?.cliente?.correo || ''}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Habitación</p>
+                <p className="text-gray-800 font-medium">{selectedEvent.reservationDetails?.habitacion?.titulo || selectedEvent.resource || 'N/A'}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Check In</p>
+                  <p className="text-gray-800">{new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium', timeStyle: 'short' }).format(selectedEvent.start)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Check Out</p>
+                  <p className="text-gray-800">{new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium', timeStyle: 'short' }).format(selectedEvent.end)}</p>
+                </div>
+              </div>
+              <div className="bg-gray-50 p-3 rounded-xl border border-gray-100 flex justify-between items-center">
+                <div>
+                  <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Acompañantes ({selectedEvent.reservationDetails?.huespedes?.length || 0} Reg.)</p>
+                  <p className="text-gray-800 font-medium">
+                    {selectedEvent.reservationDetails?.numeroAdultos || 1} Adulto(s) 
+                    {selectedEvent.reservationDetails?.numeroNinos > 0 ? `, ${selectedEvent.reservationDetails?.numeroNinos} Niño(s)` : ''}
+                  </p>
+                </div>
+                <button 
+                  onClick={() => setIsHuespedesModalOpen(true)}
+                  className="flex items-center gap-1 text-[var(--mv-blue)] hover:text-[#0b3c66] bg-blue-50 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors"
+                >
+                  <UserGroupIcon className="w-4 h-4" />
+                  Registro TRA
+                </button>
+              </div>
+              <div className="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-100">
+                 <div>
+                    <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Estado</p>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold uppercase mt-1 ${
+                      selectedEvent.reservationDetails?.status === 'completed' ? 'bg-gray-200 text-gray-700' :
+                      selectedEvent.reservationDetails?.status === 'confirmed' ? 'bg-green-200 text-green-800' : 
+                      selectedEvent.reservationDetails?.status === 'pending' ? 'bg-yellow-200 text-yellow-800' : 'bg-red-200 text-red-800'
+                    }`}>
+                      {selectedEvent.reservationDetails?.status || 'N/A'}
+                    </span>
+                 </div>
+                 <div className="text-right">
+                    <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Valor Total</p>
+                    <p className="text-lg font-bold text-[var(--mv-ink)]">
+                      ${Number(selectedEvent.reservationDetails?.value || 0).toLocaleString('es-CO')}
+                    </p>
+                 </div>
+              </div>
+              {selectedEvent.reservationDetails?.notas_admin && (
+                <div className="bg-yellow-50/50 p-3 rounded-xl border border-yellow-100">
+                  <p className="text-xs text-yellow-700 uppercase tracking-wider font-semibold mb-1">Notas / Mensajes</p>
+                  <p className="text-sm text-gray-700 italic">{selectedEvent.reservationDetails.notas_admin}</p>
+                </div>
+              )}
+            </div>
+            <div className="mt-6 flex justify-end">
+              <button 
+                onClick={() => setSelectedEvent(null)}
+                className="px-5 py-2.5 bg-[var(--mv-blue)] hover:bg-[#0b3c66] text-white rounded-full text-sm font-medium transition-all"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {selectedEvent && (
+        <HuespedesModal 
+          isOpen={isHuespedesModalOpen}
+          onClose={() => setIsHuespedesModalOpen(false)}
+          reservation={selectedEvent.reservationDetails}
+          onSuccess={() => {
+            fetchEvents();
+            // Para actualizar los datos del modal sin cerrarlo, habría que hacer fetch de nuevo a la reserva
+            // Por simplicidad, el fetchEvents refrescará el state general en background
+          }}
+        />
+      )}
     </div>
   );
 }

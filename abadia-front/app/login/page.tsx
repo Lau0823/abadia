@@ -8,26 +8,47 @@ export const metadata = {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen bg-[var(--mv-cream)] flex flex-col justify-center items-center p-4 relative overflow-hidden">
-      {/* Elementos decorativos de fondo */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-[var(--mv-sage)] opacity-10 blur-[100px]"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-[var(--mv-blue)] opacity-10 blur-[120px]"></div>
+    <div className="min-h-screen flex relative overflow-hidden bg-white">
       
-      <div className="w-full flex justify-center mb-8 z-10">
-        {/* Aquí puedes usar el logo.png que tienes en public */}
-        <div className="relative w-40 h-16">
-           {/* Fallback por si la imagen no carga, un texto estilizado */}
-           <h1 className="text-4xl mv-script text-[var(--mv-ink)] text-center w-full">Abadia</h1>
+      {/* Lado izquierdo: Formulario */}
+      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-8 z-10 bg-white relative">
+        <div className="absolute top-12 left-12 lg:top-16 lg:left-16 max-w-sm hidden sm:block">
+          <h2 className="text-3xl font-light mb-2 uppercase tracking-widest font-luxury-title text-[#3d342e]">Panel de Control</h2>
+          <p className="text-xs font-light tracking-wider text-gray-500 leading-relaxed">Gestiona la disponibilidad, revisa tus reservas y administra el hotel.</p>
+        </div>
+        <div className="w-full flex justify-center mb-10">
+          <div className="relative w-64 h-28 filter brightness-0">
+             <Image 
+               src="/logo.png" 
+               alt="Abadía Hotel Logo" 
+               fill 
+               className="object-contain" 
+               priority
+             />
+          </div>
+        </div>
+        
+        <div className="w-full flex justify-center">
+          <LoginForm />
+        </div>
+        
+        <div className="mt-16 text-center text-xs text-gray-400">
+          &copy; {new Date().getFullYear()} Abadía. Todos los derechos reservados.
         </div>
       </div>
-      
-      <div className="z-10 w-full flex justify-center">
-        <LoginForm />
+
+      {/* Lado derecho: Imagen Profesional */}
+      <div className="hidden lg:flex lg:w-1/2 relative z-10 bg-[#3d342e]">
+        <Image 
+          src="/WhatsApp Image 2026-07-06 at 20.33.43.jpeg" 
+          alt="Abadia Hotel" 
+          fill 
+          className="object-cover opacity-90"
+          priority
+        />
+        <div className="absolute inset-0 bg-gradient-to-l from-black/5 via-black/20 to-black/40"></div>
       </div>
-      
-      <div className="mt-12 text-center text-xs text-gray-400 z-10">
-        &copy; {new Date().getFullYear()} Abadia. Todos los derechos reservados.
-      </div>
+
     </div>
   );
 }

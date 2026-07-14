@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
 import { HabitacionesService } from './habitaciones.service';
 import { CreateHabitacionDto } from './dto/create-habitacion.dto';
 import { UpdateHabitacionDto } from './dto/update-habitacion.dto';
@@ -27,6 +27,15 @@ export class HabitacionesController {
     return this.habitacionesService.findAll();
   }
 
+  @Get('disponibles')
+  @Public()
+  findDisponibles(@Query('checkIn') checkIn: string, @Query('checkOut') checkOut: string) {
+    if (!checkIn || !checkOut) {
+      return this.habitacionesService.findAll();
+    }
+    return this.habitacionesService.findDisponibles(checkIn, checkOut);
+  }
+
   @Get(':id')
   @Public()
   findOne(@Param('id') id: string) {
@@ -39,6 +48,14 @@ export class HabitacionesController {
   @Roles(Role.Admin, Role.SuperAdmin)
   update(@Param('id') id: string, @Body() updateHabitacionDto: UpdateHabitacionDto) {
     return this.habitacionesService.update(id, updateHabitacionDto);
+  }
+
+  @Patch(':id/limpieza')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @Roles(Role.Admin, Role.SuperAdmin)
+  updateLimpieza(@Param('id') id: string, @Body('estadoLimpieza') estadoLimpieza: string) {
+    return this.habitacionesService.updateLimpieza(id, estadoLimpieza);
   }
 
   @Delete(':id')

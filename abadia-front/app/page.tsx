@@ -2,17 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { useHabitacionesStore } from '../store/habitacionesStore';
 
 // --- INTERFACES DE DATOS ---
-interface Habitacion {
-  id: string;
-  titulo: string;
-  descripcion: string;
-  imagen: string;
-  precio: string;
-  ocupacion: string;
-}
-
 interface PlanHotel {
   id: string;
   titulo: string;
@@ -57,15 +49,7 @@ const IMAGENES_HERO: string[] = [
   "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=1920&q=80"  
 ];
 
-// --- 6 HABITACIONES PARA LA GRILLA ---
-const HABITACIONES_GRILLA: Habitacion[] = [
-  { id: "grid-1", titulo: "Habitación 1", descripcion: "Nuestra suite insignia con tina de hidromasaje exterior y vistas infinitas al valle.", imagen: "/WhatsApp Image 2026-07-06 at 20.33.44.jpeg", precio: "Desde $450.000 COP", ocupacion: "Máx. 2 Adultos" },
-  { id: "grid-2", titulo: "Habitación 2", descripcion: "Equilibrio perfecto entre arquitectura rústica y confort moderno, equipada con chimenea.", imagen: "/WhatsApp Image 2026-07-06 at 20.33.43 (1).jpeg", precio: "Desde $320.000 COP", ocupacion: "Máx. 2 Adultos + 1 Niño" },
-  { id: "grid-3", titulo: "Habitación 3", descripcion: "Un espacio diseñado para el silencio, la lectura y la reconexión espiritual interior.", imagen: "/WhatsApp Image 2026-07-06 at 20.33.43.jpeg", precio: "Desde $280.000 COP", ocupacion: "Máx. 2 Adultos" },
-  { id: "grid-4", titulo: "Habitación 4", descripcion: "Cabaña independiente rodeada de pinos con terraza privada elevada sobre el dosel arbóreo.", imagen: "/WhatsApp Image 2026-07-08 at 10.54.20 (1).jpeg", precio: "Desde $310.000 COP", ocupacion: "Hasta 3 Personas" },
-  { id: "grid-5", titulo: "Habitación 5", descripcion: "Orientada al oeste, ofrece los mejores espectáculos cromáticos del crepúsculo desde la cama.", imagen: "/WhatsApp Image 2026-07-08 at 10.54.20 (1).jpeg", precio: "Desde $380.000 COP", ocupacion: "Máx. 2 Adultos" },
-  { id: "grid-6", titulo: "Habitación 6", descripcion: "Techos altos, luz natural cenital y texturas orgánicas inspiradas en la naturaleza local.", imagen: "/WhatsApp Image 2026-07-06 at 20.33.44.jpeg", precio: "Desde $290.000 COP", ocupacion: "Familiar — Hasta 4 Personas" }
-];
+
 
 const PLANES: PlanHotel[] = [
   { id: "romantica", titulo: "Noche Romántica", subtitulo: "BASIC", descripcion: "Cena de tres tiempos a la luz de las velas servida en nuestra cava privada, una botella de champaña premium de bienvenida y acceso exclusivo al spa.", precio: "$250.000 COP / pareja", imagen: "https://i.pinimg.com/736x/6e/e5/6d/6ee56dc274682fb52d8986c70c816349.jpg", etiqueta: "EXPERIENCIA EXCLUSIVA" },
@@ -98,12 +82,12 @@ const TERMINOS_POLITICAS: TerminoPolitica[] = [
 ];
 
 export default function HomePage() {
+  const { habitaciones, fetchHabitaciones, isLoading } = useHabitacionesStore();
   const [heroActivo, setHeroActivo] = useState<number>(0);
   const [planActivo, setPlanActivo] = useState<string>("romantica");
   const [logoError, setLogoError] = useState<boolean>(false);
   const [isMounted, setIsMounted] = useState<boolean>(false);
   
-  const [menuAbierto, setMenuAbierto] = useState<boolean>(false);
   const [habitacionConPrecio, setHabitacionConPrecio] = useState<string | null>(null);
   
   const [pagoActivo, setPagoActivo] = useState<number>(0);
@@ -112,7 +96,8 @@ export default function HomePage() {
 
   useEffect(() => {
     setIsMounted(true);
-  }, []);
+    fetchHabitaciones();
+  }, [fetchHabitaciones]);
 
   useEffect(() => {
     if (!isMounted) return;
@@ -127,7 +112,6 @@ export default function HomePage() {
   };
 
   const hacerScrollASeccion = (idSeccion: string) => {
-    setMenuAbierto(false);
     const elem = document.getElementById(idSeccion);
     if (elem) {
       elem.scrollIntoView({ behavior: 'smooth' });
@@ -166,34 +150,7 @@ export default function HomePage() {
         }
       `}</style>
 
-      {/* --- BOTÓN HAMBURGUESA FIJO --- */}
-      <nav className="fixed top-6 right-6 z-50">
-        <button 
-          onClick={() => setMenuAbierto(!menuAbierto)}
-          className="bg-white/90 backdrop-blur-md p-4 rounded-full shadow-md border border-[#f4f1ea] flex flex-col justify-center items-center gap-1.5 w-12 h-12 active:scale-95 transition-all z-50 relative"
-          aria-label="Alternar menú"
-        >
-          <span className={`h-[1px] w-5 bg-[#3d342e] transition-all duration-300 ${menuAbierto ? 'rotate-45 translate-y-[3px]' : ''}`} />
-          <span className={`h-[1px] w-5 bg-[#3d342e] transition-all duration-300 ${menuAbierto ? 'opacity-0' : ''}`} />
-          <span className={`h-[1px] w-5 bg-[#3d342e] transition-all duration-300 ${menuAbierto ? '-rotate-45 translate-y-[3px]' : ''}`} />
-        </button>
-      </nav>
 
-      {/* --- PANEL LATERAL DEL MENÚ --- */}
-      <div className={`fixed inset-y-0 right-0 z-40 w-full sm:w-80 bg-white/95 backdrop-blur-md shadow-2xl p-8 flex flex-col justify-between border-l border-[#f4f1ea] transition-transform duration-500 ease-out ${menuAbierto ? 'translate-x-0' : 'translate-x-full'}`}>
-        <div className="pt-16">
-          <span className="text-[10px] uppercase tracking-[0.25em] text-[#3d342e]/50 font-medium block mb-8">— Navegación</span>
-          <ul className="flex flex-col gap-6 text-lg text-[#3d342e] font-light tracking-wide">
-            <li className="cursor-pointer hover:text-neutral-500 transition-colors" onClick={() => { setMenuAbierto(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Inicio</li>
-            <li className="cursor-pointer hover:text-neutral-400 transition-colors" onClick={() => hacerScrollASeccion('habitaciones')}>Habitaciones</li>
-            <li className="cursor-pointer hover:text-neutral-400 transition-colors" onClick={() => hacerScrollASeccion('seccion-reservas-mid')}>Reservar</li>
-            <li className="cursor-pointer hover:text-neutral-400 transition-colors" onClick={() => hacerScrollASeccion('casa')}>Conoce la Casa</li>
-            <li className="cursor-pointer hover:text-neutral-400 transition-colors" onClick={() => hacerScrollASeccion('planes')}>Planes y Precios</li>
-            <li className="cursor-pointer hover:text-neutral-400 transition-colors" onClick={() => hacerScrollASeccion('turismo')}>Entorno Local</li>
-          </ul>
-        </div>
-        <div className="text-[10px] text-neutral-400 font-medium tracking-wide">© 2026 Abadía Hotel Boutique.</div>
-      </div>
 
       {/* 1. HERO SECTION */}
       <section className="relative h-screen w-full overflow-hidden bg-neutral-900">
@@ -253,7 +210,8 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-            {HABITACIONES_GRILLA.map((hab) => {
+            {isLoading && <p className="text-center w-full col-span-full">Cargando habitaciones...</p>}
+            {habitaciones.map((hab) => {
               const tarjetaVolteada = habitacionConPrecio === hab.id;
               return (
                 <div key={hab.id} className="relative aspect-[4/5] w-full bg-[#f4f1ea] rounded-[2.5rem] shadow-sm overflow-hidden border border-[#f4f1ea]/30 transition-all duration-500 hover:scale-[1.01] hover:shadow-md group">
@@ -266,7 +224,7 @@ export default function HomePage() {
                     <div className="relative z-20 text-white text-left">
                       <span className="text-[9px] font-medium uppercase tracking-widest bg-white/20 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">{hab.ocupacion}</span>
                       <h3 className="text-2xl font-light tracking-wide mt-3 mb-1 uppercase font-luxury-title">{hab.titulo}</h3>
-                      <p className="text-neutral-300 text-xs font-light tracking-wider mb-4">{hab.precio} / noche</p>
+                      <p className="text-neutral-300 text-xs font-light tracking-wider mb-4">Desde ${hab.precio?.toLocaleString('es-CO')} COP / noche</p>
                       <button 
                         onClick={() => activarVolteoCard(hab.id)}
                         className="bg-white/10 backdrop-blur-sm text-white text-[10px] uppercase tracking-widest px-5 py-3 rounded-xl border border-white/20 w-full hover:bg-white hover:text-[#3d342e] transition-all duration-300 font-medium"
@@ -289,7 +247,7 @@ export default function HomePage() {
                     </div>
 
                     <div className="flex flex-col justify-center items-center gap-3 py-2 flex-1">
-                      <p className="text-[#f4f1ea]/90 text-xs font-light leading-relaxed px-1 text-left">{hab.descripcion}</p>
+                      <p className="text-[#f4f1ea]/90 text-xs font-light leading-relaxed px-1 text-left">{hab.subtitulo}</p>
                       <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-left w-full max-w-[220px] mx-auto pt-3 border-t border-white/10 text-[#f4f1ea]/70 font-light text-[11px]">
                         <span>❄️ Nevera pequeña</span>
                         <span>育 Baño privado</span>

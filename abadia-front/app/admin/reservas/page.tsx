@@ -2,50 +2,62 @@
 
 import { useState, useEffect } from "react";
 import { fetchApi } from "@/lib/api";
-import { PlusIcon, EyeIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, UserGroupIcon, EyeIcon } from "@heroicons/react/24/outline";
+import NuevaReservaModal from "@/components/NuevaReservaModal";
+import HuespedesModal from "@/components/HuespedesModal";
 
 export default function ReservasPage() {
   const [reservas, setReservas] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isNewModalOpen, setIsNewModalOpen] = useState(false);
+  const [isHuespedesModalOpen, setIsHuespedesModalOpen] = useState(false);
+  const [selectedReserva, setSelectedReserva] = useState<any>(null);
+
+  const fetchReservas = async () => {
+    setLoading(true);
+    try {
+      const data = await fetchApi("/reservations");
+      setReservas(data);
+    } catch (error) {
+      console.error("Error cargando reservas, usando fallback", error);
+      // Fallback for UI demo
+      setReservas([
+        { 
+          id: "1", 
+          cliente: { nombre: "María Pérez", correo: "maria@example.com" }, 
+          habitacion: { titulo: "Habitación 1" }, 
+          checkIn: new Date().toISOString(), 
+          checkOut: new Date(new Date().setDate(new Date().getDate() + 2)).toISOString(), 
+          status: "confirmed",
+          value: 900000 
+        },
+        { 
+          id: "2", 
+          cliente: { nombre: "Carlos López", correo: "carlos@example.com" }, 
+          habitacion: { titulo: "Habitación 2" }, 
+          checkIn: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(), 
+          checkOut: new Date(new Date().setDate(new Date().getDate() + 4)).toISOString(), 
+          status: "pending",
+          value: 960000 
+        },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchReservas = async () => {
-      try {
-        const data = await fetchApi("/reservations");
-        setReservas(data);
-      } catch (error) {
-        console.error("Error cargando reservas", error);
-        // Fallback for UI demo
-        setReservas([
-          { 
-            id: "1", 
-            cliente: { nombre: "María Pérez", correo: "maria@example.com" }, 
-            habitacion: { titulo: "Habitación 1" }, 
-            checkIn: new Date().toISOString(), 
-            checkOut: new Date(new Date().setDate(new Date().getDate() + 2)).toISOString(), 
-            estado: "CONFIRMED",
-            value: 900000 
-          },
-          { 
-            id: "2", 
-            cliente: { nombre: "Carlos López", correo: "carlos@example.com" }, 
-            habitacion: { titulo: "Habitación 2" }, 
-            checkIn: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(), 
-            checkOut: new Date(new Date().setDate(new Date().getDate() + 4)).toISOString(), 
-            estado: "PENDING",
-            value: 960000 
-          },
-        ]);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchReservas();
   }, []);
 
   const formatDate = (dateString: string) => {
     const d = new Date(dateString);
     return new Intl.DateTimeFormat('es-CO', { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' }).format(d);
+  };
+
+  const handleOpenRegistro = (reserva: any) => {
+    setSelectedReserva(reserva);
+    setIsHuespedesModalOpen(true);
   };
 
   return (
@@ -55,7 +67,10 @@ export default function ReservasPage() {
           <h2 className="text-2xl font-bold text-[var(--mv-ink)] uppercase tracking-wide">Reservaciones</h2>
           <p className="text-gray-500 mt-1 text-sm">Listado de estancias y huéspedes.</p>
         </div>
-        <button className="flex items-center gap-2 bg-[var(--mv-blue)] hover:bg-[#0b3c66] text-white px-5 py-2.5 rounded-full text-sm font-medium transition-all shadow-md">
+        <button 
+          onClick={() => setIsNewModalOpen(true)}
+          className="flex items-center gap-2 bg-[var(--mv-blue)] hover:bg-[#0b3c66] text-white px-5 py-2.5 rounded-full text-sm font-medium transition-all shadow-md"
+        >
           <PlusIcon className="w-5 h-5" />
           Nueva Reserva
         </button>
@@ -98,7 +113,12 @@ export default function ReservasPage() {
                       </div>
                     </td>
                     <td className="p-4">
-                      <span className="font-medium text-[var(--mv-ink)]">{res.habitacion.titulo}</span>
+                      <div className="flex flex-col">
+                        <span className="font-medium text-[var(--mv-ink)]">{res.habitacion.titulo}</span>
+                        <span className="text-xs text-gray-500">
+                          {res.numeroAdultos || 1} Adulto(s) {res.numeroNinos > 0 ? `, ${res.numeroNinos} Niño(s)` : ''}
+                        </span>
+                      </div>
                     </td>
                     <td className="p-4">
                       <div className="flex flex-col text-sm text-gray-600">
@@ -113,17 +133,24 @@ export default function ReservasPage() {
                     </td>
                     <td className="p-4">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-widest uppercase ${
-                        res.estado === 'COMPLETED' ? 'bg-gray-100 text-gray-700' :
-                        res.estado === 'CONFIRMED' ? 'bg-green-100 text-green-700' : 
-                        res.estado === 'PENDING' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
+                        res.status === 'completed' ? 'bg-gray-100 text-gray-700' :
+                        res.status === 'confirmed' ? 'bg-green-100 text-green-700' : 
+                        res.status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
                       }`}>
-                        {res.estado === 'COMPLETED' ? 'Completada' :
-                         res.estado === 'CONFIRMED' ? 'Confirmada' :
-                         res.estado === 'PENDING' ? 'Pendiente' : 'Cancelada'}
+                        {res.status === 'completed' ? 'Completada' :
+                         res.status === 'confirmed' ? 'Confirmada' :
+                         res.status === 'pending' ? 'Pendiente' : 'Cancelada'}
                       </span>
                     </td>
                     <td className="p-4 text-right">
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button 
+                          onClick={() => handleOpenRegistro(res)}
+                          className="flex items-center gap-1 text-xs text-[var(--mv-blue)] hover:text-[#0b3c66] bg-blue-50 px-3 py-1.5 rounded-lg font-semibold transition-colors"
+                        >
+                          <UserGroupIcon className="w-4 h-4" />
+                          TRA ({res.huespedes?.length || 0})
+                        </button>
                         <button className="p-2 text-gray-400 hover:text-[var(--mv-blue)] hover:bg-[var(--mv-blue)]/10 rounded-lg transition-all">
                           <EyeIcon className="w-5 h-5" />
                         </button>
@@ -136,6 +163,19 @@ export default function ReservasPage() {
           </table>
         </div>
       </div>
+
+      <NuevaReservaModal 
+        isOpen={isNewModalOpen}
+        onClose={() => setIsNewModalOpen(false)}
+        onSuccess={() => fetchReservas()}
+      />
+
+      <HuespedesModal 
+        isOpen={isHuespedesModalOpen}
+        onClose={() => setIsHuespedesModalOpen(false)}
+        reservation={selectedReserva}
+        onSuccess={() => fetchReservas()}
+      />
     </div>
   );
 }

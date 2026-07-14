@@ -17,6 +17,12 @@ export class ReservationsController {
   }
 
   @Public()
+  @Post('book')
+  createPublicReservation(@Body() data: any) {
+    return this.reservationsService.createPublicReservation(data);
+  }
+
+  @Public()
   @Get()
   findAll() {
     return this.reservationsService.findAll();
@@ -38,5 +44,17 @@ export class ReservationsController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.reservationsService.remove(+id);
+  }
+
+  @ApiBearerAuth('JWT-auth')
+  @Post(':id/huespedes')
+  addHuesped(@Param('id') id: string, @Body() huespedData: { nombre: string; documento: string }) {
+    return this.reservationsService.addHuesped(+id, huespedData);
+  }
+
+  @ApiBearerAuth('JWT-auth')
+  @Delete('huespedes/:huespedId')
+  removeHuesped(@Param('huespedId') huespedId: string) {
+    return this.reservationsService.removeHuesped(+huespedId);
   }
 }
