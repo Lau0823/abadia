@@ -73,6 +73,20 @@ ADMIN_PASSWORD=admin123*
 3. Acceder a la documentación API (Swagger):
    `http://localhost:3002/api` (o el puerto configurado).
 
+### Poblar Base de Datos (Seeder)
+
+Para llenar la base de datos con información inicial (habitaciones, configuración, métodos de pago y un usuario administrador), asegúrate de que el servidor esté corriendo y realiza una petición `GET` a:
+
+```
+http://localhost:3002/api/seed
+```
+*(Nota: Ajusta el puerto o el prefijo `/api` si es diferente).*
+
+Una vez que se ejecute exitosamente, podrás ingresar al panel de administración con las siguientes credenciales por defecto:
+
+- **Email:** `admin@abadia.com` (o el usuario `admin`)
+- **Contraseña:** `admin123`
+
 ## 📄 Licencia
 
 Abadía - Todos los derechos reservados.

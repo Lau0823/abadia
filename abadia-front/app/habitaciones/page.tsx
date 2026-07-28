@@ -69,14 +69,14 @@ export default function CatalogPage() {
       <section className="px-4 md:px-8 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12">
           {HABITACIONES_LIST.map((hab) => (
-            <div 
-              key={hab.id} 
+            <div
+              key={hab.id}
               onClick={() => router.push(`/habitaciones/${hab.id}`)}
               className="relative aspect-[4/5] w-full overflow-hidden bg-white rounded-[2.5rem] shadow-sm border border-[#f4f1ea]/40 group cursor-pointer transition-all duration-500 hover:scale-[1.01] hover:shadow-md"
             >
               <Image src={hab.imagen} alt={hab.titulo} fill sizes="(max-width: 640px) 100vw, 33vw" className="object-cover transition-transform duration-1000 ease-out group-hover:scale-[1.03]" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent z-10" />
-              
+
               <div className="absolute bottom-0 left-0 right-0 p-8 z-20 text-white">
                 <span className="text-[9px] font-medium uppercase tracking-widest bg-white/20 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">{hab.ocupacion}</span>
                 {/* Modificación tipográfica limpia: Sin cursiva en la tarjeta */}
@@ -90,4 +90,4 @@ export default function CatalogPage() {
       </section>
     </main>
   );
-}
+} 

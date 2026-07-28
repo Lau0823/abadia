@@ -22,7 +22,7 @@ export class UsersService implements OnModuleInit {
 
   async seedAdmin() {
     const adminUsername = process.env.ADMIN_USERNAME || 'admin';
-    const adminEmail = process.env.ADMIN_EMAIL || 'admin@milesvisual.com';
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@abadia.com';
     const adminPassword = process.env.ADMIN_PASSWORD || 'Admin123*';
 
     const existingAdmin = await this.usersRepository.findOne({ where: { username: adminUsername } });

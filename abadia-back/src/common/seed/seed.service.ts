@@ -40,13 +40,13 @@ export class SeedService {
   }
 
   private async seedUsers() {
-    const adminEmail = 'admin@milesvisual.com';
+    const adminEmail = 'admin@abadia.com';
     const existing = await this.userRepository.findOne({ where: { email: adminEmail } });
 
     if (!existing) {
       const hashedPassword = await bcrypt.hash('admin123', 10);
       const admin = this.userRepository.create({
-        nombre: 'Admin Miles Visual',
+        nombre: 'Admin Abadía',
         username: 'admin',
         email: adminEmail,
         password_hash: hashedPassword,
@@ -59,8 +59,8 @@ export class SeedService {
   private async seedSettings() {
     const settings = [
       // SEO
-      { key: 'seo_title', value: 'Miles Visual | Fotografía Editorial', description: 'Título de la página' },
-      { key: 'seo_description', value: 'Estudio de fotografía especializado en bodas, prebodas y fotografía editorial. Capturamos momentos eternos.', description: 'Meta descripción' },
+      { key: 'seo_title', value: 'Abadía | Hotel Boutique', description: 'Título de la página' },
+      { key: 'seo_description', value: 'Un lugar diseñado para el silencio, la lectura y la reconexión espiritual interior.', description: 'Meta descripción' },
 
       // HERO
       { key: 'hero_title', value: 'FOTOS SOÑADAS', description: 'Título principal de la portada' },
@@ -82,9 +82,9 @@ export class SeedService {
       { key: 'estudio_desc', value: 'Retratos y piezas visuales con una propuesta limpia, refinada y pensada desde la estética, la dirección y el detalle.', description: 'Descripción sección Estudio' },
 
       // CONTACTO
-      { key: 'contact_email', value: 'hola@milesvisual.com', description: 'Email de contacto' },
+      { key: 'contact_email', value: 'hola@abadia.com', description: 'Email de contacto' },
       { key: 'contact_phone', value: '573148112717', description: 'WhatsApp' },
-      { key: 'instagram_url', value: 'https://instagram.com/milesvisual', description: 'Instagram' },
+      { key: 'instagram_url', value: 'https://instagram.com/abadia', description: 'Instagram' },
       { key: 'whatsapp_number', value: '573148112717', description: 'Número de WhatsApp para cotizaciones' },
 
       // RECURSOS MULTIMEDIA (CLOUDINARY)
@@ -136,9 +136,9 @@ export class SeedService {
         const checkOut = new Date(checkIn);
         checkOut.setDate(checkOut.getDate() + 3);
 
-        const r1 = this.reservationRepository.create({
-          cliente: cliente1,
-          habitacion: hab1,
+        const r1: Reservation = this.reservationRepository.create[""]({
+          cliente_id: cliente1.id,
+          habitacion_id: hab1.id,
           checkIn,
           checkOut,
           numeroHuespedes: 2,
@@ -161,7 +161,7 @@ export class SeedService {
         const checkOut = new Date(checkIn);
         checkOut.setDate(checkOut.getDate() + 2);
 
-        const r2 = this.reservationRepository.create({
+        const r2 = this.reservationRepository.create[""]({
           cliente: cliente2,
           habitacion: hab2,
           checkIn,

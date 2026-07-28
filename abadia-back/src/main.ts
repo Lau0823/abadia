@@ -44,7 +44,7 @@ async function bootstrap() {
           username: 'superadmin',
           password: defaultPassword || 'ChangeMeNow2026!',
           rol: Role.SuperAdmin,
-          email: 'superadmin@milesvisual.com',
+          email: 'superadmin@abadia.com',
           telefono: '5551234567'
         });
         console.log('Usuario superadmin por defecto creado exitosamente.');

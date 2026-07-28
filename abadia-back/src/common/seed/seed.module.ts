@@ -12,9 +12,9 @@ import { Cliente } from '../../clientes/entities/cliente.entity';
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      MetodoPago, 
-      Setting, 
-      Reservation, 
+      MetodoPago,
+      Setting,
+      Reservation,
       User,
       Habitacion,
       Cliente
@@ -24,4 +24,4 @@ import { Cliente } from '../../clientes/entities/cliente.entity';
   providers: [SeedService],
   exports: [SeedService],
 })
-export class SeedModule {}
+export class SeedModule { }

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Reservation, ReservationStatus } from './entities/reservation.entity';
@@ -7,6 +7,7 @@ import { Cliente } from '../clientes/entities/cliente.entity';
 import { Habitacion, EstadoLimpieza } from '../habitaciones/entities/habitacion.entity';
 import { MailService } from '../common/mail/mail.service';
 import { GoogleCalendarService } from '../google-calendar/google-calendar.service';
+
 
 @Injectable()
 export class ReservationsService {
@@ -23,7 +24,7 @@ export class ReservationsService {
     private readonly habitacionRepository: Repository<Habitacion>,
     private readonly mailService: MailService,
     private readonly googleCalendarService: GoogleCalendarService,
-  ) {}
+  ) { }
 
   private normalizeDate(date: Date | string, hour: number): Date {
     const d = new Date(date);
@@ -35,14 +36,34 @@ export class ReservationsService {
   }
 
   async create(createReservationDto: Partial<Reservation>) {
-    createReservationDto.checkIn = this.normalizeDate(createReservationDto.checkIn, 15); // 3:00 PM
-    createReservationDto.checkOut = this.normalizeDate(createReservationDto.checkOut, 11); // 11:00 AM
+    if (createReservationDto.checkIn) {
+      createReservationDto.checkIn = this.normalizeDate(
+        createReservationDto.checkIn.toDateString(),
+        15
+      );
+    }
+
+    if (createReservationDto.checkOut) {
+      createReservationDto.checkOut = this.normalizeDate(
+        createReservationDto.checkOut.toString(),
+        11
+      );
+    }
+
+    if (!createReservationDto.checkIn || !createReservationDto.checkOut) {
+      throw new BadRequestException('Las fechas de entrada y salida son obligatorias');
+    }
+
+    if (!createReservationDto.habitacion_id) {
+      throw new BadRequestException('El ID de la habitación es obligatorio');
+    }
 
     await this.verificarDisponibilidad(
-      createReservationDto.habitacion_id,
+      createReservationDto.habitacion_id as string,
       new Date(createReservationDto.checkIn),
       new Date(createReservationDto.checkOut)
     );
+
 
     const reservation = this.reservationRepository.create(createReservationDto);
     const saved = await this.reservationRepository.save(reservation);
@@ -113,7 +134,7 @@ export class ReservationsService {
 
   async update(id: number, updateReservationDto: Partial<Reservation>) {
     const oldReservation = await this.findOne(id);
-    
+
     if (updateReservationDto.checkIn) {
       updateReservationDto.checkIn = this.normalizeDate(updateReservationDto.checkIn, 15);
     }
@@ -147,7 +168,7 @@ export class ReservationsService {
 
     // Si el estado cambió a 'completed' en esta actualización (Check-out)
     if (oldReservation.status !== ReservationStatus.COMPLETED && updated.status === ReservationStatus.COMPLETED) {
-      const habitacion = await this.habitacionRepository.findOne({ where: { id: updated.habitacion_id }});
+      const habitacion = await this.habitacionRepository.findOne({ where: { id: updated.habitacion_id } });
       if (habitacion) {
         habitacion.estadoLimpieza = EstadoLimpieza.POR_ASEAR;
         await this.habitacionRepository.save(habitacion);
@@ -218,8 +239,8 @@ export class ReservationsService {
 
     const query = this.reservationRepository.createQueryBuilder('reservation')
       .where('reservation.habitacion_id = :habitacionId', { habitacionId })
-      .andWhere('reservation.status NOT IN (:...statuses)', { 
-        statuses: [ReservationStatus.CANCELLED, ReservationStatus.COMPLETED] 
+      .andWhere('reservation.status NOT IN (:...statuses)', {
+        statuses: [ReservationStatus.CANCELLED, ReservationStatus.COMPLETED]
       })
       .andWhere('(reservation.checkIn < :checkOut AND reservation.checkOut > :checkIn)', {
         checkIn,
