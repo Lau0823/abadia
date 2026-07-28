@@ -1,15 +1,17 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Habitacion } from './entities/habitacion.entity';
 import { CreateHabitacionDto } from './dto/create-habitacion.dto';
 import { UpdateHabitacionDto } from './dto/update-habitacion.dto';
+import { CloudinaryService } from '../common/cloudinary/cloudinary.service';
 
 @Injectable()
 export class HabitacionesService {
   constructor(
     @InjectRepository(Habitacion)
     private readonly habitacionRepository: Repository<Habitacion>,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   async create(createHabitacionDto: CreateHabitacionDto): Promise<Habitacion> {
@@ -75,6 +77,21 @@ export class HabitacionesService {
   async updateLimpieza(id: string, estadoLimpieza: any): Promise<Habitacion> {
     const habitacion = await this.findOne(id);
     habitacion.estadoLimpieza = estadoLimpieza;
+    return this.habitacionRepository.save(habitacion);
+  }
+
+  async uploadImages(id: string, files: Express.Multer.File[]): Promise<Habitacion> {
+    const habitacion = await this.findOne(id);
+    if (!files || files.length === 0) {
+      throw new BadRequestException('Debe proporcionar al menos un archivo de imagen');
+    }
+    
+    const uploadPromises = files.map(file => this.cloudinaryService.uploadImage(file));
+    const results = await Promise.all(uploadPromises).catch((error) => {
+        throw new BadRequestException(`Error al subir imágenes a Cloudinary: ${error.message}`);
+    });
+    
+    habitacion.imagenes = results.map(res => res.secure_url);
     return this.habitacionRepository.save(habitacion);
   }
 }

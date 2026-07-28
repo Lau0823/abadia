@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsOptional, IsEnum, Min } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsEnum, Min, IsArray } from 'class-validator';
 import { EstadoHabitacion } from '../entities/habitacion.entity';
 
 export class CreateHabitacionDto {
@@ -18,6 +18,15 @@ export class CreateHabitacionDto {
 
   @IsString()
   ocupacion: string;
+
+  @IsString()
+  @IsOptional()
+  descripcion?: string;
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  comodidades?: string[];
 
   @IsEnum(EstadoHabitacion)
   @IsOptional()

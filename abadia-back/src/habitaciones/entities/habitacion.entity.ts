@@ -25,11 +25,17 @@ export class Habitacion {
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   precio: number;
 
-  @Column({ type: 'text', nullable: true })
-  imagen: string; // URL of the image
+  @Column('text', { nullable: true })
+  descripcion: string; // Detalle largo de la suite
+
+  @Column('simple-array', { nullable: true })
+  imagenes: string[]; // URLs of the images
 
   @Column({ length: 100 })
   ocupacion: string; // e.g. "Máx. 2 Adultos"
+
+  @Column('simple-array', { nullable: true })
+  comodidades: string[]; // Ej. ["Nevera", "WiFi"]
 
   @Column({ type: 'enum', enum: EstadoHabitacion, default: EstadoHabitacion.DISPONIBLE })
   estado: EstadoHabitacion;

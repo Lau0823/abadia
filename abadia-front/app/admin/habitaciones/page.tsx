@@ -13,6 +13,7 @@ interface Habitacion {
   ocupacion: string;
   estado: string;
   estadoLimpieza: string;
+  imagenes?: string[];
 }
 
 export default function HabitacionesPage() {
@@ -56,6 +57,7 @@ export default function HabitacionesPage() {
         alert("Error al eliminar la habitación. Puede que tenga reservas asociadas.");
       }
     }
+  };
   const handleToggleLimpieza = async (hab: Habitacion) => {
     const nuevoEstado = hab.estadoLimpieza === 'LIMPIA' ? 'POR_ASEAR' : 'LIMPIA';
     try {
@@ -71,25 +73,25 @@ export default function HabitacionesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center bg-white p-6 rounded-3xl shadow-sm border border-[var(--mv-sage)]/10">
+      <div className="flex justify-between items-center bg-white p-6 rounded-3xl shadow-sm border border-(--mv-sage)/10">
         <div>
-          <h2 className="text-2xl font-bold text-[var(--mv-ink)] uppercase tracking-wide">Habitaciones</h2>
+          <h2 className="text-2xl font-bold text-(--mv-ink) uppercase tracking-wide">Habitaciones</h2>
           <p className="text-gray-500 mt-1 text-sm">Gestiona el inventario de estancias del hotel.</p>
         </div>
         <button 
           onClick={handleOpenNew}
-          className="flex items-center gap-2 bg-[var(--mv-blue)] hover:bg-[#0b3c66] text-white px-5 py-2.5 rounded-full text-sm font-medium transition-all shadow-md"
+          className="flex items-center gap-2 bg-(--mv-blue) hover:bg-[#0b3c66] text-white px-5 py-2.5 rounded-full text-sm font-medium transition-all shadow-md"
         >
           <PlusIcon className="w-5 h-5" />
           Nueva Habitación
         </button>
       </div>
 
-      <div className="bg-white rounded-3xl shadow-sm border border-[var(--mv-sage)]/10 overflow-hidden">
+      <div className="bg-white rounded-3xl shadow-sm border border-(--mv-sage)/10 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-[var(--mv-cream)]/50 border-b border-[var(--mv-sage)]/10">
+              <tr className="bg-(--mv-cream)/50 border-b border-(--mv-sage)/10">
                 <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-widest">Habitación</th>
                 <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-widest">Precio Noche</th>
                 <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-widest">Ocupación</th>
@@ -98,12 +100,12 @@ export default function HabitacionesPage() {
                 <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-widest text-right">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--mv-sage)]/10">
+            <tbody className="divide-y divide-(--mv-sage)/10">
               {loading ? (
                 <tr>
                   <td colSpan={5} className="p-8 text-center text-gray-400">
                     <div className="animate-pulse flex flex-col items-center gap-2">
-                        <div className="w-6 h-6 border-2 border-[var(--mv-blue)] border-t-transparent rounded-full animate-spin"></div>
+                        <div className="w-6 h-6 border-2 border-(--mv-blue) border-t-transparent rounded-full animate-spin"></div>
                         <span>Cargando...</span>
                     </div>
                   </td>
@@ -116,13 +118,29 @@ export default function HabitacionesPage() {
                 habitaciones.map((hab) => (
                   <tr key={hab.id} className="hover:bg-gray-50/50 transition-colors group">
                     <td className="p-4">
-                      <div className="flex flex-col">
-                        <span className="font-semibold text-[var(--mv-ink)]">{hab.titulo}</span>
-                        <span className="text-xs text-gray-500 uppercase tracking-wider">{hab.subtitulo}</span>
+                      <div className="flex items-center gap-3">
+                        {hab.imagenes && hab.imagenes.length > 0 ? (
+                          <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 shrink-0 shadow-sm border border-gray-200 relative group/img" title={hab.imagenes.length > 1 ? `Múltiples imágenes adjuntas (${hab.imagenes.length})` : 'Imagen de la habitación'}>
+                            <img src={hab.imagenes[0]} alt={hab.titulo} className="w-full h-full object-cover" />
+                            {hab.imagenes.length > 1 && (
+                              <div className="absolute bottom-0 right-0 bg-black/60 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-tl-md">
+                                +{hab.imagenes.length - 1}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center shrink-0 shadow-sm border border-gray-200">
+                            <span className="text-[10px] text-gray-400 font-medium">Sin foto</span>
+                          </div>
+                        )}
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-(--mv-ink)">{hab.titulo}</span>
+                          <span className="text-xs text-gray-500 uppercase tracking-wider">{hab.subtitulo}</span>
+                        </div>
                       </div>
                     </td>
                     <td className="p-4">
-                      <span className="font-medium text-[var(--mv-ink)]">
+                      <span className="font-medium text-(--mv-ink)">
                         ${Number(hab.precio).toLocaleString("es-CO")}
                       </span>
                     </td>
@@ -154,7 +172,7 @@ export default function HabitacionesPage() {
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button 
                           onClick={() => handleOpenEdit(hab)}
-                          className="p-2 text-gray-400 hover:text-[var(--mv-blue)] hover:bg-[var(--mv-blue)]/10 rounded-lg transition-all"
+                          className="p-2 text-gray-400 hover:text-(--mv-blue) hover:bg-(--mv-blue)/10 rounded-lg transition-all"
                         >
                           <PencilIcon className="w-5 h-5" />
                         </button>

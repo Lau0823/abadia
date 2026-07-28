@@ -14,39 +14,13 @@ interface Suite {
   amenidades: string[];
 }
 
-const SUITES_DATA: Record<string, Suite> = {
-  "suite-insignia": {
-    id: "suite-insignia",
-    titulo: "Habitación 1",
-    subtitulo: "Suite Insignia",
-    descripcion: "Nuestra estancia más majestuosa. Cuenta con una tina de hidromasaje exterior privada y vistas infinitas al valle. Su arquitectura interior expone techos altos con vigas de madera nativa, lencería de cama de 400 hilos y ventanales acústicos de piso a techo.",
-    ocupacion: "Máx. 2 Adultos",
-    imagenes: [
-      "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=1200&q=80"
-    ],
-    amenidades: ["❄️ Nevera pequeña", "🚿 Baño privado", "📺 Smart TV", "📶 Internet WiFi", "☕ Cafetera"]
-  },
-  "refugio-rustico": {
-    id: "refugio-rustico",
-    titulo: "Habitación 2",
-    subtitulo: "Refugio Rústico",
-    descripcion: "Equilibrio perfecto entre la calidez rústica caribeña y el minimalismo moderno. Viene equipada con una chimenea privada para las noches frescas y un balcón artesanal diseñado minuciosamente para disfrutar los amaneceres.",
-    ocupacion: "Máx. 2 Adultos + 1 Niño",
-    imagenes: [
-      "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1591088398332-8a7791972843?auto=format&fit=crop&w=1200&q=80"
-    ],
-    amenidades: ["❄️ Nevera pequeña", "🚿 Baño privado", "📺 Smart TV", "📶 Internet WiFi", "🔥 Chimenea"]
-  }
-};
+const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=1200&q=80";
 
 export default function SuiteDetailPage() {
   const { id } = useParams();
   const router = useRouter();
   const [suite, setSuite] = useState<Suite | null>(null);
+  const [loading, setLoading] = useState(true);
   const [imagenActivaIdx, setImagenActivaIdx] = useState<number>(0);
   const [menuAbierto, setMenuAbierto] = useState<boolean>(false);
 
@@ -60,10 +34,22 @@ export default function SuiteDetailPage() {
   const [fechaSalida, setFechaSalida] = useState<string>('');
 
   useEffect(() => {
-    if (id && SUITES_DATA[id as string]) {
-      setSuite(SUITES_DATA[id as string]);
-    } else {
-      setSuite(SUITES_DATA["suite-insignia"]);
+    if (id) {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002'}/habitaciones/${id}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && !data.error) {
+            setSuite({
+              ...data,
+              amenidades: data.comodidades && data.comodidades.length > 0 ? data.comodidades : ["❄️ Nevera pequeña", "🚿 Baño privado", "📺 Smart TV", "📶 Internet WiFi"]
+            });
+          }
+          setLoading(false);
+        })
+        .catch(err => {
+          console.error("Error fetching room details:", err);
+          setLoading(false);
+        });
     }
   }, [id]);
 
@@ -74,7 +60,8 @@ export default function SuiteDetailPage() {
     setPrecioTotal(costoAdultos + costoNinos);
   }, [adultos, ninos]);
 
-  if (!suite) return <div className="min-h-screen bg-white" />;
+  if (loading) return <div className="min-h-screen bg-white flex justify-center items-center"><div className="w-8 h-8 border-2 border-[#3d342e] border-t-transparent rounded-full animate-spin"></div></div>;
+  if (!suite) return <div className="min-h-screen bg-white flex justify-center items-center"><p className="text-xl">Habitación no encontrada</p></div>;
 
   const formatoMoneda = (valor: number) => {
     return new Intl.NumberFormat('es-CO', {
@@ -84,10 +71,42 @@ export default function SuiteDetailPage() {
     }).format(valor);
   };
 
-  const enviarWhatsApp = (e: React.FormEvent) => {
+  const enviarWhatsApp = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const isProcessing = true; // Podríamos usar estado, pero como redirige rápido, basta así.
+
+    // 1. Enviar silenciosamente la reserva a la Base de Datos
+    if (suite) {
+      try {
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002'}/reservations/book`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            cliente: {
+              nombre: nombre,
+              telefono: telefono,
+              correo: '', // Opcional, por ahora vacío para no dar fricción
+              documento: `WEB-${telefono || Date.now().toString().slice(-6)}`, // Documento falso automático
+              tipoDocumento: 'CC'
+            },
+            reserva: {
+              habitacion_id: suite.id,
+              checkIn: fechaEntrada,
+              checkOut: fechaSalida,
+              numeroAdultos: adultos,
+              numeroNinos: ninos
+            }
+          })
+        });
+      } catch (error) {
+        console.error("Error guardando la reserva en background:", error);
+      }
+    }
+
+    // 2. Redirigir a WhatsApp de Inmediato
     const texto = `Hola Abadía Hotel Boutique, deseo gestionar la reserva de la siguiente estancia:\n\n` +
-      `🏨 *Habitación:* ${suite.titulo} - ${suite.subtitulo}\n` +
+      `🏨 *Habitación:* ${suite?.titulo} - ${suite?.subtitulo}\n` +
       `👤 *Cliente:* ${nombre}\n` +
       `📞 *Teléfono:* ${telefono}\n` +
       `📅 *Check-In:* ${fechaEntrada}\n` +
@@ -113,9 +132,9 @@ export default function SuiteDetailPage() {
       {/* --- NAV HAMBURGUESA --- */}
       <nav className="fixed top-6 right-6 z-50">
         <button onClick={() => setMenuAbierto(!menuAbierto)} className="bg-white/90 backdrop-blur-md p-4 rounded-full shadow-md border border-[#f4f1ea] flex flex-col justify-center items-center gap-1.5 w-12 h-12">
-          <span className={`h-[1px] w-5 bg-[#3d342e] transition-all duration-300 ${menuAbierto ? 'rotate-45 translate-y-[3px]' : ''}`} />
-          <span className={`h-[1px] w-5 bg-[#3d342e] transition-all duration-300 ${menuAbierto ? 'opacity-0' : ''}`} />
-          <span className={`h-[1px] w-5 bg-[#3d342e] transition-all duration-300 ${menuAbierto ? '-rotate-45 translate-y-[3px]' : ''}`} />
+          <span className={`h-px w-5 bg-[#3d342e] transition-all duration-300 ${menuAbierto ? 'rotate-45 translate-y-0.75' : ''}`} />
+          <span className={`h-px w-5 bg-[#3d342e] transition-all duration-300 ${menuAbierto ? 'opacity-0' : ''}`} />
+          <span className={`h-px w-5 bg-[#3d342e] transition-all duration-300 ${menuAbierto ? '-rotate-45 translate-y-0.75' : ''}`} />
         </button>
       </nav>
 
@@ -150,7 +169,7 @@ export default function SuiteDetailPage() {
           <div className="lg:col-span-8 flex flex-col gap-5 w-full relative">
             <div className="relative h-[60vh] md:h-[78vh] w-full bg-[#f4f1ea] rounded-[2.5rem] overflow-hidden shadow-2xl border border-[#e6dfd1]/30">
               <Image 
-                src={suite.imagenes[imagenActivaIdx]} 
+                src={suite.imagenes && suite.imagenes.length > 0 ? suite.imagenes[imagenActivaIdx] : FALLBACK_IMAGE} 
                 alt={suite.titulo} 
                 fill 
                 priority 
@@ -158,23 +177,27 @@ export default function SuiteDetailPage() {
                 className="object-cover transition-all duration-700 ease-out" 
               />
               
-              <div className="absolute bottom-6 left-6 z-30 flex gap-2">
-                <button onClick={() => setImagenActivaIdx(prev => (prev - 1 + suite.imagenes.length) % suite.imagenes.length)} className="w-12 h-12 rounded-2xl bg-white/95 backdrop-blur-md shadow-lg flex items-center justify-center font-bold text-[#3d342e] hover:bg-white active:scale-95 transition-all">←</button>
-                <button onClick={() => setImagenActivaIdx(prev => (prev + 1) % suite.imagenes.length)} className="w-12 h-12 rounded-2xl bg-white/95 backdrop-blur-md shadow-lg flex items-center justify-center font-bold text-[#3d342e] hover:bg-white active:scale-95 transition-all">→</button>
-              </div>
+              {suite.imagenes && suite.imagenes.length > 1 && (
+                <div className="absolute bottom-6 left-6 z-30 flex gap-2">
+                  <button onClick={() => setImagenActivaIdx(prev => (prev - 1 + suite.imagenes.length) % suite.imagenes.length)} className="w-12 h-12 rounded-2xl bg-white/95 backdrop-blur-md shadow-lg flex items-center justify-center font-bold text-[#3d342e] hover:bg-white active:scale-95 transition-all">←</button>
+                  <button onClick={() => setImagenActivaIdx(prev => (prev + 1) % suite.imagenes.length)} className="w-12 h-12 rounded-2xl bg-white/95 backdrop-blur-md shadow-lg flex items-center justify-center font-bold text-[#3d342e] hover:bg-white active:scale-95 transition-all">→</button>
+                </div>
+              )}
 
               {/* TIRA DE MINIATURAS HORIZONTALES FLOTANTES */}
-              <div className="absolute bottom-6 right-6 z-30 p-2.5 bg-black/10 backdrop-blur-md rounded-2xl flex gap-2.5 max-w-[220px] sm:max-w-none overflow-x-auto scrollbar-none border border-white/10 shadow-inner">
-                {suite.imagenes.map((imgUrl, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setImagenActivaIdx(index)}
-                    className={`relative w-20 md:w-24 aspect-[16/10] rounded-xl overflow-hidden flex-shrink-0 border-2 transition-all duration-300 ${imagenActivaIdx === index ? 'border-white scale-[0.93] shadow-md' : 'border-transparent opacity-50 hover:opacity-100'}`}
-                  >
-                    <Image src={imgUrl} alt="Vista miniatura" fill sizes="100px" className="object-cover" />
-                  </button>
-                ))}
-              </div>
+              {suite.imagenes && suite.imagenes.length > 0 && (
+                <div className="absolute bottom-6 right-6 z-30 p-2.5 bg-black/10 backdrop-blur-md rounded-2xl flex gap-2.5 max-w-55 sm:max-w-none overflow-x-auto scrollbar-none border border-white/10 shadow-inner">
+                  {suite.imagenes.map((imgUrl, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setImagenActivaIdx(index)}
+                      className={`relative w-20 md:w-24 aspect-16/10 rounded-xl overflow-hidden shrink-0 border-2 transition-all duration-300 ${imagenActivaIdx === index ? 'border-white scale-[0.93] shadow-md' : 'border-transparent opacity-50 hover:opacity-100'}`}
+                    >
+                      <Image src={imgUrl} alt="Vista miniatura" fill sizes="100px" className="object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="p-6 bg-[#f4f1ea]/20 rounded-3xl border border-[#f4f1ea]/60 text-left">
@@ -191,7 +214,7 @@ export default function SuiteDetailPage() {
           <div className="lg:col-span-4 bg-white p-8 rounded-[2.5rem] shadow-xl border border-[#f4f1ea] w-full text-left">
             <span className="text-[10px] uppercase tracking-[0.3em] text-[#3d342e]/50 font-bold block mb-1">DETALLE DE LUJO</span>
             <h2 className="text-3xl font-luxury-title uppercase text-[#3d342e] tracking-tight mb-1">
-              {suite.titulo} <span className="font-luxury-script text-3xl md:text-4xl text-[#7a6e5d] lowercase normal-case">{suite.subtitulo}</span>
+              {suite.titulo} <span className="font-luxury-script text-3xl md:text-4xl text-[#7a6e5d] normal-case">{suite.subtitulo}</span>
             </h2>
             <span className="inline-block text-[9px] font-bold uppercase tracking-widest bg-[#3d342e]/5 text-[#3d342e] px-3 py-1 rounded-full mb-6">
               {suite.ocupacion}

@@ -22,6 +22,7 @@ import { ReservationsModule } from './reservations/reservations.module';
 import { HabitacionesModule } from './habitaciones/habitaciones.module';
 import { GoogleCalendarModule } from './google-calendar/google-calendar.module';
 import { SettingsModule } from './settings/settings.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -85,6 +86,7 @@ import { SettingsModule } from './settings/settings.module';
     HabitacionesModule,
     GoogleCalendarModule,
     SettingsModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [

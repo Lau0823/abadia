@@ -181,12 +181,54 @@ export class SeedService {
 
   private async seedHabitaciones() {
     const habitaciones = [
-      { titulo: "Habitación 1", subtitulo: "Nuestra suite insignia con tina de hidromasaje exterior y vistas infinitas al valle.", imagen: "/WhatsApp Image 2026-07-06 at 20.33.44.jpeg", precio: 450000, ocupacion: "Máx. 2 Adultos", estado: EstadoHabitacion.DISPONIBLE },
-      { titulo: "Habitación 2", subtitulo: "Equilibrio perfecto entre arquitectura rústica y confort moderno, equipada con chimenea.", imagen: "/WhatsApp Image 2026-07-06 at 20.33.43 (1).jpeg", precio: 320000, ocupacion: "Máx. 2 Adultos + 1 Niño", estado: EstadoHabitacion.DISPONIBLE },
-      { titulo: "Habitación 3", subtitulo: "Un espacio diseñado para el silencio, la lectura y la reconexión espiritual interior.", imagen: "/WhatsApp Image 2026-07-06 at 20.33.43.jpeg", precio: 280000, ocupacion: "Máx. 2 Adultos", estado: EstadoHabitacion.DISPONIBLE },
-      { titulo: "Habitación 4", subtitulo: "Cabaña independiente rodeada de pinos con terraza privada elevada sobre el dosel arbóreo.", imagen: "/WhatsApp Image 2026-07-08 at 10.54.20 (1).jpeg", precio: 310000, ocupacion: "Hasta 3 Personas", estado: EstadoHabitacion.DISPONIBLE },
-      { titulo: "Habitación 5", subtitulo: "Orientada al oeste, ofrece los mejores espectáculos cromáticos del crepúsculo desde la cama.", imagen: "/WhatsApp Image 2026-07-08 at 10.54.20 (1).jpeg", precio: 380000, ocupacion: "Máx. 2 Adultos", estado: EstadoHabitacion.DISPONIBLE },
-      { titulo: "Habitación 6", subtitulo: "Techos altos, luz natural cenital y texturas orgánicas inspiradas en la naturaleza local.", imagen: "/WhatsApp Image 2026-07-06 at 20.33.44.jpeg", precio: 290000, ocupacion: "Familiar — Hasta 4 Personas", estado: EstadoHabitacion.DISPONIBLE }
+      { 
+        titulo: "Habitación 1", 
+        subtitulo: "Nuestra suite insignia con tina de hidromasaje exterior y vistas infinitas al valle.", 
+        descripcion: "Nuestra estancia más majestuosa. Cuenta con una tina de hidromasaje exterior privada y vistas infinitas al valle. Su arquitectura interior expone techos altos con vigas de madera nativa, lencería de cama de 400 hilos y ventanales acústicos de piso a techo.",
+        comodidades: ["❄️ Nevera pequeña", "🚿 Baño privado", "📺 Smart TV", "📶 Internet WiFi", "☕ Cafetera"],
+        imagenes: ["/WhatsApp Image 2026-07-06 at 20.33.44.jpeg"], 
+        precio: 450000, ocupacion: "Máx. 2 Adultos", estado: EstadoHabitacion.DISPONIBLE 
+      },
+      { 
+        titulo: "Habitación 2", 
+        subtitulo: "Equilibrio perfecto entre arquitectura rústica y confort moderno, equipada con chimenea.", 
+        descripcion: "Equilibrio perfecto entre la calidez rústica caribeña y el minimalismo moderno. Viene equipada con una chimenea privada para las noches frescas y un balcón artesanal diseñado minuciosamente para disfrutar los amaneceres.",
+        comodidades: ["❄️ Nevera pequeña", "🚿 Baño privado", "📺 Smart TV", "📶 Internet WiFi", "🔥 Chimenea"],
+        imagenes: ["/WhatsApp Image 2026-07-06 at 20.33.43 (1).jpeg"], 
+        precio: 320000, ocupacion: "Máx. 2 Adultos + 1 Niño", estado: EstadoHabitacion.DISPONIBLE 
+      },
+      { 
+        titulo: "Habitación 3", 
+        subtitulo: "Un espacio diseñado para el silencio, la lectura y la reconexión espiritual interior.", 
+        descripcion: "Un entorno místico ideal para el descanso. Con detalles en madera y piedra que evocan la tranquilidad monástica, cuenta con sábanas de lujo, un pequeño escritorio vintage y acceso rápido al jardín zen central.",
+        comodidades: ["🚿 Baño privado", "📶 Internet WiFi", "🧊 Minibar"],
+        imagenes: ["/WhatsApp Image 2026-07-06 at 20.33.43.jpeg"], 
+        precio: 280000, ocupacion: "Máx. 2 Adultos", estado: EstadoHabitacion.DISPONIBLE 
+      },
+      { 
+        titulo: "Habitación 4", 
+        subtitulo: "Cabaña independiente rodeada de pinos con terraza privada elevada sobre el dosel arbóreo.", 
+        descripcion: "Sumérgete en la naturaleza con esta cabaña escondida. Sus amplios ventanales permiten observar la flora y fauna local desde la comodidad de una cama queen-size. Incluye una terraza privada para meditar al amanecer.",
+        comodidades: ["❄️ Nevera pequeña", "🚿 Baño privado", "📶 Internet WiFi", "☕ Cafetera"],
+        imagenes: ["/WhatsApp Image 2026-07-08 at 10.54.20 (1).jpeg"], 
+        precio: 310000, ocupacion: "Hasta 3 Personas", estado: EstadoHabitacion.DISPONIBLE 
+      },
+      { 
+        titulo: "Habitación 5", 
+        subtitulo: "Orientada al oeste, ofrece los mejores espectáculos cromáticos del crepúsculo desde la cama.", 
+        descripcion: "Diseñada específicamente para capturar la luz del atardecer. Esta habitación goza de tonos dorados por la tarde, combinando mobiliario clásico y amenidades modernas para una experiencia de relajación total.",
+        comodidades: ["🚿 Baño privado", "📺 Smart TV", "📶 Internet WiFi", "🌬️ Aire Acondicionado"],
+        imagenes: ["/WhatsApp Image 2026-07-08 at 10.54.20 (1).jpeg"], 
+        precio: 380000, ocupacion: "Máx. 2 Adultos", estado: EstadoHabitacion.DISPONIBLE 
+      },
+      { 
+        titulo: "Habitación 6", 
+        subtitulo: "Techos altos, luz natural cenital y texturas orgánicas inspiradas en la naturaleza local.", 
+        descripcion: "La suite ideal para la familia o grupo de amigos. Espacios amplios y diáfanos que permiten el descanso conjunto sin sacrificar la privacidad. Texturas de lino y algodón complementan la estética orgánica del lugar.",
+        comodidades: ["❄️ Nevera pequeña", "🚿 Baño privado", "📺 Smart TV", "📶 Internet WiFi", "☕ Cafetera"],
+        imagenes: ["/WhatsApp Image 2026-07-06 at 20.33.44.jpeg"], 
+        precio: 290000, ocupacion: "Familiar — Hasta 4 Personas", estado: EstadoHabitacion.DISPONIBLE 
+      }
     ];
 
     for (const h of habitaciones) {
@@ -195,7 +237,9 @@ export class SeedService {
         await this.habitacionRepository.save(h);
       } else {
         existing.subtitulo = h.subtitulo;
-        existing.imagen = h.imagen;
+        existing.descripcion = h.descripcion;
+        existing.comodidades = h.comodidades;
+        existing.imagenes = h.imagenes;
         existing.precio = h.precio;
         existing.ocupacion = h.ocupacion;
         existing.estado = h.estado;

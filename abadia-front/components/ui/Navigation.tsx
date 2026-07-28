@@ -9,6 +9,10 @@ export default function Navigation() {
   const pathname = usePathname();
   const router = useRouter();
 
+  if (pathname.startsWith('/admin')) {
+    return null;
+  }
+
   const hacerScrollASeccion = (idSeccion: string) => {
     setMenuAbierto(false);
     if (pathname !== '/') {

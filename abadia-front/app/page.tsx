@@ -170,7 +170,7 @@ export default function HomePage() {
           {IMAGENES_HERO.map((imgUrl, idx) => {
             const isHeroActive = idx === heroActivo;
             return (
-              <div key={idx} className={`absolute inset-0 w-full h-full transition-all duration-[1500ms] ease-in-out bg-black/40 ${isHeroActive ? 'opacity-100 scale-100' : 'opacity-0 scale-105 pointer-events-none'}`}>
+              <div key={idx} className={`absolute inset-0 w-full h-full transition-all duration-1500 ease-in-out bg-black/40 ${isHeroActive ? 'opacity-100 scale-100' : 'opacity-0 scale-105 pointer-events-none'}`}>
                 <div className="absolute inset-0 bg-black/35 z-10" />
                 <Image src={imgUrl} alt={`Abadía Vista Principal ${idx + 1}`} fill priority={idx === 0} unoptimized sizes="100vw" className="object-cover" />
               </div>
@@ -188,7 +188,7 @@ export default function HomePage() {
       {/* --- 2. CINTURÓN PROMOCIONAL --- */}
       <section className="bg-[#f4f1ea]/60 py-14 px-4 text-center border-y border-[#e6dfd1]/30">
         <div className="max-w-4xl mx-auto">
-          <h3 className="text-xl md:text-3xl font-light tracking-[0.1em] text-[#3d342e] uppercase leading-tight font-luxury-title">
+          <h3 className="text-xl md:text-3xl font-light tracking-widest text-[#3d342e] uppercase leading-tight font-luxury-title">
             Desconéctate desde <span className="font-editorial-italic text-[#7a6e5d] font-normal lowercase tracking-normal">$70.000 cop</span> la noche
           </h3>
           <p className="text-neutral-400 text-[10px] mt-2 tracking-[0.3em] uppercase font-light">
@@ -205,7 +205,7 @@ export default function HomePage() {
             <span className="text-[10px] uppercase tracking-[0.4em] text-[#3d342e]/40 font-medium block mb-2">— HABITACIONES</span>
             <h2 className="text-4xl md:text-6xl text-[#3d342e] uppercase leading-none flex flex-col">
               <span className="font-luxury-title tracking-tight">Estancias de</span>
-              <span className="font-luxury-script text-5xl md:text-8xl text-[#7a6e5d] capitalize -mt-3 md:-mt-6 normal-case tracking-normal">Ensueño</span>
+              <span className="font-luxury-script text-5xl md:text-8xl text-[#7a6e5d] -mt-3 md:-mt-6 normal-case tracking-normal">Ensueño</span>
             </h2>
           </div>
 
@@ -214,12 +214,12 @@ export default function HomePage() {
             {habitaciones.map((hab) => {
               const tarjetaVolteada = habitacionConPrecio === hab.id;
               return (
-                <div key={hab.id} className="relative aspect-[4/5] w-full bg-[#f4f1ea] rounded-[2.5rem] shadow-sm overflow-hidden border border-[#f4f1ea]/30 transition-all duration-500 hover:scale-[1.01] hover:shadow-md group">
+                <div key={hab.id} className="relative aspect-4/5 w-full bg-[#f4f1ea] rounded-[2.5rem] shadow-sm overflow-hidden border border-[#f4f1ea]/30 transition-all duration-500 hover:scale-[1.01] hover:shadow-md group">
                   
                   {/* FRONT */}
                   <div className={`absolute inset-0 w-full h-full p-8 flex flex-col justify-end transition-all duration-500 ease-in-out ${tarjetaVolteada ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100'}`}>
                     <Image src={hab.imagen} alt={hab.titulo} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition-transform duration-1000 ease-out group-hover:scale-[1.02]" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent z-10" />
+                    <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/10 to-transparent z-10" />
                     
                     <div className="relative z-20 text-white text-left">
                       <span className="text-[9px] font-medium uppercase tracking-widest bg-white/20 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">{hab.ocupacion}</span>
@@ -248,11 +248,19 @@ export default function HomePage() {
 
                     <div className="flex flex-col justify-center items-center gap-3 py-2 flex-1">
                       <p className="text-[#f4f1ea]/90 text-xs font-light leading-relaxed px-1 text-left">{hab.subtitulo}</p>
-                      <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-left w-full max-w-[220px] mx-auto pt-3 border-t border-white/10 text-[#f4f1ea]/70 font-light text-[11px]">
-                        <span>❄️ Nevera pequeña</span>
-                        <span>育 Baño privado</span>
-                        <span>📺 Smart TV</span>
-                        <span>📶 WiFi Libre</span>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-left w-full max-w-55 mx-auto pt-3 border-t border-white/10 text-[#f4f1ea]/70 font-light text-[11px]">
+                        {hab.comodidades && hab.comodidades.length > 0 ? (
+                          hab.comodidades.slice(0, 4).map((com: string, idx: number) => (
+                            <span key={idx}>{com}</span>
+                          ))
+                        ) : (
+                          <>
+                            <span>❄️ Nevera pequeña</span>
+                            <span>🚿 Baño privado</span>
+                            <span>📺 Smart TV</span>
+                            <span>📶 Internet WiFi</span>
+                          </>
+                        )}
                       </div>
                     </div>
 

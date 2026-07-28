@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query, UseInterceptors, UploadedFiles, ParseFilePipeBuilder, HttpStatus } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { HabitacionesService } from './habitaciones.service';
 import { CreateHabitacionDto } from './dto/create-habitacion.dto';
 import { UpdateHabitacionDto } from './dto/update-habitacion.dto';
@@ -6,7 +7,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../common/enums/role.enum';
 import { Public } from '../auth/decorators/public.decorator';
-import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiConsumes, ApiOperation } from '@nestjs/swagger';
 
 @ApiTags('Habitaciones')
 @Controller('habitaciones')
@@ -64,5 +65,23 @@ export class HabitacionesController {
   @Roles(Role.Admin, Role.SuperAdmin)
   remove(@Param('id') id: string) {
     return this.habitacionesService.remove(id);
+  }
+
+  @Post(':id/imagenes')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @Roles(Role.Admin, Role.SuperAdmin)
+  @UseInterceptors(FilesInterceptor('files', 10))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Sube múltiples imágenes para la habitación' })
+  uploadImages(
+    @Param('id') id: string,
+    @UploadedFiles(
+      new ParseFilePipeBuilder()
+        .addMaxSizeValidator({ maxSize: 10485760, message: 'El archivo supera el límite de 10 MB' })
+        .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY }),
+    ) files: Array<Express.Multer.File>,
+  ) {
+    return this.habitacionesService.uploadImages(id, files);
   }
 }
