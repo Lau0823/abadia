@@ -75,5 +75,19 @@ jobs:
             npm run build
             pm2 startOrReload /var/www/abadia-back/ecosystem.config.cjs
             pm2 save
-            curl --fail --silent --show-error http://127.0.0.1:3102/health >/dev/null
-            curl --fail --silent --show-error http://127.0.0.1:3100/ >/dev/null
+            for url in http://127.0.0.1:3102/health http://127.0.0.1:3100/; do
+              for attempt in $(seq 1 30); do
+                if curl --fail --silent --show-error "$url" >/dev/null; then
+                  break
+                fi
+
+                if [ "$attempt" -eq 30 ]; then
+                  echo "Service did not become ready: $url"
+                  pm2 logs abadia-back --lines 100 --nostream || true
+                  pm2 logs abadia-front --lines 100 --nostream || true
+                  exit 1
+                fi
+
+                sleep 1
+              done
+            done
