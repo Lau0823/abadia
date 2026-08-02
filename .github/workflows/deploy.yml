@@ -31,7 +31,7 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          fingerprint: ${{ secrets.VPS_HOST_FINGERPRINT }}
+          fingerprint: SHA256:KkiAxqPAAfkZWrdg+Z8JkCvj5W9+waXhIARGHWDw0es
           source: 'abadia-front,abadia-back'
           target: '/var/www'
           overwrite: true
@@ -42,7 +42,7 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          fingerprint: ${{ secrets.VPS_HOST_FINGERPRINT }}
+          fingerprint: SHA256:KkiAxqPAAfkZWrdg+Z8JkCvj5W9+waXhIARGHWDw0es
           source: 'deploy/abadia1.nginx.conf'
           target: '/home/camilo/'
           strip_components: 1
@@ -54,7 +54,7 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          fingerprint: ${{ secrets.VPS_HOST_FINGERPRINT }}
+          fingerprint: SHA256:KkiAxqPAAfkZWrdg+Z8JkCvj5W9+waXhIARGHWDw0es
           script: |
             set -eu
             cd /var/www/abadia-back
