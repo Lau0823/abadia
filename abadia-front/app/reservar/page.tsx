@@ -348,6 +348,8 @@ export default function ReservarPage() {
                   </div>
                 </div>
 
+                </div>
+
                 <div className="pt-8 border-t border-[#e6dfd1]">
                   <h3 className="text-lg font-luxury-title uppercase text-[#3d342e] mb-4">3. Políticas del Hotel</h3>
                   <div className="bg-[#f4f1ea]/30 p-5 rounded-xl border border-[#e6dfd1]/50 text-xs text-neutral-500 leading-relaxed font-light mb-6 space-y-3">
