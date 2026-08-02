@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { fetchApi, API_URL } from "../lib/api";
 import Link from "next/link";
+import Image from "next/image";
 import {
   HomeIcon,
   UsersIcon,
@@ -82,9 +83,23 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
         {/* Sidebar */}
         <aside className="w-20 lg:w-64 bg-white border-r border-[var(--mv-sage)]/10 flex flex-col justify-between transition-all duration-300 shadow-sm z-20">
           <div>
-            <div className="h-20 flex items-center justify-center lg:justify-start lg:px-8 border-b border-[var(--mv-sage)]/10">
-              <span className="mv-script text-2xl lg:text-3xl text-[var(--mv-ink)] hidden lg:block">Abadia</span>
-              <span className="mv-script text-2xl text-[var(--mv-ink)] lg:hidden">A</span>
+            <div className="h-20 flex items-center justify-center lg:justify-start lg:px-6 border-b border-[var(--mv-sage)]/10">
+              <Image 
+                src="/logo.png" 
+                alt="Abadia Logo" 
+                width={120} 
+                height={48} 
+                className="hidden lg:block object-contain" 
+                priority
+              />
+              <Image 
+                src="/logo.png" 
+                alt="Abadia Logo" 
+                width={40} 
+                height={40} 
+                className="lg:hidden object-contain" 
+                priority
+              />
             </div>
             
             <nav className="mt-6 flex flex-col gap-2 px-3">
