@@ -2,11 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { Calendar, dateFnsLocalizer, Views } from "react-big-calendar";
-import format from "date-fns/format";
-import parse from "date-fns/parse";
-import startOfWeek from "date-fns/startOfWeek";
-import getDay from "date-fns/getDay";
-import es from "date-fns/locale/es";
+import { format, parse, startOfWeek, getDay } from "date-fns";
+import { es } from "date-fns/locale/es";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { fetchApi } from "@/lib/api";
 import { UserGroupIcon } from "@heroicons/react/24/outline";
@@ -219,9 +216,9 @@ export default function CalendarioPage() {
           onClose={() => setIsHuespedesModalOpen(false)}
           reservation={selectedEvent.reservationDetails}
           onSuccess={() => {
-            fetchEvents();
+            fetchReservas();
             // Para actualizar los datos del modal sin cerrarlo, habría que hacer fetch de nuevo a la reserva
-            // Por simplicidad, el fetchEvents refrescará el state general en background
+            // Por simplicidad, el fetchReservas refrescará el state general en background
           }}
         />
       )}
