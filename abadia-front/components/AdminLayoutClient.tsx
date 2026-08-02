@@ -85,7 +85,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
           <div>
             <div className="h-20 flex items-center justify-center lg:justify-start lg:px-6 border-b border-[var(--mv-sage)]/10">
               <Image 
-                src="/logo.png" 
+                src="/abadia_color.png" 
                 alt="Abadia Logo" 
                 width={120} 
                 height={48} 
@@ -93,7 +93,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
                 priority
               />
               <Image 
-                src="/logo.png" 
+                src="/abadia_color.png" 
                 alt="Abadia Logo" 
                 width={40} 
                 height={40} 
