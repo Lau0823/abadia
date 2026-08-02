@@ -25,6 +25,16 @@ jobs:
       - name: Check out source
         uses: actions/checkout@v4
 
+      - name: Verify the target host key
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+        run: |
+          set -euo pipefail
+          actual_fingerprint="$(ssh-keyscan -T 10 -t ed25519 "$VPS_HOST" 2>/dev/null | ssh-keygen -lf - | awk '{print $2}')"
+          test -n "$actual_fingerprint"
+          echo "Detected VPS host fingerprint: $actual_fingerprint"
+          test "$actual_fingerprint" = "SHA256:KkiAxqPAAfkZWrdg+Z8JkCvj5W9+waXhIARGHWDw0es"
+
       - name: Copy application source
         uses: appleboy/scp-action@v1
         with:
