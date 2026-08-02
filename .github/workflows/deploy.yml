@@ -2,7 +2,7 @@ name: Deploy Abadía
 
 on:
   push:
-    branches: [main]
+    branches: [camilo]
     paths:
       - 'abadia-front/**'
       - 'abadia-back/**'
