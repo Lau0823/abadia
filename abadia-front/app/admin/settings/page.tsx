@@ -81,8 +81,8 @@ export default function SettingsPage() {
     <div className="max-w-5xl mx-auto space-y-6">
       <div className="flex flex-col md:flex-row md:justify-between md:items-center bg-white p-6 rounded-3xl shadow-sm border border-[var(--mv-sage)]/10 gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-[var(--mv-ink)] uppercase tracking-wide">Configuración del Sistema</h2>
-          <p className="text-gray-500 mt-1 text-sm">Administra las variables globales y credenciales (Ej. Google Calendar).</p>
+          <h2 className="text-2xl font-bold text-[var(--mv-ink)] uppercase tracking-wide">Contenido del sitio</h2>
+          <p className="text-gray-500 mt-1 text-sm">Administra los textos, enlaces y recursos públicos que se muestran en la web.</p>
         </div>
         
         <div className="flex items-center gap-4">
@@ -96,7 +96,7 @@ export default function SettingsPage() {
             className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-full text-sm font-medium transition-all"
           >
             <PlusIcon className="w-5 h-5" />
-            Añadir Variable
+            Añadir ajuste
           </button>
           <button 
             onClick={handleSaveAll}
@@ -122,7 +122,7 @@ export default function SettingsPage() {
           <div className="space-y-4">
             {settings.length === 0 ? (
               <div className="text-center py-10 text-gray-500">
-                No hay configuraciones registradas. Añade tu primera variable.
+                No hay ajustes de contenido registrados. Añade el primero.
               </div>
             ) : (
               settings.map((setting, index) => (
@@ -134,8 +134,8 @@ export default function SettingsPage() {
                       type="text" 
                       value={setting.key}
                       onChange={(e) => handleChange(index, 'key', e.target.value)}
-                      disabled={!setting.isNew && setting.key === 'google_access_token' || setting.key === 'google_refresh_token'}
-                      placeholder="Ej. TAX_RATE"
+                      disabled={!setting.isNew}
+                      placeholder="Ej. hero_title"
                       className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-[var(--mv-blue)] outline-none disabled:bg-gray-100 disabled:text-gray-500 font-mono"
                     />
                   </div>
@@ -176,7 +176,7 @@ export default function SettingsPage() {
             )}
             
             <div className="mt-4 p-4 bg-yellow-50 rounded-xl border border-yellow-100 text-sm text-yellow-800">
-              <strong>Nota:</strong> Al presionar "Guardar Cambios", se actualizarán todas las variables listadas arriba. Las variables del sistema como `google_access_token` no deben editarse manualmente.
+              <strong>Nota:</strong> Estas son configuraciones públicas del contenido. Contraseñas, tokens y credenciales se gestionan únicamente en el entorno seguro del servidor y no se muestran aquí.
             </div>
           </div>
         )}

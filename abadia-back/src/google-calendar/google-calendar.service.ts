@@ -21,8 +21,8 @@ export class GoogleCalendarService {
 
   async loadTokensFromDb() {
     try {
-      const accessTokenSetting = await this.settingsService.findOne('google_access_token');
-      const refreshTokenSetting = await this.settingsService.findOne('google_refresh_token');
+      const accessTokenSetting = await this.settingsService.findPrivateOne('google_access_token');
+      const refreshTokenSetting = await this.settingsService.findPrivateOne('google_refresh_token');
 
       if (accessTokenSetting && accessTokenSetting.value) {
         this.oauth2Client.setCredentials({
@@ -43,9 +43,9 @@ export class GoogleCalendarService {
       refresh_token: refreshToken,
     });
 
-    await this.settingsService.upsert('google_access_token', accessToken, 'Google Calendar Access Token');
+    await this.settingsService.upsertPrivate('google_access_token', accessToken, 'Google Calendar Access Token');
     if (refreshToken) {
-      await this.settingsService.upsert('google_refresh_token', refreshToken, 'Google Calendar Refresh Token');
+      await this.settingsService.upsertPrivate('google_refresh_token', refreshToken, 'Google Calendar Refresh Token');
     }
   }
 
