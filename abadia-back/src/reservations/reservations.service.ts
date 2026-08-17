@@ -40,7 +40,7 @@ export class ReservationsService {
   async create(createReservationDto: Partial<Reservation>) {
     if (createReservationDto.checkIn) {
       createReservationDto.checkIn = this.normalizeDate(
-        createReservationDto.checkIn.toDateString(),
+        createReservationDto.checkIn.toString(),
         15
       );
     }
