@@ -7,7 +7,8 @@ import { Cliente } from '../clientes/entities/cliente.entity';
 import { Habitacion, EstadoLimpieza } from '../habitaciones/entities/habitacion.entity';
 import { MailService } from '../common/mail/mail.service';
 import { GoogleCalendarService } from '../google-calendar/google-calendar.service';
-
+import { FinanzasService } from '../finanzas/finanzas.service';
+import { TipoTransaccion, CategoriaTransaccion } from '../finanzas/entities/transaccion.entity';
 
 @Injectable()
 export class ReservationsService {
@@ -24,6 +25,7 @@ export class ReservationsService {
     private readonly habitacionRepository: Repository<Habitacion>,
     private readonly mailService: MailService,
     private readonly googleCalendarService: GoogleCalendarService,
+    private readonly finanzasService: FinanzasService,
   ) { }
 
   private normalizeDate(date: Date | string, hour: number): Date {
@@ -67,6 +69,18 @@ export class ReservationsService {
 
     const reservation = this.reservationRepository.create(createReservationDto);
     const saved = await this.reservationRepository.save(reservation);
+
+    // Si la reserva se crea con un anticipo inicial
+    if (saved.anticipo && Number(saved.anticipo) > 0) {
+      await this.finanzasService.create({
+        monto: Number(saved.anticipo),
+        tipo: TipoTransaccion.INGRESO,
+        categoria: CategoriaTransaccion.RESERVACION,
+        concepto: `Anticipo inicial de la reserva #${saved.id}`,
+        fecha: new Date().toISOString(),
+        reservaId: saved.id,
+      });
+    }
 
     if (saved.status === ReservationStatus.CONFIRMED) {
       await this.processConfirmedReservation(saved);
@@ -160,6 +174,21 @@ export class ReservationsService {
       ...oldReservation,
       ...updateReservationDto,
     });
+
+    // Detectar si el anticipo aumentó (nuevo pago)
+    if (updateReservationDto.anticipo !== undefined && oldReservation.anticipo !== undefined) {
+      const diff = Number(updateReservationDto.anticipo) - Number(oldReservation.anticipo);
+      if (diff > 0) {
+        await this.finanzasService.create({
+          monto: diff,
+          tipo: TipoTransaccion.INGRESO,
+          categoria: CategoriaTransaccion.RESERVACION,
+          concepto: `Pago/Anticipo de la reserva #${updated.id}`,
+          fecha: new Date().toISOString(),
+          reservaId: updated.id,
+        });
+      }
+    }
 
     // Si el estado cambió a 'confirmed' en esta actualización
     if (oldReservation.status !== ReservationStatus.CONFIRMED && updated.status === ReservationStatus.CONFIRMED) {

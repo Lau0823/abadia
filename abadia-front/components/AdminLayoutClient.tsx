@@ -14,6 +14,8 @@ import {
   Cog6ToothIcon,
   ArrowLeftOnRectangleIcon,
   BanknotesIcon,
+  DocumentTextIcon,
+  ChartBarIcon,
 } from "@heroicons/react/24/outline";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/Tooltip";
 import { useAuthStore } from "../store/authStore";
@@ -24,6 +26,8 @@ const navigation = [
   { name: "Reservas", href: "/admin/reservas", icon: CalendarDaysIcon },
   { name: "Habitaciones", href: "/admin/habitaciones", icon: KeyIcon },
   { name: "Clientes", href: "/admin/clientes", icon: UsersIcon },
+  { name: "Cotizaciones", href: "/admin/cotizaciones", icon: DocumentTextIcon },
+  { name: "Finanzas", href: "/admin/finanzas", icon: ChartBarIcon },
   { name: "Cuentas", href: "/admin/cuentas", icon: BanknotesIcon },
   { name: "Configuración", href: "/admin/settings", icon: Cog6ToothIcon },
 ];

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { fetchApi } from "@/lib/api";
-import { PlusIcon, UserGroupIcon, EyeIcon } from "@heroicons/react/24/outline";
+import { fetchApi, API_URL } from "@/lib/api";
+import { PlusIcon, UserGroupIcon, EyeIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
 import NuevaReservaModal from "@/components/NuevaReservaModal";
 import HuespedesModal from "@/components/HuespedesModal";
 
@@ -24,7 +24,7 @@ export default function ReservasPage() {
       setReservas([
         { 
           id: "1", 
-          cliente: { nombre: "María Pérez", correo: "maria@example.com" }, 
+          cliente: { id: 1, nombre: "María Pérez", correo: "maria@example.com" }, 
           habitacion: { titulo: "Habitación 1" }, 
           checkIn: new Date().toISOString(), 
           checkOut: new Date(new Date().setDate(new Date().getDate() + 2)).toISOString(), 
@@ -33,7 +33,7 @@ export default function ReservasPage() {
         },
         { 
           id: "2", 
-          cliente: { nombre: "Carlos López", correo: "carlos@example.com" }, 
+          cliente: { id: 2, nombre: "Carlos López", correo: "carlos@example.com" }, 
           habitacion: { titulo: "Habitación 2" }, 
           checkIn: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(), 
           checkOut: new Date(new Date().setDate(new Date().getDate() + 4)).toISOString(), 
@@ -58,6 +58,39 @@ export default function ReservasPage() {
   const handleOpenRegistro = (reserva: any) => {
     setSelectedReserva(reserva);
     setIsHuespedesModalOpen(true);
+  };
+
+  const handleGenerateFactura = async (res: any) => {
+    try {
+      // Intentar crear la factura primero (si ya existe dará error, pero podemos manejarlo)
+      const payload = {
+        reserva_id: res.id,
+        cliente_id: res.cliente.id || res.cliente_id,
+        total: Number(res.value),
+      };
+      
+      let facturaId = "";
+      try {
+        const result = await fetchApi("/facturas", { method: "POST", body: JSON.stringify(payload) });
+        facturaId = result.id || (result.data && result.data.id);
+      } catch (e: any) {
+        // Si falla porque ya existe el registro único reserva_id, buscar la factura de esta reserva.
+        // Como no tenemos endpoint buscar por reserva, podríamos implementar uno o buscar en findAll
+        const facturas = await fetchApi("/facturas");
+        const found = (facturas.data || facturas).find((f: any) => f.reserva_id === res.id);
+        if (found) {
+          facturaId = found.id;
+        } else {
+          throw new Error("No se pudo crear ni encontrar la factura.");
+        }
+      }
+
+      if (facturaId) {
+        window.open(`${API_URL}/documents/factura/${facturaId}`, "_blank");
+      }
+    } catch (error: any) {
+      alert("Error al generar la factura: " + (error.message || ""));
+    }
   };
 
   return (
@@ -150,6 +183,13 @@ export default function ReservasPage() {
                         >
                           <UserGroupIcon className="w-4 h-4" />
                           TRA ({res.huespedes?.length || 0})
+                        </button>
+                        <button 
+                          onClick={() => handleGenerateFactura(res)}
+                          className="p-2 text-gray-400 hover:text-[var(--mv-blue)] hover:bg-[var(--mv-blue)]/10 rounded-lg transition-all"
+                          title="Generar Factura"
+                        >
+                          <DocumentTextIcon className="w-5 h-5" />
                         </button>
                         <button className="p-2 text-gray-400 hover:text-[var(--mv-blue)] hover:bg-[var(--mv-blue)]/10 rounded-lg transition-all">
                           <EyeIcon className="w-5 h-5" />

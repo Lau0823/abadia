@@ -8,12 +8,14 @@ import { Cliente } from '../clientes/entities/cliente.entity';
 import { Habitacion } from '../habitaciones/entities/habitacion.entity';
 import { MailModule } from '../common/mail/mail.module';
 import { GoogleCalendarModule } from '../google-calendar/google-calendar.module';
+import { FinanzasModule } from '../finanzas/finanzas.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Reservation, Huesped, Cliente, Habitacion]),
     MailModule,
-    GoogleCalendarModule
+    GoogleCalendarModule,
+    FinanzasModule
   ],
   controllers: [ReservationsController],
   providers: [ReservationsService],

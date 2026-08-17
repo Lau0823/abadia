@@ -23,6 +23,13 @@ import { HabitacionesModule } from './habitaciones/habitaciones.module';
 import { GoogleCalendarModule } from './google-calendar/google-calendar.module';
 import { SettingsModule } from './settings/settings.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { FinanzasModule } from './finanzas/finanzas.module';
+import { Transaccion } from './finanzas/entities/transaccion.entity';
+import { CotizacionesModule } from './cotizaciones/cotizaciones.module';
+import { Cotizacion } from './cotizaciones/entities/cotizacion.entity';
+import { FacturasModule } from './facturas/facturas.module';
+import { Factura } from './facturas/entities/factura.entity';
+import { DocumentsModule } from './documents/documents.module';
 
 @Module({
   imports: [
@@ -47,6 +54,9 @@ import { DashboardModule } from './dashboard/dashboard.module';
           Habitacion,
           Setting,
           Huesped,
+          Transaccion,
+          Cotizacion,
+          Factura,
         ];
 
         if (databaseUrl) {
@@ -87,6 +97,10 @@ import { DashboardModule } from './dashboard/dashboard.module';
     GoogleCalendarModule,
     SettingsModule,
     DashboardModule,
+    FinanzasModule,
+    CotizacionesModule,
+    FacturasModule,
+    DocumentsModule,
   ],
   controllers: [AppController],
   providers: [
