@@ -2,15 +2,17 @@
 
 import { useState, useEffect } from "react";
 import { fetchApi, API_URL } from "@/lib/api";
-import { PlusIcon, UserGroupIcon, EyeIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, UserGroupIcon, EyeIcon, DocumentTextIcon, ArrowsRightLeftIcon } from "@heroicons/react/24/outline";
 import NuevaReservaModal from "@/components/NuevaReservaModal";
 import HuespedesModal from "@/components/HuespedesModal";
+import TransferirReservaModal from "@/components/TransferirReservaModal";
 
 export default function ReservasPage() {
   const [reservas, setReservas] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
   const [isHuespedesModalOpen, setIsHuespedesModalOpen] = useState(false);
+  const [isTransferirModalOpen, setIsTransferirModalOpen] = useState(false);
   const [selectedReserva, setSelectedReserva] = useState<any>(null);
 
   const fetchReservas = async () => {
@@ -58,6 +60,11 @@ export default function ReservasPage() {
   const handleOpenRegistro = (reserva: any) => {
     setSelectedReserva(reserva);
     setIsHuespedesModalOpen(true);
+  };
+
+  const handleOpenTransferir = (reserva: any) => {
+    setSelectedReserva(reserva);
+    setIsTransferirModalOpen(true);
   };
 
   const handleGenerateFactura = async (res: any) => {
@@ -185,6 +192,13 @@ export default function ReservasPage() {
                           TRA ({res.huespedes?.length || 0})
                         </button>
                         <button 
+                          onClick={() => handleOpenTransferir(res)}
+                          className="p-2 text-gray-400 hover:text-[var(--mv-blue)] hover:bg-[var(--mv-blue)]/10 rounded-lg transition-all"
+                          title="Transferir Habitación"
+                        >
+                          <ArrowsRightLeftIcon className="w-5 h-5" />
+                        </button>
+                        <button 
                           onClick={() => handleGenerateFactura(res)}
                           className="p-2 text-gray-400 hover:text-[var(--mv-blue)] hover:bg-[var(--mv-blue)]/10 rounded-lg transition-all"
                           title="Generar Factura"
@@ -213,6 +227,13 @@ export default function ReservasPage() {
       <HuespedesModal 
         isOpen={isHuespedesModalOpen}
         onClose={() => setIsHuespedesModalOpen(false)}
+        reservation={selectedReserva}
+        onSuccess={() => fetchReservas()}
+      />
+
+      <TransferirReservaModal
+        isOpen={isTransferirModalOpen}
+        onClose={() => setIsTransferirModalOpen(false)}
         reservation={selectedReserva}
         onSuccess={() => fetchReservas()}
       />

@@ -14,7 +14,7 @@ export default function CotizacionesPage() {
     setLoading(true);
     try {
       const response = await fetchApi("/cotizaciones");
-      setCotizaciones(response.data || []);
+      setCotizaciones(Array.isArray(response) ? response : (response.data || []));
     } catch (error) {
       console.error("Error cargando cotizaciones", error);
     } finally {

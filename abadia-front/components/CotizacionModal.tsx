@@ -39,6 +39,28 @@ export default function CotizacionModal({ isOpen, onClose, onSuccess }: Cotizaci
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    // Calculo automático del total estimado
+    if (formData.habitacion_id && formData.checkIn && formData.checkOut) {
+      const checkInDate = new Date(formData.checkIn);
+      const checkOutDate = new Date(formData.checkOut);
+      
+      if (checkOutDate > checkInDate) {
+        const diffTime = Math.abs(checkOutDate.getTime() - checkInDate.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        // Ensure habitaciones is an array before trying to find the item
+        const hbs = Array.isArray(habitaciones) ? habitaciones : ((habitaciones as any).data || []);
+        const habitacionSeleccionada = hbs.find((h: any) => h.id === formData.habitacion_id);
+        
+        if (habitacionSeleccionada) {
+          const precioTotal = diffDays * Number(habitacionSeleccionada.precio);
+          setFormData(prev => ({ ...prev, total_estimado: precioTotal }));
+        }
+      }
+    }
+  }, [formData.habitacion_id, formData.checkIn, formData.checkOut, habitaciones]);
+
   const fetchClientes = async () => {
     try {
       const response = await fetchApi("/clientes?limit=100");

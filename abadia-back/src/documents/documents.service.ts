@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import * as PDFDocument from 'pdfkit';
-import { Response } from 'express';
+import PDFDocument = require('pdfkit');
+import type { Response } from 'express';
 import { CotizacionesService } from '../cotizaciones/cotizaciones.service';
 import { FacturasService } from '../facturas/facturas.service';
 
