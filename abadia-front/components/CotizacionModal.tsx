@@ -149,10 +149,6 @@ export default function CotizacionModal({ isOpen, onClose, onSuccess }: Cotizaci
                 {Array.isArray(habitaciones) && habitaciones.map(h => (
                   <option key={h.id} value={h.id}>{h.titulo} - ${h.precio}/noche</option>
                 ))}
-                {/* Fallback if data is inside .data */}
-                {habitaciones.data && habitaciones.data.map((h: any) => (
-                  <option key={h.id} value={h.id}>{h.titulo} - ${h.precio}/noche</option>
-                ))}
               </select>
             </div>
 
