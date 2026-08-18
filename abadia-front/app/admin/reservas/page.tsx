@@ -147,11 +147,12 @@ export default function ReservasPage() {
           </div>
           <button 
             onClick={() => setIsNewModalOpen(true)}
-          className="flex items-center gap-2 bg-[var(--mv-blue)] hover:bg-[#0b3c66] text-white px-5 py-2.5 rounded-full text-sm font-medium transition-all shadow-md"
-        >
-          <PlusIcon className="w-5 h-5" />
-          Nueva Reserva
-        </button>
+            className="flex items-center gap-2 bg-[var(--mv-blue)] hover:bg-[#0b3c66] text-white px-5 py-2.5 rounded-full text-sm font-medium transition-all shadow-md"
+          >
+            <PlusIcon className="w-5 h-5" />
+            Nueva Reserva
+          </button>
+        </div>
       </div>
 
       <div className="bg-white rounded-3xl shadow-sm border border-[var(--mv-sage)]/10 overflow-hidden">
