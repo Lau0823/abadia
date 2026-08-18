@@ -26,7 +26,9 @@ export default function CotizacionModal({ isOpen, onClose, onSuccess }: Cotizaci
   useEffect(() => {
     if (isOpen) {
       fetchClientes();
-      fetchHabitaciones();
+      if (!formData.checkIn || !formData.checkOut) {
+        setHabitaciones([]);
+      }
       setFormData({
         cliente_id: "",
         habitacion_id: "",
@@ -61,6 +63,31 @@ export default function CotizacionModal({ isOpen, onClose, onSuccess }: Cotizaci
     }
   }, [formData.habitacion_id, formData.checkIn, formData.checkOut, habitaciones]);
 
+  // Buscar habitaciones disponibles cuando cambian las fechas
+  useEffect(() => {
+    if (formData.checkIn && formData.checkOut) {
+      const loadDisponibles = async () => {
+        try {
+          const response = await fetchApi(`/habitaciones/disponibles?checkIn=${formData.checkIn}&checkOut=${formData.checkOut}`);
+          setHabitaciones(response || []);
+          // Si la habitación seleccionada ya no está disponible, la deseleccionamos
+          if (formData.habitacion_id && !response.find((h: any) => h.id === formData.habitacion_id)) {
+            setFormData(prev => ({ ...prev, habitacion_id: "" }));
+          }
+        } catch (error) {
+          console.error("Error loading habitaciones disponibles", error);
+        }
+      };
+      loadDisponibles();
+    } else {
+      setHabitaciones([]);
+      setFormData(prev => ({ ...prev, habitacion_id: "" }));
+    }
+  }, [formData.checkIn, formData.checkOut]);
+
+  // Obtener fecha actual en formato para input date
+  const todayStr = new Date().toISOString().slice(0, 10);
+
   const fetchClientes = async () => {
     try {
       const response = await fetchApi("/clientes?limit=100");
@@ -70,14 +97,7 @@ export default function CotizacionModal({ isOpen, onClose, onSuccess }: Cotizaci
     }
   };
 
-  const fetchHabitaciones = async () => {
-    try {
-      const response = await fetchApi("/habitaciones");
-      setHabitaciones(response || []); // Assuming habitaciones returns array directly or modify if it's .data
-    } catch (error) {
-      console.error("Error loading habitaciones", error);
-    }
-  };
+  // fetchHabitaciones ha sido reemplazado por la búsqueda dinámica en useEffect
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,11 +161,18 @@ export default function CotizacionModal({ isOpen, onClose, onSuccess }: Cotizaci
               <label className="block text-sm font-medium text-gray-700 mb-1">Habitación / Propiedad</label>
               <select
                 required
-                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--mv-blue)] outline-none bg-white"
+                disabled={!formData.checkIn || !formData.checkOut}
+                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--mv-blue)] outline-none bg-white disabled:opacity-50 disabled:bg-gray-50"
                 value={formData.habitacion_id}
                 onChange={(e) => setFormData({ ...formData, habitacion_id: e.target.value })}
               >
-                <option value="">Seleccione una habitación...</option>
+                <option value="">
+                  {!formData.checkIn || !formData.checkOut 
+                    ? "Selecciona fechas primero" 
+                    : Array.isArray(habitaciones) && habitaciones.length === 0 
+                      ? "No hay habitaciones disponibles" 
+                      : "Seleccione una habitación..."}
+                </option>
                 {Array.isArray(habitaciones) && habitaciones.map(h => (
                   <option key={h.id} value={h.id}>{h.titulo} - ${h.precio}/noche</option>
                 ))}
@@ -158,6 +185,7 @@ export default function CotizacionModal({ isOpen, onClose, onSuccess }: Cotizaci
                 <input
                   type="date"
                   required
+                  min={todayStr}
                   className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--mv-blue)] outline-none"
                   value={formData.checkIn}
                   onChange={(e) => setFormData({ ...formData, checkIn: e.target.value })}
@@ -168,6 +196,7 @@ export default function CotizacionModal({ isOpen, onClose, onSuccess }: Cotizaci
                 <input
                   type="date"
                   required
+                  min={formData.checkIn || todayStr}
                   className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--mv-blue)] outline-none"
                   value={formData.checkOut}
                   onChange={(e) => setFormData({ ...formData, checkOut: e.target.value })}

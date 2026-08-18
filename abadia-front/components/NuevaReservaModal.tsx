@@ -29,24 +29,49 @@ export default function NuevaReservaModal({ isOpen, onClose, onSuccess }: NuevaR
 
   useEffect(() => {
     if (isOpen) {
-      const loadData = async () => {
+      const loadClientes = async () => {
         setLoadingData(true);
         try {
-          const [clientesRes, habitacionesRes] = await Promise.all([
-            fetchApi("/clientes?limit=1000"), // Traemos suficientes para el select por ahora
-            fetchApi("/habitaciones")
-          ]);
+          const clientesRes = await fetchApi("/clientes?limit=1000");
           setClientes(clientesRes.data || []);
-          setHabitaciones(habitacionesRes || []);
+          // Limpiar habitaciones al abrir si no hay fechas
+          if (!formData.checkIn || !formData.checkOut) {
+            setHabitaciones([]);
+          }
         } catch (err: any) {
-          setError("Error al cargar clientes o habitaciones.");
+          setError("Error al cargar clientes.");
         } finally {
           setLoadingData(false);
         }
       };
-      loadData();
+      loadClientes();
     }
   }, [isOpen]);
+
+  // Buscar habitaciones disponibles cuando cambian las fechas
+  useEffect(() => {
+    if (formData.checkIn && formData.checkOut) {
+      const loadDisponibles = async () => {
+        try {
+          const res = await fetchApi(`/habitaciones/disponibles?checkIn=${formData.checkIn}&checkOut=${formData.checkOut}`);
+          setHabitaciones(res || []);
+          // Si la habitación seleccionada ya no está disponible, la deseleccionamos
+          if (formData.habitacion_id && !res.find((h: any) => h.id === formData.habitacion_id)) {
+            setFormData(prev => ({ ...prev, habitacion_id: "" }));
+          }
+        } catch (err: any) {
+          console.error("Error cargando habitaciones disponibles", err);
+        }
+      };
+      loadDisponibles();
+    } else {
+      setHabitaciones([]);
+      setFormData(prev => ({ ...prev, habitacion_id: "" }));
+    }
+  }, [formData.checkIn, formData.checkOut]);
+
+  // Obtener fecha actual en formato para datetime-local
+  const todayStr = new Date().toISOString().slice(0, 16);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -127,9 +152,16 @@ export default function NuevaReservaModal({ isOpen, onClose, onSuccess }: NuevaR
                   value={formData.habitacion_id} 
                   onChange={handleChange}
                   required
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[var(--mv-blue)] outline-none transition-all"
+                  disabled={!formData.checkIn || !formData.checkOut}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[var(--mv-blue)] outline-none transition-all disabled:opacity-50 disabled:bg-gray-50"
                 >
-                  <option value="">Selecciona una habitación</option>
+                  <option value="">
+                    {!formData.checkIn || !formData.checkOut 
+                      ? "Selecciona fechas de check-in y check-out primero" 
+                      : habitaciones.length === 0 
+                        ? "No hay habitaciones disponibles en estas fechas" 
+                        : "Selecciona una habitación disponible"}
+                  </option>
                   {habitaciones.map(h => (
                     <option key={h.id} value={h.id}>{h.titulo}</option>
                   ))}
@@ -142,6 +174,7 @@ export default function NuevaReservaModal({ isOpen, onClose, onSuccess }: NuevaR
                   type="datetime-local" 
                   name="checkIn"
                   value={formData.checkIn}
+                  min={todayStr}
                   onChange={handleChange}
                   required
                   className="w-full border border-gray-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[var(--mv-blue)] outline-none transition-all"
@@ -154,6 +187,7 @@ export default function NuevaReservaModal({ isOpen, onClose, onSuccess }: NuevaR
                   type="datetime-local" 
                   name="checkOut"
                   value={formData.checkOut}
+                  min={formData.checkIn || todayStr}
                   onChange={handleChange}
                   required
                   className="w-full border border-gray-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[var(--mv-blue)] outline-none transition-all"
