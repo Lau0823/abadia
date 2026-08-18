@@ -31,6 +31,8 @@ import { FacturasModule } from './facturas/facturas.module';
 import { Factura } from './facturas/entities/factura.entity';
 import { DocumentsModule } from './documents/documents.module';
 
+import { DataSource } from 'typeorm';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -110,4 +112,30 @@ import { DocumentsModule } from './documents/documents.module';
     },
   ],
 })
-export class AppModule { }
+export class AppModule {
+  constructor(private dataSource: DataSource) {}
+
+  async onModuleInit() {
+    try {
+      console.log('Verificando y configurando extensiones de BD (pg_trgm)...');
+      await this.dataSource.query('CREATE EXTENSION IF NOT EXISTS pg_trgm;');
+
+      // Índices para Clientes
+      await this.dataSource.query(`CREATE INDEX IF NOT EXISTS idx_cliente_nombre_trgm ON clientes USING gin (nombre gin_trgm_ops);`);
+      await this.dataSource.query(`CREATE INDEX IF NOT EXISTS idx_cliente_correo_trgm ON clientes USING gin (correo gin_trgm_ops);`);
+      
+      // Índices para Habitaciones
+      await this.dataSource.query(`CREATE INDEX IF NOT EXISTS idx_habitacion_titulo_trgm ON habitaciones USING gin (titulo gin_trgm_ops);`);
+      
+      // Índices para Cotizaciones
+      await this.dataSource.query(`CREATE INDEX IF NOT EXISTS idx_cotizacion_numero_trgm ON cotizaciones USING gin (numero_cotizacion gin_trgm_ops);`);
+      
+      // Índices para Facturas
+      await this.dataSource.query(`CREATE INDEX IF NOT EXISTS idx_factura_numero_trgm ON facturas USING gin (numero_factura gin_trgm_ops);`);
+
+      console.log('Índices de alta velocidad GIN configurados correctamente.');
+    } catch (error) {
+      console.error('Error al configurar pg_trgm (Puede que la BD no soporte esta extensión o falten permisos):', error.message);
+    }
+  }
+}
