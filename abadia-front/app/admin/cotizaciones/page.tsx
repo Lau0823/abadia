@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { fetchApi, API_URL } from "@/lib/api";
-import { PlusIcon, DocumentArrowDownIcon, CheckCircleIcon, ClockIcon, XCircleIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, DocumentArrowDownIcon, CheckCircleIcon, ClockIcon, XCircleIcon, MagnifyingGlassIcon, ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import CotizacionModal from "@/components/CotizacionModal";
 
 export default function CotizacionesPage() {
@@ -10,11 +10,31 @@ export default function CotizacionesPage() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [search, setSearch] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [total, setTotal] = useState(0);
+
+  // Debounce para búsqueda
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearch(searchTerm);
+      setPage(1);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
   const fetchCotizaciones = async () => {
     setLoading(true);
     try {
-      const response = await fetchApi("/cotizaciones");
-      setCotizaciones(Array.isArray(response) ? response : (response.data || []));
+      const response = await fetchApi(`/cotizaciones?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`);
+      if (response && response.data) {
+        setCotizaciones(response.data);
+        setTotal(response.total);
+      } else {
+        setCotizaciones(Array.isArray(response) ? response : []);
+      }
     } catch (error) {
       console.error("Error cargando cotizaciones", error);
     } finally {
@@ -24,7 +44,7 @@ export default function CotizacionesPage() {
 
   useEffect(() => {
     fetchCotizaciones();
-  }, []);
+  }, [page, limit, search]);
 
   const handleOpenNew = () => {
     setIsModalOpen(true);
@@ -63,6 +83,16 @@ export default function CotizacionesPage() {
         </div>
         
         <div className="flex items-center gap-4">
+          <div className="relative">
+            <MagnifyingGlassIcon className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input 
+              type="text" 
+              placeholder="Buscar cliente, número..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 pr-4 py-2 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-[var(--mv-blue)] focus:border-transparent w-64"
+            />
+          </div>
           <button 
             onClick={handleOpenNew}
             className="flex items-center gap-2 bg-[var(--mv-blue)] hover:bg-[#0b3c66] text-white px-5 py-2.5 rounded-full text-sm font-medium transition-all shadow-md shrink-0"
@@ -150,7 +180,49 @@ export default function CotizacionesPage() {
         )}
       </div>
 
-      <CotizacionModal 
+      {/* Paginación */}
+      <div className="bg-white px-6 py-4 flex items-center justify-between border border-[var(--mv-sage)]/10 rounded-3xl shadow-sm">
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <span>Mostrar</span>
+          <select 
+            value={limit}
+            onChange={(e) => {
+              setLimit(Number(e.target.value));
+              setPage(1);
+            }}
+            className="border border-gray-200 rounded-md py-1 px-2 focus:outline-none focus:ring-1 focus:ring-[var(--mv-blue)]"
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+          </select>
+          <span>resultados</span>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-gray-500">
+            Mostrando {Math.min((page - 1) * limit + 1, total)} a {Math.min(page * limit, total)} de {total}
+          </span>
+          <div className="flex gap-1">
+            <button 
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="p-1 rounded-md border border-gray-200 text-gray-500 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+            >
+              <ChevronLeftIcon className="w-5 h-5" />
+            </button>
+            <button 
+              onClick={() => setPage(p => p + 1)}
+              disabled={page * limit >= total}
+              className="p-1 rounded-md border border-gray-200 text-gray-500 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+            >
+              <ChevronRightIcon className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <CotizacionModal  
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSuccess={fetchCotizaciones}

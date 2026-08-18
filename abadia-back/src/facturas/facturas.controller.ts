@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Put, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, UseGuards, Query } from '@nestjs/common';
 import { FacturasService } from './facturas.service';
 import { CreateFacturaDto } from './dto/create-factura.dto';
 import { FacturaStatus } from './entities/factura.entity';
@@ -20,8 +20,16 @@ export class FacturasController {
 
   @Get()
   @ApiOperation({ summary: 'Obtener todas las facturas' })
-  findAll() {
-    return this.facturasService.findAll();
+  findAll(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.facturasService.findAll(
+      page ? parseInt(page, 10) : undefined,
+      limit ? parseInt(limit, 10) : undefined,
+      search,
+    );
   }
 
   @Get(':id')

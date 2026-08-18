@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Put, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, UseGuards, Query } from '@nestjs/common';
 import { CotizacionesService } from './cotizaciones.service';
 import { CreateCotizacionDto } from './dto/create-cotizacion.dto';
 import { CotizacionStatus } from './entities/cotizacion.entity';
@@ -20,8 +20,16 @@ export class CotizacionesController {
 
   @Get()
   @ApiOperation({ summary: 'Obtener todas las cotizaciones' })
-  findAll() {
-    return this.cotizacionesService.findAll();
+  findAll(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.cotizacionesService.findAll(
+      page ? parseInt(page, 10) : undefined,
+      limit ? parseInt(limit, 10) : undefined,
+      search,
+    );
   }
 
   @Get(':id')

@@ -13,22 +13,55 @@ export class FacturasService {
 
   async create(createFacturaDto: CreateFacturaDto): Promise<Factura> {
     const d = new Date();
-    // Generar un número de factura simple (ej: F-2023-0001)
-    const count = await this.facturaRepository.count();
-    const numero_factura = `F-${d.getFullYear()}-${(count + 1).toString().padStart(4, '0')}`;
+    let retries = 5;
+    let offset = 1;
 
-    const factura = this.facturaRepository.create({
-      ...createFacturaDto,
-      numero_factura,
-    });
-    return await this.facturaRepository.save(factura);
+    while (retries > 0) {
+      try {
+        const count = await this.facturaRepository.count();
+        const numero_factura = `F-${d.getFullYear()}-${(count + offset).toString().padStart(4, '0')}`;
+
+        const factura = this.facturaRepository.create({
+          ...createFacturaDto,
+          numero_factura,
+        });
+        return await this.facturaRepository.save(factura);
+      } catch (error: any) {
+        if (error.code === '23505') {
+          retries--;
+          offset++;
+          if (retries === 0) {
+            throw new Error('No se pudo generar un número de factura único. Por favor intente nuevamente.');
+          }
+        } else {
+          throw error;
+        }
+      }
+    }
+    throw new Error('Error al generar factura');
   }
 
-  async findAll(): Promise<Factura[]> {
-    return await this.facturaRepository.find({
-      order: { createdAt: 'DESC' },
-      relations: ['reserva', 'cliente'],
-    });
+  async findAll(page: number = 1, limit: number = 10, search?: string) {
+    const query = this.facturaRepository.createQueryBuilder('factura')
+      .leftJoinAndSelect('factura.reserva', 'reserva')
+      .leftJoinAndSelect('factura.cliente', 'cliente')
+      .orderBy('factura.createdAt', 'DESC');
+
+    if (search) {
+      query.andWhere('(cliente.nombre ILIKE :search OR cliente.correo ILIKE :search OR factura.numero_factura ILIKE :search OR CAST(factura.id AS TEXT) ILIKE :search)', { search: `%${search}%` });
+    }
+
+    const skip = (page - 1) * limit;
+    query.skip(skip).take(limit);
+
+    const [data, total] = await query.getManyAndCount();
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+    };
   }
 
   async findOne(id: string): Promise<Factura> {

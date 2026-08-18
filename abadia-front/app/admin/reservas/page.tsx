@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { fetchApi, API_URL } from "@/lib/api";
-import { PlusIcon, UserGroupIcon, EyeIcon, DocumentTextIcon, ArrowsRightLeftIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, UserGroupIcon, EyeIcon, DocumentTextIcon, ArrowsRightLeftIcon, MagnifyingGlassIcon, ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import NuevaReservaModal from "@/components/NuevaReservaModal";
 import HuespedesModal from "@/components/HuespedesModal";
 import TransferirReservaModal from "@/components/TransferirReservaModal";
+import DetalleReservaModal from "@/components/DetalleReservaModal";
 
 export default function ReservasPage() {
   const [reservas, setReservas] = useState<any[]>([]);
@@ -13,13 +14,34 @@ export default function ReservasPage() {
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
   const [isHuespedesModalOpen, setIsHuespedesModalOpen] = useState(false);
   const [isTransferirModalOpen, setIsTransferirModalOpen] = useState(false);
+  const [isDetalleModalOpen, setIsDetalleModalOpen] = useState(false);
   const [selectedReserva, setSelectedReserva] = useState<any>(null);
+
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [search, setSearch] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [total, setTotal] = useState(0);
+
+  // Debounce para búsqueda
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearch(searchTerm);
+      setPage(1); // Reset a pagina 1 al buscar
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   const fetchReservas = async () => {
     setLoading(true);
     try {
-      const data = await fetchApi("/reservations");
-      setReservas(data);
+      const response = await fetchApi(`/reservations?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`);
+      if (response && response.data) {
+        setReservas(response.data);
+        setTotal(response.total);
+      } else {
+        setReservas(response);
+      }
     } catch (error) {
       console.error("Error cargando reservas, usando fallback", error);
       // Fallback for UI demo
@@ -50,7 +72,7 @@ export default function ReservasPage() {
 
   useEffect(() => {
     fetchReservas();
-  }, []);
+  }, [page, limit, search]);
 
   const formatDate = (dateString: string) => {
     const d = new Date(dateString);
@@ -65,6 +87,11 @@ export default function ReservasPage() {
   const handleOpenTransferir = (reserva: any) => {
     setSelectedReserva(reserva);
     setIsTransferirModalOpen(true);
+  };
+
+  const handleOpenDetalle = (reserva: any) => {
+    setSelectedReserva(reserva);
+    setIsDetalleModalOpen(true);
   };
 
   const handleGenerateFactura = async (res: any) => {
@@ -107,8 +134,19 @@ export default function ReservasPage() {
           <h2 className="text-2xl font-bold text-[var(--mv-ink)] uppercase tracking-wide">Reservaciones</h2>
           <p className="text-gray-500 mt-1 text-sm">Listado de estancias y huéspedes.</p>
         </div>
-        <button 
-          onClick={() => setIsNewModalOpen(true)}
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <MagnifyingGlassIcon className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input 
+              type="text" 
+              placeholder="Buscar por cliente, id, o habitación..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 pr-4 py-2 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-[var(--mv-blue)] focus:border-transparent w-64"
+            />
+          </div>
+          <button 
+            onClick={() => setIsNewModalOpen(true)}
           className="flex items-center gap-2 bg-[var(--mv-blue)] hover:bg-[#0b3c66] text-white px-5 py-2.5 rounded-full text-sm font-medium transition-all shadow-md"
         >
           <PlusIcon className="w-5 h-5" />
@@ -205,7 +243,11 @@ export default function ReservasPage() {
                         >
                           <DocumentTextIcon className="w-5 h-5" />
                         </button>
-                        <button className="p-2 text-gray-400 hover:text-[var(--mv-blue)] hover:bg-[var(--mv-blue)]/10 rounded-lg transition-all">
+                        <button 
+                          onClick={() => handleOpenDetalle(res)}
+                          className="p-2 text-gray-400 hover:text-[var(--mv-blue)] hover:bg-[var(--mv-blue)]/10 rounded-lg transition-all"
+                          title="Ver Detalles"
+                        >
                           <EyeIcon className="w-5 h-5" />
                         </button>
                       </div>
@@ -216,9 +258,51 @@ export default function ReservasPage() {
             </tbody>
           </table>
         </div>
+        
+        {/* Paginación */}
+        <div className="bg-white px-6 py-4 flex items-center justify-between border-t border-[var(--mv-sage)]/10">
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <span>Mostrar</span>
+            <select 
+              value={limit}
+              onChange={(e) => {
+                setLimit(Number(e.target.value));
+                setPage(1);
+              }}
+              className="border border-gray-200 rounded-md py-1 px-2 focus:outline-none focus:ring-1 focus:ring-[var(--mv-blue)]"
+            >
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+            </select>
+            <span>resultados</span>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-gray-500">
+              Mostrando {Math.min((page - 1) * limit + 1, total)} a {Math.min(page * limit, total)} de {total}
+            </span>
+            <div className="flex gap-1">
+              <button 
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="p-1 rounded-md border border-gray-200 text-gray-500 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              >
+                <ChevronLeftIcon className="w-5 h-5" />
+              </button>
+              <button 
+                onClick={() => setPage(p => p + 1)}
+                disabled={page * limit >= total}
+                className="p-1 rounded-md border border-gray-200 text-gray-500 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              >
+                <ChevronRightIcon className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <NuevaReservaModal 
+      <NuevaReservaModal  
         isOpen={isNewModalOpen}
         onClose={() => setIsNewModalOpen(false)}
         onSuccess={() => fetchReservas()}
@@ -236,6 +320,12 @@ export default function ReservasPage() {
         onClose={() => setIsTransferirModalOpen(false)}
         reservation={selectedReserva}
         onSuccess={() => fetchReservas()}
+      />
+
+      <DetalleReservaModal
+        isOpen={isDetalleModalOpen}
+        onClose={() => setIsDetalleModalOpen(false)}
+        reservation={selectedReserva}
       />
     </div>
   );

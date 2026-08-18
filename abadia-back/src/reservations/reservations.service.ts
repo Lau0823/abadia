@@ -128,11 +128,28 @@ export class ReservationsService {
     return await this.reservationRepository.save(reservation);
   }
 
-  async findAll() {
-    return await this.reservationRepository.find({
-      relations: ['cliente', 'habitacion', 'huespedes'],
-      order: { createdAt: 'DESC' },
-    });
+  async findAll(page: number = 1, limit: number = 10, search?: string) {
+    const query = this.reservationRepository.createQueryBuilder('reservation')
+      .leftJoinAndSelect('reservation.cliente', 'cliente')
+      .leftJoinAndSelect('reservation.habitacion', 'habitacion')
+      .leftJoinAndSelect('reservation.huespedes', 'huespedes')
+      .orderBy('reservation.createdAt', 'DESC');
+
+    if (search) {
+      query.andWhere('(cliente.nombre ILIKE :search OR cliente.correo ILIKE :search OR CAST(reservation.id AS TEXT) ILIKE :search OR habitacion.titulo ILIKE :search)', { search: `%${search}%` });
+    }
+
+    const skip = (page - 1) * limit;
+    query.skip(skip).take(limit);
+
+    const [data, total] = await query.getManyAndCount();
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+    };
   }
 
   async findOne(id: number) {

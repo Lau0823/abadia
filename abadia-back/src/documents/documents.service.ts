@@ -24,10 +24,10 @@ export class DocumentsService {
     
     // Pipe to response
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename=cotizacion_${id}.pdf`);
+    res.setHeader('Content-Disposition', `attachment; filename=cotizacion_${cotizacion.numero_cotizacion || id}.pdf`);
     doc.pipe(res);
 
-    const docId = `COT-${cotizacion.id.split('-')[0].toUpperCase()}`;
+    const docId = cotizacion.numero_cotizacion || `COT-${cotizacion.id.split('-')[0].toUpperCase()}`;
     this.generateHeader(doc, 'COTIZACIÓN', docId);
     this.generateCustomerInformation(doc, cotizacion.cliente, cotizacion.createdAt);
     
