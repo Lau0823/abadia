@@ -5,6 +5,7 @@ export async function fetchApi(endpoint: string, options: RequestInit = {}) {
   
   // Aseguramos que siempre enviamos las cookies (para el HttpOnly JWT)
   const defaultOptions: RequestInit = {
+    cache: 'no-store', // Evita que se cachee la respuesta
     ...options,
     credentials: 'include',
     headers: {
