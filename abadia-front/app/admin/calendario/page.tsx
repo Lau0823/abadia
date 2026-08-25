@@ -68,8 +68,8 @@ export default function CalendarioPage() {
     <div className="bg-white rounded-3xl shadow-sm border border-[var(--mv-sage)]/10 p-6 h-[calc(100vh-140px)] flex flex-col">
       <div className="mb-6 flex justify-between items-end">
         <div>
-          <h2 className="text-2xl font-bold text-[var(--mv-ink)] font-sans uppercase tracking-wide">Calendario de Ocupación</h2>
-          <p className="text-gray-500 mt-1">Visualiza los ingresos y salidas de las estancias.</p>
+          <h2 className="text-2xl font-bold text-[var(--mv-ink)] uppercase tracking-[0.05em]">Calendario de Ocupación</h2>
+          <p className="text-gray-500 mt-2 text-sm font-medium">Visualiza los ingresos y salidas de las estancias.</p>
         </div>
         <div className="flex gap-2">
             <div className="flex items-center gap-2">
@@ -81,15 +81,59 @@ export default function CalendarioPage() {
       
       <div className="flex-1 min-h-0">
         <style>{`
-          .rbc-calendar { font-family: 'Raleway', sans-serif; }
-          .rbc-event { background-color: var(--mv-blue) !important; border-radius: 6px; padding: 4px 8px; border: none; }
-          .rbc-today { background-color: var(--mv-sage) !important; opacity: 0.05; }
-          .rbc-toolbar button { border-radius: 8px; color: var(--mv-ink); border-color: #e5e7eb; padding: 6px 12px; font-weight: 500;}
-          .rbc-toolbar button.rbc-active { background-color: var(--mv-blue); color: white; border-color: var(--mv-blue); }
-          .rbc-toolbar button:active, .rbc-toolbar button:hover { background-color: var(--mv-blue) !important; color: white; opacity: 0.8; }
-          .rbc-header { padding: 10px 0; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; color: var(--mv-ink); }
-          .rbc-month-view { border-radius: 12px; overflow: hidden; border-color: #f3f4f6; }
-          .rbc-day-bg { border-color: #f3f4f6; }
+          .rbc-calendar { font-family: var(--font-montserrat), sans-serif; }
+          .rbc-event { 
+            background-color: var(--mv-blue) !important; 
+            border-radius: 8px; 
+            padding: 6px 10px; 
+            border: none; 
+            font-size: 0.8rem; 
+            font-weight: 500; 
+            box-shadow: 0 4px 6px -1px rgba(15, 76, 129, 0.2); 
+            transition: all 0.2s ease;
+          }
+          .rbc-event:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px -2px rgba(15, 76, 129, 0.3);
+            filter: brightness(1.1);
+          }
+          .rbc-today { background-color: var(--mv-sage) !important; opacity: 0.1; }
+          .rbc-toolbar { margin-bottom: 24px; gap: 8px; }
+          .rbc-toolbar button { 
+            border-radius: 9999px;
+            color: var(--mv-ink); 
+            border: 1px solid #e5e7eb; 
+            padding: 8px 20px; 
+            font-weight: 600; 
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            transition: all 0.3s ease;
+          }
+          .rbc-toolbar button.rbc-active { 
+            background-color: var(--mv-blue); 
+            color: white; 
+            border-color: var(--mv-blue); 
+            box-shadow: 0 4px 10px rgba(15, 76, 129, 0.25);
+          }
+          .rbc-toolbar button:active, .rbc-toolbar button:hover { 
+            background-color: var(--mv-blue) !important; 
+            color: white; 
+            border-color: var(--mv-blue);
+          }
+          .rbc-header { 
+            padding: 14px 0; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            font-size: 0.7rem; 
+            letter-spacing: 0.15em;
+            color: var(--mv-ink); 
+            border-bottom: 1px solid #f3f4f6;
+          }
+          .rbc-month-view { border-radius: 16px; overflow: hidden; border: 1px solid #f3f4f6; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.02); }
+          .rbc-day-bg { border-color: #f3f4f6; transition: background-color 0.2s ease; }
+          .rbc-day-bg:hover { background-color: #f9fafb; }
+          .rbc-off-range-bg { background-color: #fafafa; }
         `}</style>
         {loading ? (
             <div className="w-full h-full flex items-center justify-center">
@@ -126,17 +170,17 @@ export default function CalendarioPage() {
 
       {/* Modal de Detalles del Evento */}
       {selectedEvent && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl relative animate-in fade-in zoom-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--mv-ink)]/30 backdrop-blur-md p-4">
+          <div className="bg-white rounded-[32px] p-8 w-full max-w-lg shadow-[0_20px_60px_-15px_rgba(0,0,0,0.2)] relative animate-in fade-in zoom-in-95 duration-300">
             <button 
               onClick={() => setSelectedEvent(null)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 p-2"
+              className="absolute top-6 right-6 text-gray-400 hover:text-gray-800 bg-gray-50 hover:bg-gray-100 rounded-full p-2 transition-all"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-            <h3 className="text-xl font-bold text-[var(--mv-ink)] mb-4 border-b pb-2">Detalles de la Reserva</h3>
+            <h3 className="text-2xl font-bold text-[var(--mv-ink)] mb-6 border-b border-[var(--mv-sage)]/20 pb-4">Detalles de la Reserva</h3>
             <div className="space-y-4">
               <div>
                 <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Cliente</p>
@@ -198,10 +242,10 @@ export default function CalendarioPage() {
                 </div>
               )}
             </div>
-            <div className="mt-6 flex justify-end">
+            <div className="mt-8 flex justify-end">
               <button 
                 onClick={() => setSelectedEvent(null)}
-                className="px-5 py-2.5 bg-[var(--mv-blue)] hover:bg-[#0b3c66] text-white rounded-full text-sm font-medium transition-all"
+                className="inline-flex items-center justify-center rounded-full bg-[var(--mv-ink)] px-8 py-3 text-[11px] font-bold uppercase tracking-[0.15em] text-white transition hover:bg-black hover:scale-105 active:scale-95 shadow-lg"
               >
                 Cerrar
               </button>
