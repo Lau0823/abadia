@@ -3,6 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 
+// --- NÚMERO DE CONTACTO OFICIAL ---
+const NUMERO_WHATSAPP = "573122373415";
+
 // --- INTERFACES DE DATOS ---
 interface Habitacion {
   id: string;
@@ -50,14 +53,56 @@ const IMAGENES_HERO: string[] = [
   "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=1920&q=80"  
 ];
 
-// --- SERVICIOS / AMENITIES GENERALES ---
+// --- SERVICIOS CON ACCIONES DE DESTINO/SECCIÓN ---
 const SERVICIOS_HOTEL = [
-  { id: 'srv-1', nombre: 'Piscina de Calma', icon: '🏊‍♂️', desc: 'Área húmeda al aire libre' },
-  { id: 'srv-2', nombre: 'Gastronomía Local', icon: '🍽️', desc: 'Cocina de autor y desayunos' },
-  { id: 'srv-3', nombre: 'Zona de Bienestar', icon: '🌿', desc: 'Masajes y aromaterapia' },
-  { id: 'srv-4', nombre: 'Pet Friendly', icon: '🐾', desc: 'Mascotas educadas bienvenidas' },
-  { id: 'srv-5', nombre: 'Parqueadero Privado', icon: '🚗', desc: 'Vigilado 24/7 sin costo' },
-  { id: 'srv-6', nombre: 'Internet de Alta Velocidad', icon: '📶', desc: 'Fibra óptica en todas las áreas' },
+  { 
+    id: 'srv-1', 
+    nombre: 'Piscina de Calma', 
+    icon: '🏊‍♂️', 
+    desc: 'Área húmeda al aire libre',
+    destino: 'galeria',
+    tipo: 'scroll'
+  },
+  { 
+    id: 'srv-2', 
+    nombre: 'Gastronomía Local', 
+    icon: '🍽️', 
+    desc: 'Cocina de autor y desayunos',
+    destino: 'galeria',
+    tipo: 'scroll'
+  },
+  { 
+    id: 'srv-3', 
+    nombre: 'Zona de Bienestar', 
+    icon: '🌿', 
+    desc: 'Masajes y aromaterapia',
+    destino: 'planes',
+    tipo: 'scroll'
+  },
+  { 
+    id: 'srv-4', 
+    nombre: 'Pet Friendly', 
+    icon: '🐾', 
+    desc: 'Mascotas bienvenidas',
+    destino: 'whatsapp-pet',
+    tipo: 'whatsapp'
+  },
+  { 
+    id: 'srv-5', 
+    nombre: 'Parqueadero Privado', 
+    icon: '🚗', 
+    desc: 'Vigilado 24/7 sin costo',
+    destino: 'ubicacion',
+    tipo: 'scroll'
+  },
+  { 
+    id: 'srv-6', 
+    nombre: 'Planes & Tours', 
+    icon: '🧭', 
+    desc: 'Actividades por la zona',
+    destino: 'planes',
+    tipo: 'scroll'
+  },
 ];
 
 // --- HABITACIONES CON MÚLTIPLES FOTOS Y SERVICIOS ---
@@ -172,7 +217,13 @@ const TESTIMONIOS: Testimonio[] = [
 ];
 
 // --- COMPONENTE TARJETA DE HABITACIÓN CON CARRUSEL PROPIO ---
-function CardHabitacionCatalogo({ habitacion }: { habitacion: Habitacion }) {
+function CardHabitacionCatalogo({ 
+  habitacion, 
+  onVerDetalles 
+}: { 
+  habitacion: Habitacion;
+  onVerDetalles: (id: string) => void;
+}) {
   const [fotoActiva, setFotoActiva] = useState<number>(0);
 
   const prevFoto = (e: React.MouseEvent) => {
@@ -186,8 +237,8 @@ function CardHabitacionCatalogo({ habitacion }: { habitacion: Habitacion }) {
   };
 
   const contactarWhatsApp = () => {
-    const msj = encodeURIComponent(`Hola! Deseo cotizar la ${habitacion.titulo} (${habitacion.precio}/noche) en Abadía Hotel Boutique.`);
-    window.open(`https://wa.me/573000000000?text=${msj}`, '_blank');
+    const msj = encodeURIComponent(`Hola! Deseo cotizar la habitación "${habitacion.titulo}" (${habitacion.precio}/noche) en Abadía Hotel Boutique.`);
+    window.open(`https://wa.me/${NUMERO_WHATSAPP}?text=${msj}`, '_blank');
   };
 
   return (
@@ -282,7 +333,7 @@ function CardHabitacionCatalogo({ habitacion }: { habitacion: Habitacion }) {
 
           <div className="grid grid-cols-2 gap-2">
             <button
-              onClick={() => window.location.href = `/habitaciones#${habitacion.id}`}
+              onClick={() => onVerDetalles(habitacion.id)}
               className="w-full py-2.5 px-3 rounded-xl border border-[#3c2f27]/30 text-[#3c2f27] text-[10px] uppercase tracking-widest font-medium hover:bg-[#3c2f27] hover:text-[#efebe4] transition-all text-center"
             >
               Ver Detalles
@@ -337,14 +388,28 @@ export default function HomePage() {
   const ejecutarReserva = (e: React.FormEvent) => {
     e.preventDefault();
     const query = new URLSearchParams({ checkIn, checkOut, huespedes }).toString();
-    window.location.href = `/habitaciones?${query}`;
+    const msj = encodeURIComponent(`Hola! Quiero consultar disponibilidad en Abadía Hotel Boutique:\n📅 Check-in: ${checkIn || 'Por definir'}\n📅 Check-out: ${checkOut || 'Por definir'}\n👥 Huéspedes: ${huespedes}`);
+    window.open(`https://wa.me/${NUMERO_WHATSAPP}?text=${msj}`, '_blank');
+  };
+
+  const manejarClickServicio = (srv: typeof SERVICIOS_HOTEL[0]) => {
+    if (srv.tipo === 'scroll') {
+      hacerScrollASeccion(srv.destino);
+    } else if (srv.tipo === 'whatsapp') {
+      const msj = encodeURIComponent(`Hola! Me gustaría consultar las políticas Pet Friendly del hotel.`);
+      window.open(`https://wa.me/${NUMERO_WHATSAPP}?text=${msj}`, '_blank');
+    }
+  };
+
+  const manejarVerDetallesHabitacion = (habitacionId: string) => {
+    hacerScrollASeccion('habitaciones');
   };
 
   const planSeleccionado = PLANES_EXPERIENCIAS.find(p => p.id === planActivo) || PLANES_EXPERIENCIAS[0];
 
   const abrirWhatsAppGeneral = () => {
-    const msj = encodeURIComponent("¡Hola! Me gustaría obtener más información y disponibilidad en Abadía Hotel Boutique.");
-    window.open(`https://wa.me/573000000000?text=${msj}`, '_blank');
+    const msj = encodeURIComponent("¡Hola! Me gustaría recibir información de tarifas y disponibilidad en Abadía Hotel Boutique.");
+    window.open(`https://wa.me/${NUMERO_WHATSAPP}?text=${msj}`, '_blank');
   };
 
   if (!isMounted) {
@@ -395,7 +460,7 @@ export default function HomePage() {
           <ul className="flex flex-col gap-6 text-lg text-[#3c2f27] font-light tracking-wide">
             <li className="cursor-pointer hover:text-[#8c7355] transition-colors" onClick={() => { setMenuAbierto(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Inicio</li>
             <li className="cursor-pointer hover:text-[#8c7355] transition-colors" onClick={() => hacerScrollASeccion('habitaciones')}>Catálogo de Habitaciones</li>
-            <li className="cursor-pointer hover:text-[#8c7355] transition-colors" onClick={() => hacerScrollASeccion('servicios')}>Servicios & Comodidades</li>
+            <li className="cursor-pointer hover:text-[#8c7355] transition-colors" onClick={() => hacerScrollASeccion('servicios')}>Servicios del Hotel</li>
             <li className="cursor-pointer hover:text-[#8c7355] transition-colors" onClick={() => hacerScrollASeccion('planes')}>Planes & Experiencias</li>
             <li className="cursor-pointer hover:text-[#8c7355] transition-colors" onClick={() => hacerScrollASeccion('galeria')}>Galería de Espacios</li>
             <li className="cursor-pointer hover:text-[#8c7355] transition-colors" onClick={() => hacerScrollASeccion('testimonios')}>Opiniones de Huéspedes</li>
@@ -441,7 +506,6 @@ export default function HomePage() {
                 <label className="text-[10px] uppercase tracking-[0.2em] text-[#efebe4] font-medium mb-1.5 ml-1">Check-In</label>
                 <input 
                   type="date" 
-                  required 
                   value={checkIn}
                   onChange={(e) => setCheckIn(e.target.value)}
                   className="w-full bg-[#f7f4ee]/20 backdrop-blur-sm border border-white/40 rounded-2xl px-4 py-3 text-xs text-[#efebe4] placeholder-[#efebe4]/60 outline-none focus:bg-[#efebe4]/40 focus:border-[#d6c7b2] transition-all font-light" 
@@ -452,7 +516,6 @@ export default function HomePage() {
                 <label className="text-[10px] uppercase tracking-[0.2em] text-[#efebe4] font-medium mb-1.5 ml-1">Check-Out</label>
                 <input 
                   type="date" 
-                  required 
                   value={checkOut}
                   onChange={(e) => setCheckOut(e.target.value)}
                   className="w-full bg-[#f7f4ee]/20 backdrop-blur-sm border border-white/40 rounded-2xl px-4 py-3 text-xs text-[#efebe4] placeholder-[#efebe4]/60 outline-none focus:bg-[#efebe4]/40 focus:border-[#d6c7b2] transition-all font-light" 
@@ -475,7 +538,7 @@ export default function HomePage() {
 
               <button 
                 type="submit" 
-                className="w-full bg-[#efebe4] text-[#3c2f27] hover:bg-[#3c2f27] hover:text-[#efebe4] py-3.5 px-6 text-[10px] uppercase tracking-[0.25em] rounded-2xl hover:scale-[1.02] transition-all duration-300 font-medium shadow-lg active:scale-95 border border-[#d6c7b2]/50"
+                className="w-full bg-[#efebe4] text-[#3c2f27] hover:bg-[#3c2f27] hover:text-[#efebe4] py-3.5 px-6 text-[10px] uppercase tracking-[0.25em] rounded-2xl hover:scale-[1.02] transition-all duration-300 font-medium shadow-lg active:scale-95 border border-[#d6c7b2]/50 cursor-pointer"
               >
                 Buscar Reserva
               </button>
@@ -498,7 +561,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 2. CATÁLOGO DE HABITACIONES (GRID RESPONSIVE MODULAR) */}
+      {/* 2. CATÁLOGO DE HABITACIONES */}
       <section id="habitaciones" className="py-24 px-4 md:px-8 bg-[#f7f4ee]">
         <div className="max-w-7xl mx-auto">
           
@@ -518,37 +581,46 @@ export default function HomePage() {
           {/* Grid de Tarjetas de Catálogo */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
             {HABITACIONES_CATALOGO.map((hab) => (
-              <CardHabitacionCatalogo key={hab.id} habitacion={hab} />
+              <CardHabitacionCatalogo 
+                key={hab.id} 
+                habitacion={hab} 
+                onVerDetalles={manejarVerDetallesHabitacion}
+              />
             ))}
           </div>
 
         </div>
       </section>
 
-      {/* 3. SERVICIOS & COMODIDADES (CARDS ICONOGRÁFICAS) */}
+      {/* 3. SERVICIOS DEL HOTEL (INTERACTIVOS - REDIRIGEN A SU SECCIÓN) */}
       <section id="servicios" className="py-20 px-4 md:px-8 bg-[#efebe4]/60 border-y border-[#d6c7b2]/40">
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-14">
             <span className="text-[10px] uppercase tracking-[0.3em] text-[#3c2f27] font-medium block mb-2">— COMODIDADES INCLUIDAS</span>
             <h2 className="text-3xl md:text-5xl text-[#3c2f27] uppercase font-luxury-title">Servicios del Hotel</h2>
+            <p className="text-xs text-[#3c2f27]/60 font-light mt-2">Haz clic en cualquier servicio para explorar los detalles</p>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             {SERVICIOS_HOTEL.map((srv) => (
-              <div 
+              <button 
                 key={srv.id} 
-                className="bg-[#f7f4ee] p-6 rounded-2xl border border-[#d6c7b2]/40 text-center flex flex-col items-center justify-center hover:border-[#3c2f27] hover:shadow-md transition-all group"
+                onClick={() => manejarClickServicio(srv)}
+                className="bg-[#f7f4ee] p-6 rounded-2xl border border-[#d6c7b2]/40 text-center flex flex-col items-center justify-center hover:border-[#3c2f27] hover:shadow-md hover:-translate-y-1 transition-all group cursor-pointer active:scale-95"
               >
                 <span className="text-3xl mb-3 block group-hover:scale-110 transition-transform">{srv.icon}</span>
                 <h4 className="text-xs font-medium uppercase tracking-wider text-[#3c2f27] mb-1">{srv.nombre}</h4>
                 <p className="text-[10px] text-[#3c2f27]/60 font-light">{srv.desc}</p>
-              </div>
+                <span className="text-[9px] uppercase tracking-widest text-[#8c7355] mt-3 opacity-0 group-hover:opacity-100 transition-opacity font-medium">
+                  Explorar →
+                </span>
+              </button>
             ))}
           </div>
         </div>
       </section>
 
-      {/* 4. EXPERIENCIAS Y PAQUETES ADICIONALES TIPO CATÁLOGO */}
+      {/* 4. EXPERIENCIAS Y PAQUETES */}
       <section id="planes" className="py-24 px-4 bg-[#f7f4ee] relative">
         <div className="max-w-5xl mx-auto">
           
@@ -566,7 +638,7 @@ export default function HomePage() {
               <button 
                 key={plan.id}
                 onClick={() => setPlanActivo(plan.id)}
-                className={`flex-1 min-w-[150px] py-3 text-[10px] tracking-widest uppercase rounded-xl transition-all duration-300 font-medium ${planActivo === plan.id ? 'bg-[#3c2f27] text-[#efebe4] shadow-sm' : 'bg-[#efebe4] text-[#3c2f27]/70 hover:text-[#3c2f27] hover:bg-[#d6c7b2]/30'}`}
+                className={`flex-1 min-w-[150px] py-3 text-[10px] tracking-widest uppercase rounded-xl transition-all duration-300 font-medium cursor-pointer ${planActivo === plan.id ? 'bg-[#3c2f27] text-[#efebe4] shadow-sm' : 'bg-[#efebe4] text-[#3c2f27]/70 hover:text-[#3c2f27] hover:bg-[#d6c7b2]/30'}`}
               >
                 {plan.titulo.split(' ')[0]} {plan.titulo.split(' ')[1]}
               </button>
@@ -608,10 +680,10 @@ export default function HomePage() {
                 </div>
                 <button 
                   onClick={() => {
-                    const msj = encodeURIComponent(`Hola! Quiero reservar el paquete: ${planSeleccionado.titulo}`);
-                    window.open(`https://wa.me/573000000000?text=${msj}`, '_blank');
+                    const msj = encodeURIComponent(`Hola! Quiero reservar el paquete "${planSeleccionado.titulo}" en Abadía Hotel Boutique.`);
+                    window.open(`https://wa.me/${NUMERO_WHATSAPP}?text=${msj}`, '_blank');
                   }}
-                  className="w-full bg-[#3c2f27] text-[#efebe4] hover:bg-[#5a483c] border border-[#3c2f27] py-4 rounded-2xl text-[10px] uppercase tracking-[0.2em] font-medium transition-all duration-300 shadow-md"
+                  className="w-full bg-[#3c2f27] text-[#efebe4] hover:bg-[#5a483c] border border-[#3c2f27] py-4 rounded-2xl text-[10px] uppercase tracking-[0.2em] font-medium transition-all duration-300 shadow-md cursor-pointer active:scale-95"
                 >
                   Reservar este Paquete
                 </button>
@@ -622,7 +694,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 5. GALERÍA TIPO FEED / MOSAICO INSTAGRAM */}
+      {/* 5. GALERÍA TIPO FEED / MOSAICO */}
       <section id="galeria" className="py-24 px-4 md:px-8 bg-[#efebe4]/40 border-t border-[#d6c7b2]/40">
         <div className="max-w-7xl mx-auto">
           
@@ -638,6 +710,10 @@ export default function HomePage() {
             {FOTOS_MOSAICO.map((foto) => (
               <div 
                 key={foto.id} 
+                onClick={() => {
+                  const msj = encodeURIComponent(`Hola! Me llamó la atención el espacio "${foto.titulo}". ¿Tienen disponibilidad para estas fechas?`);
+                  window.open(`https://wa.me/${NUMERO_WHATSAPP}?text=${msj}`, '_blank');
+                }}
                 className="relative aspect-square rounded-3xl overflow-hidden group cursor-pointer border border-[#d6c7b2]/40 shadow-sm"
               >
                 <Image 
@@ -660,7 +736,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 6. CONFIANZA & OPINIONES (TESTIMONIOS) */}
+      {/* 6. CONFIANZA & OPINIONES */}
       <section id="testimonios" className="py-24 px-4 md:px-8 bg-[#f7f4ee]">
         <div className="max-w-6xl mx-auto">
           
@@ -776,12 +852,12 @@ export default function HomePage() {
         </div>
       </footer>
 
-      {/* 8. BOTÓN FLOTANTE DE WHATSAPP (FIJO EN MÓVILES Y DESKTOP) */}
+      {/* 8. BOTÓN FLOTANTE DE WHATSAPP CON NÚMERO DIRECTO */}
       <div className="fixed bottom-6 right-6 z-40">
         <button
           onClick={abrirWhatsAppGeneral}
           aria-label="Contactar por WhatsApp"
-          className="bg-[#25D366] text-white p-4 rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all flex items-center justify-center group"
+          className="bg-[#25D366] text-white p-4 rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all flex items-center justify-center group cursor-pointer"
         >
           <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24">
             <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
