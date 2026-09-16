@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { fetchApi } from "@/lib/api";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon, PlusIcon } from "@heroicons/react/24/outline";
+import ClienteModal from "./ClienteModal";
 
 interface CotizacionModalProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ export default function CotizacionModal({ isOpen, onClose, onSuccess }: Cotizaci
   const [loading, setLoading] = useState(false);
   const [clientes, setClientes] = useState<any[]>([]);
   const [habitaciones, setHabitaciones] = useState<any[]>([]);
+  const [isClienteModalOpen, setIsClienteModalOpen] = useState(false);
   
   const [formData, setFormData] = useState({
     cliente_id: "",
@@ -144,17 +146,26 @@ export default function CotizacionModal({ isOpen, onClose, onSuccess }: Cotizaci
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Cliente</label>
-              <select
-                required
-                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--mv-blue)] outline-none bg-white"
-                value={formData.cliente_id}
-                onChange={(e) => setFormData({ ...formData, cliente_id: e.target.value })}
-              >
-                <option value="">Seleccione un cliente...</option>
-                {clientes.map(c => (
-                  <option key={c.id} value={c.id}>{c.nombre} ({c.documento})</option>
-                ))}
-              </select>
+              <div className="flex gap-2">
+                <select
+                  required
+                  className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--mv-blue)] outline-none bg-white"
+                  value={formData.cliente_id}
+                  onChange={(e) => setFormData({ ...formData, cliente_id: e.target.value })}
+                >
+                  <option value="">Seleccione un cliente...</option>
+                  {clientes.map(c => (
+                    <option key={c.id} value={c.id}>{c.nombre} ({c.documento})</option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => setIsClienteModalOpen(true)}
+                  className="flex items-center gap-1 bg-[var(--mv-blue)]/10 text-[var(--mv-blue)] hover:bg-[var(--mv-blue)]/20 px-3 py-2 rounded-xl text-sm font-medium transition-colors whitespace-nowrap"
+                >
+                  <PlusIcon className="w-4 h-4" /> Nuevo
+                </button>
+              </div>
             </div>
 
             <div>
@@ -261,6 +272,12 @@ export default function CotizacionModal({ isOpen, onClose, onSuccess }: Cotizaci
           </div>
         </form>
       </div>
+
+      <ClienteModal 
+        isOpen={isClienteModalOpen}
+        onClose={() => setIsClienteModalOpen(false)}
+        onSuccess={fetchClientes}
+      />
     </div>
   );
 }

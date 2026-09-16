@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
 import { fetchApi } from "@/lib/api";
+import ClienteModal from "./ClienteModal";
 
 interface NuevaReservaModalProps {
   isOpen: boolean;
@@ -15,6 +15,19 @@ export default function NuevaReservaModal({ isOpen, onClose, onSuccess }: NuevaR
   const [loadingData, setLoadingData] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [isClienteModalOpen, setIsClienteModalOpen] = useState(false);
+
+  const loadClientes = async () => {
+    setLoadingData(true);
+    try {
+      const clientesRes = await fetchApi("/clientes?limit=1000");
+      setClientes(clientesRes.data || []);
+    } catch (err: any) {
+      setError("Error al cargar clientes.");
+    } finally {
+      setLoadingData(false);
+    }
+  };
 
   const [formData, setFormData] = useState({
     cliente_id: "",
@@ -29,22 +42,10 @@ export default function NuevaReservaModal({ isOpen, onClose, onSuccess }: NuevaR
 
   useEffect(() => {
     if (isOpen) {
-      const loadClientes = async () => {
-        setLoadingData(true);
-        try {
-          const clientesRes = await fetchApi("/clientes?limit=1000");
-          setClientes(clientesRes.data || []);
-          // Limpiar habitaciones al abrir si no hay fechas
-          if (!formData.checkIn || !formData.checkOut) {
-            setHabitaciones([]);
-          }
-        } catch (err: any) {
-          setError("Error al cargar clientes.");
-        } finally {
-          setLoadingData(false);
-        }
-      };
       loadClientes();
+      if (!formData.checkIn || !formData.checkOut) {
+        setHabitaciones([]);
+      }
     }
   }, [isOpen]);
 
@@ -131,18 +132,30 @@ export default function NuevaReservaModal({ isOpen, onClose, onSuccess }: NuevaR
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
                 <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Cliente</label>
-                <select 
-                  name="cliente_id" 
-                  value={formData.cliente_id} 
-                  onChange={handleChange}
-                  required
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[var(--mv-blue)] outline-none transition-all"
-                >
-                  <option value="">Selecciona un cliente</option>
-                  {clientes.map(c => (
-                    <option key={c.id} value={c.id}>{c.nombre} ({c.documento})</option>
-                  ))}
-                </select>
+                <div className="flex gap-2">
+                  <select 
+                    name="cliente_id" 
+                    value={formData.cliente_id} 
+                    onChange={handleChange}
+                    required
+                    className="w-full border border-gray-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[var(--mv-blue)] outline-none transition-all"
+                  >
+                    <option value="">Selecciona un cliente</option>
+                    {clientes.map(c => (
+                      <option key={c.id} value={c.id}>{c.nombre} ({c.documento})</option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => setIsClienteModalOpen(true)}
+                    className="flex items-center gap-1 bg-[var(--mv-blue)]/10 text-[var(--mv-blue)] hover:bg-[var(--mv-blue)]/20 px-3 py-2 rounded-xl text-sm font-medium transition-colors whitespace-nowrap"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    Nuevo
+                  </button>
+                </div>
               </div>
 
               <div className="col-span-2">
@@ -255,6 +268,12 @@ export default function NuevaReservaModal({ isOpen, onClose, onSuccess }: NuevaR
           </form>
         )}
       </div>
+
+      <ClienteModal 
+        isOpen={isClienteModalOpen}
+        onClose={() => setIsClienteModalOpen(false)}
+        onSuccess={loadClientes}
+      />
     </div>
   );
 }

@@ -16,19 +16,20 @@ import {
   BanknotesIcon,
   DocumentTextIcon,
   ChartBarIcon,
+  BriefcaseIcon,
+  ClipboardDocumentListIcon
 } from "@heroicons/react/24/outline";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/Tooltip";
 import { useAuthStore } from "../store/authStore";
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: HomeIcon },
-  { name: "Calendario", href: "/admin/calendario", icon: CalendarIcon },
-  { name: "Reservas", href: "/admin/reservas", icon: CalendarDaysIcon },
-  { name: "Habitaciones", href: "/admin/habitaciones", icon: KeyIcon },
+  { name: "Calendario", href: "/admin/calendario", icon: CalendarDaysIcon },
   { name: "Clientes", href: "/admin/clientes", icon: UsersIcon },
-  { name: "Cotizaciones", href: "/admin/cotizaciones", icon: DocumentTextIcon },
+  { name: "Cotizaciones y Reservas", href: "/admin/cotizaciones-reservas", icon: ClipboardDocumentListIcon },
+  { name: "Habitaciones", href: "/admin/habitaciones", icon: KeyIcon },
+  { name: "Empleados", href: "/admin/empleados", icon: BriefcaseIcon },
   { name: "Finanzas", href: "/admin/finanzas", icon: ChartBarIcon },
-  { name: "Cuentas", href: "/admin/cuentas", icon: BanknotesIcon },
   { name: "Configuración", href: "/admin/settings", icon: Cog6ToothIcon },
 ];
 
