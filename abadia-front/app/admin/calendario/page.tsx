@@ -189,7 +189,9 @@ export default function CalendarioPage() {
                   date: "Fecha",
                   time: "Hora",
                   event: "Reserva",
-                  noEventsInRange: "No hay reservas en este rango."
+                  noEventsInRange: "No hay reservas en este rango.",
+                  allDay: "Todo el día",
+                  showMore: (total) => `+ Ver más (${total})`
               }}
               views={[Views.MONTH, Views.WEEK, Views.AGENDA]}
               defaultView={Views.MONTH}

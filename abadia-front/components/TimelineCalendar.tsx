@@ -48,7 +48,13 @@ export default function TimelineCalendar({ events, onSelectEvent }: TimelineCale
     const eventEnd = new Date(event.end);
     
     // Check if event belongs to this room
-    if (event.reservationDetails?.habitacion?.id !== habId && event.resource !== habitaciones.find(h => h.id === habId)?.titulo) {
+    const habTitulo = habitaciones.find(h => h.id === habId)?.titulo;
+    const belongsToRoom = 
+      event.reservationDetails?.habitacion?.id === habId || 
+      event.reservationDetails?.habitacion_id === habId || 
+      event.resource === habTitulo;
+
+    if (!belongsToRoom) {
       return null;
     }
 
