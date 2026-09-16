@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useState, useEffect } from "react";
 import { fetchApi } from "@/lib/api";
 import ClienteModal from "./ClienteModal";
 
