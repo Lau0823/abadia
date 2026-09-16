@@ -88,20 +88,20 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
         {/* Sidebar */}
         <aside className="w-20 lg:w-64 bg-white border-r border-[var(--mv-sage)]/10 flex flex-col justify-between transition-all duration-300 shadow-sm z-20">
           <div>
-            <div className="h-20 flex items-center justify-center lg:justify-start lg:px-6 border-b border-[var(--mv-sage)]/10">
+            <div className="h-24 flex items-center justify-center border-b border-[var(--mv-sage)]/10 w-full">
               <Image
                 src="/abadia.png"
                 alt="Abadia Logo"
-                width={120}
-                height={48}
+                width={80}
+                height={80}
                 className="hidden lg:block object-contain"
                 priority
               />
               <Image
                 src="/abadia.png"
                 alt="Abadia Logo"
-                width={40}
-                height={40}
+                width={36}
+                height={36}
                 className="lg:hidden object-contain"
                 priority
               />
