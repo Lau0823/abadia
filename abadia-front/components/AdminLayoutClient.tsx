@@ -89,24 +89,24 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
         <aside className="w-20 lg:w-64 bg-white border-r border-[var(--mv-sage)]/10 flex flex-col justify-between transition-all duration-300 shadow-sm z-20">
           <div>
             <div className="h-20 flex items-center justify-center lg:justify-start lg:px-6 border-b border-[var(--mv-sage)]/10">
-              <Image 
-                src="/abadia.jpeg" 
-                alt="Abadia Logo" 
-                width={120} 
-                height={48} 
-                className="hidden lg:block object-contain" 
+              <Image
+                src="/abadia.png"
+                alt="Abadia Logo"
+                width={120}
+                height={48}
+                className="hidden lg:block object-contain"
                 priority
               />
-              <Image 
-                src="/abadia.jpeg" 
-                alt="Abadia Logo" 
-                width={40} 
-                height={40} 
-                className="lg:hidden object-contain" 
+              <Image
+                src="/abadia.png"
+                alt="Abadia Logo"
+                width={40}
+                height={40}
+                className="lg:hidden object-contain"
                 priority
               />
             </div>
-            
+
             <nav className="mt-6 flex flex-col gap-2 px-3">
               {navigation.map((item) => {
                 const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
@@ -115,11 +115,10 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
                     <TooltipTrigger asChild>
                       <Link
                         href={item.href}
-                        className={`group flex items-center lg:px-4 py-3 rounded-xl transition-all ${
-                          isActive
+                        className={`group flex items-center lg:px-4 py-3 rounded-xl transition-all ${isActive
                             ? "bg-[var(--mv-blue)] text-white shadow-md"
                             : "text-gray-500 hover:bg-[var(--mv-blue)]/10 hover:text-[var(--mv-blue)]"
-                        }`}
+                          }`}
                       >
                         <div className="flex w-full justify-center lg:justify-start items-center">
                           <item.icon className="w-6 h-6 shrink-0" />
@@ -165,13 +164,13 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
               <span className="font-medium">{toastMessage}</span>
             </div>
           )}
-          
+
           <header className="h-20 bg-white/80 backdrop-blur-md border-b border-[var(--mv-sage)]/10 flex items-center justify-between px-8 z-10">
             <h1 className="text-xl font-semibold text-[var(--mv-ink)] tracking-wide">
               {navigation.find((n) => pathname === n.href || pathname.startsWith(n.href + "/"))?.name || "Panel"}
             </h1>
             <div className="flex items-center gap-4">
-              <a 
+              <a
                 href={`${API_URL}/google-calendar/auth`}
                 className="hidden md:flex items-center gap-2 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-full text-sm font-medium transition-all shadow-sm"
               >
@@ -189,7 +188,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
               </div>
             </div>
           </header>
-          
+
           <div className="flex-1 overflow-auto p-8 mv-scrollbar">
             {children}
           </div>
