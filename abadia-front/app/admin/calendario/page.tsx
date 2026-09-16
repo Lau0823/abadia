@@ -6,8 +6,9 @@ import { format, parse, startOfWeek, getDay } from "date-fns";
 import { es } from "date-fns/locale/es";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { fetchApi } from "@/lib/api";
-import { UserGroupIcon } from "@heroicons/react/24/outline";
+import { UserGroupIcon, CalendarDaysIcon, Bars3BottomLeftIcon } from "@heroicons/react/24/outline";
 import HuespedesModal from "@/components/HuespedesModal";
+import TimelineCalendar from "@/components/TimelineCalendar";
 
 const locales = {
   es: es,
@@ -26,6 +27,7 @@ export default function CalendarioPage() {
   const [loading, setLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [isHuespedesModalOpen, setIsHuespedesModalOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'classic' | 'timeline'>('timeline');
 
   const fetchReservas = async () => {
     try {
@@ -71,10 +73,36 @@ export default function CalendarioPage() {
           <h2 className="text-2xl font-bold text-[var(--mv-ink)] uppercase tracking-[0.05em]">Calendario de Ocupación</h2>
           <p className="text-gray-500 mt-2 text-sm font-medium">Visualiza los ingresos y salidas de las estancias.</p>
         </div>
-        <div className="flex gap-2">
-            <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-[var(--mv-blue)]"></div>
-                <span className="text-xs text-gray-600 font-medium">Reservas</span>
+        <div className="flex gap-4 items-center">
+            <div className="flex items-center gap-2 mr-4">
+                <div className="w-3 h-3 rounded-full bg-[var(--mv-blue)] shadow-sm"></div>
+                <span className="text-xs text-gray-600 font-medium uppercase tracking-wider">Reservas</span>
+            </div>
+            
+            {/* View Toggle */}
+            <div className="flex bg-gray-100 p-1 rounded-full border border-gray-200">
+              <button
+                onClick={() => setViewMode('timeline')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all ${
+                  viewMode === 'timeline' 
+                    ? 'bg-white text-[var(--mv-blue)] shadow-sm' 
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <Bars3BottomLeftIcon className="w-4 h-4" />
+                Línea de Tiempo
+              </button>
+              <button
+                onClick={() => setViewMode('classic')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all ${
+                  viewMode === 'classic' 
+                    ? 'bg-white text-[var(--mv-blue)] shadow-sm' 
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <CalendarDaysIcon className="w-4 h-4" />
+                Mes
+              </button>
             </div>
         </div>
       </div>
@@ -84,17 +112,18 @@ export default function CalendarioPage() {
           .rbc-calendar { font-family: var(--font-montserrat), sans-serif; }
           .rbc-event { 
             background-color: var(--mv-blue) !important; 
-            border-radius: 8px; 
-            padding: 6px 10px; 
+            border-radius: 4px; 
+            padding: 2px 6px; 
             border: none; 
-            font-size: 0.8rem; 
-            font-weight: 500; 
-            box-shadow: 0 4px 6px -1px rgba(15, 76, 129, 0.2); 
+            font-size: 0.7rem; 
+            font-weight: 600; 
+            line-height: 1.2;
+            box-shadow: 0 2px 4px -1px rgba(15, 76, 129, 0.2); 
             transition: all 0.2s ease;
           }
           .rbc-event:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px -2px rgba(15, 76, 129, 0.3);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(15, 76, 129, 0.3);
             filter: brightness(1.1);
           }
           .rbc-today { background-color: var(--mv-sage) !important; opacity: 0.1; }
@@ -139,31 +168,33 @@ export default function CalendarioPage() {
             <div className="w-full h-full flex items-center justify-center">
                 <div className="animate-spin w-8 h-8 border-4 border-[var(--mv-blue)] border-t-transparent rounded-full"></div>
             </div>
+        ) : viewMode === 'timeline' ? (
+            <TimelineCalendar events={events} onSelectEvent={setSelectedEvent} />
         ) : (
             <Calendar
-            localizer={localizer}
-            events={events}
-            startAccessor="start"
-            endAccessor="end"
-            style={{ height: '100%' }}
-            culture="es"
-            messages={{
-                next: "Sig.",
-                previous: "Ant.",
-                today: "Hoy",
-                month: "Mes",
-                week: "Semana",
-                day: "Día",
-                agenda: "Agenda",
-                date: "Fecha",
-                time: "Hora",
-                event: "Reserva",
-                noEventsInRange: "No hay reservas en este rango."
-            }}
-            views={[Views.MONTH, Views.WEEK, Views.AGENDA]}
-            defaultView={Views.MONTH}
-            popup
-            onSelectEvent={(event) => setSelectedEvent(event)}
+              localizer={localizer}
+              events={events}
+              startAccessor="start"
+              endAccessor="end"
+              style={{ height: '100%' }}
+              culture="es"
+              messages={{
+                  next: "Sig.",
+                  previous: "Ant.",
+                  today: "Hoy",
+                  month: "Mes",
+                  week: "Semana",
+                  day: "Día",
+                  agenda: "Agenda",
+                  date: "Fecha",
+                  time: "Hora",
+                  event: "Reserva",
+                  noEventsInRange: "No hay reservas en este rango."
+              }}
+              views={[Views.MONTH, Views.WEEK, Views.AGENDA]}
+              defaultView={Views.MONTH}
+              popup
+              onSelectEvent={(event) => setSelectedEvent(event)}
             />
         )}
       </div>
