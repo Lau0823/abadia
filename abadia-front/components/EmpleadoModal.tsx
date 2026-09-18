@@ -15,7 +15,10 @@ export default function EmpleadoModal({ isOpen, onClose, onSuccess, empleado }: 
   const [error, setError] = useState("");
 
   const [formData, setFormData] = useState({
+    nombre: "",
     username: "",
+    email: "",
+    telefono: "",
     password: "", // Only required on creation
     rol: "employee" // Default role
   });
@@ -24,13 +27,19 @@ export default function EmpleadoModal({ isOpen, onClose, onSuccess, empleado }: 
     if (isOpen) {
       if (empleado) {
         setFormData({
+          nombre: empleado.nombre || "",
           username: empleado.username || "",
+          email: empleado.email || "",
+          telefono: empleado.telefono || "",
           password: "", // Leave blank for edit, not sent unless we want to change
           rol: empleado.rol || "employee"
         });
       } else {
         setFormData({
+          nombre: "",
           username: "",
+          email: "",
+          telefono: "",
           password: "",
           rol: "employee"
         });
@@ -53,7 +62,10 @@ export default function EmpleadoModal({ isOpen, onClose, onSuccess, empleado }: 
       if (empleado && empleado.id) {
         // Edit
         const body: any = {
+            nombre: formData.nombre,
             username: formData.username,
+            email: formData.email,
+            telefono: formData.telefono,
             rol: formData.rol
         };
         if (formData.password) {
@@ -108,30 +120,73 @@ export default function EmpleadoModal({ isOpen, onClose, onSuccess, empleado }: 
           )}
           
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Nombre de Usuario</label>
+            <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Nombre Completo</label>
             <input 
               type="text" 
-              name="username"
-              value={formData.username}
+              name="nombre"
+              value={formData.nombre}
               onChange={handleChange}
               required
               minLength={3}
-              placeholder="Ej. jperez"
+              placeholder="Ej. Juan Pérez"
               className="w-full border border-gray-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[var(--mv-blue)] outline-none transition-all"
             />
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Contraseña</label>
-            <input 
-              type="password" 
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required={!isEditing}
-              placeholder={isEditing ? "Dejar en blanco para no cambiar" : "Contraseña segura"}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[var(--mv-blue)] outline-none transition-all"
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Nombre de Usuario</label>
+              <input 
+                type="text" 
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                required
+                minLength={4}
+                placeholder="Ej. jperez"
+                className="w-full border border-gray-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[var(--mv-blue)] outline-none transition-all"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Contraseña</label>
+              <input 
+                type="password" 
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required={!isEditing}
+                minLength={6}
+                placeholder={isEditing ? "Dejar en blanco para no cambiar" : "Mínimo 6 caracteres"}
+                className="w-full border border-gray-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[var(--mv-blue)] outline-none transition-all"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Correo Electrónico (Opcional)</label>
+              <input 
+                type="email" 
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="ejemplo@correo.com"
+                className="w-full border border-gray-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[var(--mv-blue)] outline-none transition-all"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Teléfono (Opcional)</label>
+              <input 
+                type="tel" 
+                name="telefono"
+                value={formData.telefono}
+                onChange={handleChange}
+                placeholder="Ej. 3001234567"
+                className="w-full border border-gray-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[var(--mv-blue)] outline-none transition-all"
+              />
+            </div>
           </div>
 
           <div>

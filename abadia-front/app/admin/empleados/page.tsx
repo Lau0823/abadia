@@ -70,7 +70,7 @@ export default function EmpleadosPage() {
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input 
               type="text" 
-              placeholder="Buscar por usuario..." 
+              placeholder="Buscar empleado..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 pr-4 py-2 border border-gray-200 rounded-full focus:ring-2 focus:ring-[var(--mv-blue)] outline-none text-sm w-64 transition-all"
@@ -92,7 +92,8 @@ export default function EmpleadosPage() {
             <thead>
               <tr className="bg-[var(--mv-cream)]/50 border-b border-[var(--mv-sage)]/10">
                 <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-widest">ID</th>
-                <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-widest">Usuario</th>
+                <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-widest">Empleado</th>
+                <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-widest">Contacto</th>
                 <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-widest">Rol</th>
                 <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-widest text-right">Acciones</th>
               </tr>
@@ -120,7 +121,16 @@ export default function EmpleadosPage() {
                       <span className="text-gray-500 text-sm">#{empleado.id}</span>
                     </td>
                     <td className="p-4">
-                      <span className="font-semibold text-[var(--mv-ink)]">{empleado.username}</span>
+                      <div className="flex flex-col">
+                        <span className="font-semibold text-[var(--mv-ink)]">{empleado.nombre || empleado.username}</span>
+                        <span className="text-gray-500 text-xs">@{empleado.username}</span>
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <div className="flex flex-col text-sm">
+                        <span className="text-gray-700">{empleado.telefono || 'Sin teléfono'}</span>
+                        <span className="text-gray-500">{empleado.email || 'Sin correo'}</span>
+                      </div>
                     </td>
                     <td className="p-4">
                       <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs font-semibold uppercase">
