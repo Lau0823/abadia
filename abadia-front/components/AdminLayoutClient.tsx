@@ -17,20 +17,22 @@ import {
   DocumentTextIcon,
   ChartBarIcon,
   BriefcaseIcon,
-  ClipboardDocumentListIcon
+  ClipboardDocumentListIcon,
+  ClipboardDocumentCheckIcon
 } from "@heroicons/react/24/outline";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/Tooltip";
 import { useAuthStore } from "../store/authStore";
 
 const navigation = [
-  { name: "Dashboard", href: "/admin", icon: HomeIcon },
-  { name: "Calendario", href: "/admin/calendario", icon: CalendarDaysIcon },
-  { name: "Clientes", href: "/admin/clientes", icon: UsersIcon },
-  { name: "Cotizaciones y Reservas", href: "/admin/cotizaciones-reservas", icon: ClipboardDocumentListIcon },
-  { name: "Habitaciones", href: "/admin/habitaciones", icon: KeyIcon },
-  { name: "Empleados", href: "/admin/empleados", icon: BriefcaseIcon },
-  { name: "Finanzas", href: "/admin/finanzas", icon: ChartBarIcon },
-  { name: "Configuración", href: "/admin/settings", icon: Cog6ToothIcon },
+  { name: "Dashboard", href: "/admin", icon: HomeIcon, roles: ["superadmin", "admin", "supervisor", "empleado", "employee"] },
+  { name: "Calendario", href: "/admin/calendario", icon: CalendarDaysIcon, roles: ["superadmin", "admin", "supervisor", "empleado", "employee"] },
+  { name: "Clientes", href: "/admin/clientes", icon: UsersIcon, roles: ["superadmin", "admin", "supervisor", "empleado", "employee"] },
+  { name: "Cotizaciones y Reservas", href: "/admin/cotizaciones-reservas", icon: ClipboardDocumentListIcon, roles: ["superadmin", "admin", "supervisor"] },
+  { name: "Habitaciones", href: "/admin/habitaciones", icon: KeyIcon, roles: ["superadmin", "admin", "supervisor"] },
+  { name: "Tareas", href: "/admin/tareas", icon: ClipboardDocumentCheckIcon, roles: ["superadmin", "admin", "supervisor", "empleado", "employee"] },
+  { name: "Empleados", href: "/admin/empleados", icon: BriefcaseIcon, roles: ["superadmin", "admin"] },
+  { name: "Finanzas", href: "/admin/finanzas", icon: ChartBarIcon, roles: ["superadmin", "admin"] },
+  { name: "Configuración", href: "/admin/settings", icon: Cog6ToothIcon, roles: ["superadmin", "admin"] },
 ];
 
 export default function AdminLayoutClient({ children }: { children: React.ReactNode }) {
@@ -108,7 +110,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
             </div>
 
             <nav className="mt-6 flex flex-col gap-2 px-3">
-              {navigation.map((item) => {
+              {navigation.filter(item => item.roles.includes(user.rol)).map((item) => {
                 const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
                 return (
                   <Tooltip key={item.name}>

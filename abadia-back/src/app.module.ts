@@ -30,6 +30,8 @@ import { Cotizacion } from './cotizaciones/entities/cotizacion.entity';
 import { FacturasModule } from './facturas/facturas.module';
 import { Factura } from './facturas/entities/factura.entity';
 import { DocumentsModule } from './documents/documents.module';
+import { TareasModule } from './tareas/tareas.module';
+import { Tarea } from './tareas/entities/tarea.entity';
 
 import { DataSource } from 'typeorm';
 
@@ -59,6 +61,7 @@ import { DataSource } from 'typeorm';
           Transaccion,
           Cotizacion,
           Factura,
+          Tarea,
         ];
 
         if (databaseUrl) {
@@ -103,6 +106,7 @@ import { DataSource } from 'typeorm';
     CotizacionesModule,
     FacturasModule,
     DocumentsModule,
+    TareasModule,
   ],
   controllers: [AppController],
   providers: [
