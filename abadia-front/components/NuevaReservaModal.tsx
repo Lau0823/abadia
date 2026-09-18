@@ -75,6 +75,23 @@ export default function NuevaReservaModal({ isOpen, onClose, onSuccess }: NuevaR
   // Obtener fecha actual en formato para datetime-local
   const todayStr = new Date().toISOString().slice(0, 16);
 
+  // Recalcular el valor total automáticamente
+  useEffect(() => {
+    if (formData.habitacion_id && formData.checkIn && formData.checkOut) {
+      const start = new Date(formData.checkIn);
+      const end = new Date(formData.checkOut);
+      // Calcular diferencia en milisegundos, luego a días
+      const diffTime = Math.abs(end.getTime() - start.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1; // Mínimo 1 día
+      
+      const selectedHab = habitaciones.find((h: any) => h.id === formData.habitacion_id);
+      if (selectedHab && selectedHab.precio) {
+        const newValue = selectedHab.precio * diffDays;
+        setFormData(prev => ({ ...prev, value: newValue }));
+      }
+    }
+  }, [formData.habitacion_id, formData.checkIn, formData.checkOut, habitaciones]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));

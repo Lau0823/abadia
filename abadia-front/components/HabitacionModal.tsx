@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { fetchApi } from "@/lib/api";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/Tooltip";
 
 interface HabitacionModalProps {
   isOpen: boolean;
@@ -95,9 +96,11 @@ export default function HabitacionModal({ isOpen, onClose, onSuccess, habitacion
   };
 
   const processFiles = (files: File[]) => {
-    const combined = [...selectedFiles, ...files].slice(0, 10); // Límite de 10 imágenes y suma a las existentes
+    const combined = [...selectedFiles, ...files].slice(0, 5); // Límite de 5 imágenes
     setSelectedFiles(combined);
-    setPreviews(combined.map(f => URL.createObjectURL(f)));
+    // Mostrar las existentes más las nuevas
+    const existingPreviews = habitacion && selectedFiles.length === 0 ? (habitacion.imagenes || []) : [];
+    setPreviews([...existingPreviews, ...combined.map(f => URL.createObjectURL(f))].slice(0, 5));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -136,6 +139,13 @@ export default function HabitacionModal({ isOpen, onClose, onSuccess, habitacion
     setSaving(true);
     
     try {
+      const totalImages = selectedFiles.length > 0 ? selectedFiles.length : (habitacion?.imagenes?.length || 0);
+      if (totalImages < 3 || totalImages > 5) {
+        setError("La habitación debe tener entre 3 y 5 imágenes.");
+        setSaving(false);
+        return;
+      }
+
       const ocupacionStr = `Máx. ${formData.capacidadAdultos} Adultos${formData.capacidadNinos > 0 ? ` + ${formData.capacidadNinos} Niño${formData.capacidadNinos > 1 ? 's' : ''}` : ''}`;
 
       const payload = {
@@ -223,9 +233,14 @@ export default function HabitacionModal({ isOpen, onClose, onSuccess, habitacion
             )}
 
             <div className="group relative">
-              <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">
+              <label className="block text-xs font-semibold text-gray-500 uppercase mb-1 flex items-center">
                 Imágenes de la Habitación
-                <span className="ml-2 inline-flex items-center justify-center w-4 h-4 rounded-full bg-gray-200 text-gray-500 text-[10px] cursor-help" title="Puedes arrastrar hasta 10 imágenes. Éstas reemplazarán a las actuales.">?</span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="ml-2 inline-flex items-center justify-center w-4 h-4 rounded-full bg-gray-200 text-gray-500 text-[10px] cursor-help">?</span>
+                  </TooltipTrigger>
+                  <TooltipContent>Mínimo 3 y máximo 5 imágenes. Si subes nuevas, reemplazarán a las actuales.</TooltipContent>
+                </Tooltip>
               </label>
               
               <div 
@@ -246,7 +261,7 @@ export default function HabitacionModal({ isOpen, onClose, onSuccess, habitacion
                     <input ref={fileInputRef} id="file-upload" name="file-upload" type="file" className="sr-only" multiple accept="image/*" onChange={handleFileChange} />
                     <p>o arrastra y suelta aquí</p>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">PNG, JPG, GIF hasta 10MB c/u</p>
+                  <p className="text-xs text-gray-500 mt-1">PNG, JPG hasta 10MB c/u (Min 3, Max 5)</p>
                 </div>
               </div>
 

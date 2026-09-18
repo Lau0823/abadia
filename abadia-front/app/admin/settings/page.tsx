@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { fetchApi } from "@/lib/api";
 import { PlusIcon, TrashIcon, CheckIcon } from "@heroicons/react/24/outline";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/Tooltip";
 
 interface Setting {
   key: string;
@@ -21,7 +22,26 @@ export default function SettingsPage() {
     setLoading(true);
     try {
       const data = await fetchApi("/settings");
-      setSettings(data);
+      
+      // Pre-populate common keys if they don't exist
+      const commonKeys = [
+        { key: "telefono", description: "Teléfono principal" },
+        { key: "whatsapp", description: "Número de WhatsApp" },
+        { key: "facebook", description: "URL de Facebook" },
+        { key: "instagram", description: "URL de Instagram" }
+      ];
+      
+      const merged = [...data];
+      let hasChanges = false;
+      
+      for (const ck of commonKeys) {
+        if (!merged.find(s => s.key === ck.key)) {
+          merged.push({ key: ck.key, value: "", description: ck.description, isNew: true });
+          hasChanges = true;
+        }
+      }
+      
+      setSettings(merged);
     } catch (error) {
       console.error("Error cargando configuración", error);
     } finally {
@@ -163,13 +183,17 @@ export default function SettingsPage() {
                   </div>
 
                   <div className="md:mt-5">
-                     <button 
-                       onClick={() => handleRemoveSetting(index)}
-                       className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                       title="Eliminar esta variable de la vista"
-                     >
-                       <TrashIcon className="w-5 h-5" />
-                     </button>
+                     <Tooltip>
+                       <TooltipTrigger asChild>
+                         <button 
+                           onClick={() => handleRemoveSetting(index)}
+                           className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                         >
+                           <TrashIcon className="w-5 h-5" />
+                         </button>
+                       </TooltipTrigger>
+                       <TooltipContent>Eliminar esta variable de la vista</TooltipContent>
+                     </Tooltip>
                   </div>
                 </div>
               ))

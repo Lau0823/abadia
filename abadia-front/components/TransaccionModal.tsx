@@ -75,7 +75,14 @@ export default function TransaccionModal({ isOpen, onClose, onSuccess }: Transac
                 required
                 className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--mv-blue)] outline-none bg-white"
                 value={formData.tipo}
-                onChange={(e) => setFormData({ ...formData, tipo: e.target.value })}
+                onChange={(e) => {
+                  const nuevoTipo = e.target.value;
+                  setFormData({ 
+                    ...formData, 
+                    tipo: nuevoTipo,
+                    categoria: nuevoTipo === 'INGRESO' ? 'RESERVACION' : 'OTROS'
+                  });
+                }}
               >
                 <option value="INGRESO">Ingreso (Entrada)</option>
                 <option value="EGRESO">Egreso (Gasto)</option>
@@ -89,12 +96,17 @@ export default function TransaccionModal({ isOpen, onClose, onSuccess }: Transac
                 value={formData.categoria}
                 onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
               >
-                <option value="RESERVACION">Reservación</option>
-                <option value="EXTRAS">Venta de Extras</option>
-                <option value="MANTENIMIENTO">Mantenimiento</option>
-                <option value="NOMINA">Nómina</option>
-                <option value="SERVICIOS_PUBLICOS">Servicios Públicos</option>
-                <option value="OTROS">Otros</option>
+                {formData.tipo === 'INGRESO' ? (
+                  <option value="RESERVACION">Reservación</option>
+                ) : (
+                  <>
+                    <option value="MANTENIMIENTO">Mantenimiento</option>
+                    <option value="NOMINA">Nómina</option>
+                    <option value="SERVICIOS_PUBLICOS">Servicios Públicos</option>
+                    <option value="EXTRAS">Gastos Extras</option>
+                    <option value="OTROS">Otros</option>
+                  </>
+                )}
               </select>
             </div>
           </div>

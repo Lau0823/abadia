@@ -9,6 +9,7 @@ import HuespedesModal from "@/components/HuespedesModal";
 import TransferirReservaModal from "@/components/TransferirReservaModal";
 import DetalleReservaModal from "@/components/DetalleReservaModal";
 import ConvertirReservaModal from "@/components/ConvertirReservaModal";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/Tooltip";
 
 type FilterTab = 'Todas' | 'Cotizaciones' | 'Pendientes' | 'Realizadas' | 'En Casa' | 'Canceladas';
 
@@ -278,14 +279,27 @@ export default function CotizacionesReservasPage() {
                                 Check-out
                               </button>
                             )}
-                            {(item.uiStatus === 'Pendientes' || item.uiStatus === 'Realizadas') && (
+                            {item.uiStatus === 'Pendientes' && (
                               <button 
-                                onClick={() => handleChangeStatus(item.id, 'reserva', 'cancelled')}
-                                className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                                title="Anular Reserva"
+                                onClick={() => handleChangeStatus(item.id, 'reserva', 'confirmed')}
+                                className="flex items-center gap-1 bg-green-50 hover:bg-green-100 text-green-600 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors border border-green-200 mr-2"
                               >
-                                <XCircleIcon className="w-5 h-5" />
+                                <CheckCircleIcon className="w-4 h-4" />
+                                Confirmar
                               </button>
+                            )}
+                            {(item.uiStatus === 'Pendientes' || item.uiStatus === 'Realizadas') && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <button 
+                                    onClick={() => handleChangeStatus(item.id, 'reserva', 'cancelled')}
+                                    className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                  >
+                                    <XCircleIcon className="w-5 h-5" />
+                                  </button>
+                                </TooltipTrigger>
+                                <TooltipContent>Anular Reserva</TooltipContent>
+                              </Tooltip>
                             )}
                           </>
                         )}
@@ -293,22 +307,30 @@ export default function CotizacionesReservasPage() {
                         {/* Acciones Globales */}
                         <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 ml-2 border-l pl-2 border-gray-200">
                            {item.dataType === 'reserva' && (
-                            <button 
-                              onClick={() => { setSelectedItem(item); setIsDetalleModalOpen(true); }}
-                              className="p-1.5 text-gray-400 hover:text-[var(--mv-blue)] hover:bg-[var(--mv-blue)]/10 rounded-lg transition-all"
-                              title="Ver Detalles"
-                            >
-                              <EyeIcon className="w-5 h-5" />
-                            </button>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <button 
+                                  onClick={() => { setSelectedItem(item); setIsDetalleModalOpen(true); }}
+                                  className="p-1.5 text-gray-400 hover:text-[var(--mv-blue)] hover:bg-[var(--mv-blue)]/10 rounded-lg transition-all"
+                                >
+                                  <EyeIcon className="w-5 h-5" />
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent>Ver Detalles</TooltipContent>
+                            </Tooltip>
                            )}
                            {item.dataType === 'cotizacion' && (
-                             <button 
-                              onClick={() => window.open(`${API_URL}/documents/cotizacion/${item.id}`, "_blank")}
-                              className="p-1.5 text-gray-400 hover:text-[var(--mv-blue)] hover:bg-[var(--mv-blue)]/10 rounded-lg transition-all"
-                              title="Descargar PDF"
-                            >
-                              <DocumentArrowDownIcon className="w-5 h-5" />
-                            </button>
+                             <Tooltip>
+                              <TooltipTrigger asChild>
+                                <button 
+                                  onClick={() => window.open(`${API_URL}/documents/cotizacion/${item.id}`, "_blank")}
+                                  className="p-1.5 text-gray-400 hover:text-[var(--mv-blue)] hover:bg-[var(--mv-blue)]/10 rounded-lg transition-all"
+                                >
+                                  <DocumentArrowDownIcon className="w-5 h-5" />
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent>Descargar PDF</TooltipContent>
+                             </Tooltip>
                            )}
                         </div>
                       </div>

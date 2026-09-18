@@ -50,8 +50,8 @@ export default function TimelineCalendar({ events, onSelectEvent }: TimelineCale
     // Check if event belongs to this room
     const habTitulo = habitaciones.find(h => h.id === habId)?.titulo;
     const belongsToRoom = 
-      event.reservationDetails?.habitacion?.id === habId || 
-      event.reservationDetails?.habitacion_id === habId || 
+      String(event.reservationDetails?.habitacion?.id) === String(habId) || 
+      String(event.reservationDetails?.habitacion_id) === String(habId) || 
       event.resource === habTitulo;
 
     if (!belongsToRoom) {
@@ -59,7 +59,8 @@ export default function TimelineCalendar({ events, onSelectEvent }: TimelineCale
     }
 
     // Check if event overlaps with current month
-    if (eventEnd < firstDay || eventStart > lastDay) {
+    // We add a tiny buffer to avoid edge cases where times match exactly
+    if (eventEnd <= firstDay || eventStart >= lastDay) {
       return null;
     }
 
