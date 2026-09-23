@@ -18,7 +18,10 @@ import {
   ChartBarIcon,
   BriefcaseIcon,
   ClipboardDocumentListIcon,
-  ClipboardDocumentCheckIcon
+  ClipboardDocumentCheckIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  Bars3Icon
 } from "@heroicons/react/24/outline";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/Tooltip";
 import { useAuthStore } from "../store/authStore";
@@ -41,11 +44,36 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
   const pathname = usePathname();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  // Sidebar collapse state: default true (collapsed pill mode)
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(true);
+  const [isMounted, setIsMounted] = useState<boolean>(false);
+
   useEffect(() => {
-    checkSession().then(() => {
-      // The store handles setting loading to false
-    });
+    checkSession();
   }, [checkSession]);
+
+  useEffect(() => {
+    // Read persisted sidebar state from localStorage
+    if (typeof window !== "undefined") {
+      const savedState = localStorage.getItem("admin_sidebar_collapsed");
+      if (savedState !== null) {
+        setIsCollapsed(savedState === "true");
+      } else {
+        setIsCollapsed(true); // Default collapsed
+      }
+      setIsMounted(true);
+    }
+  }, []);
+
+  const toggleSidebar = () => {
+    setIsCollapsed(prev => {
+      const nextState = !prev;
+      if (typeof window !== "undefined") {
+        localStorage.setItem("admin_sidebar_collapsed", String(nextState));
+      }
+      return nextState;
+    });
+  };
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -54,12 +82,10 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
   }, [loading, isAuthenticated, router]);
 
   useEffect(() => {
-    // Check for google calendar success redirect
     if (typeof window !== "undefined") {
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get("google") === "success") {
         setToastMessage("¡Google Calendar conectado exitosamente!");
-        // Remove param from URL
         window.history.replaceState({}, document.title, pathname);
         setTimeout(() => setToastMessage(null), 5000);
       }
@@ -88,27 +114,49 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
     <TooltipProvider delayDuration={200}>
       <div className="flex h-screen bg-[var(--mv-cream)] overflow-hidden">
         {/* Sidebar */}
-        <aside className="w-20 lg:w-64 bg-white border-r border-[var(--mv-sage)]/10 flex flex-col justify-between transition-all duration-300 shadow-sm z-20">
+        <aside className={`${
+          isCollapsed ? 'w-20' : 'w-64'
+        } bg-white border-r border-[var(--mv-sage)]/10 flex flex-col justify-between transition-all duration-300 shadow-sm z-20 relative`}>
           <div>
-            <div className="h-24 flex items-center justify-center border-b border-[var(--mv-sage)]/10 w-full">
-              <Image
-                src="/abadia.png"
-                alt="Abadia Logo"
-                width={80}
-                height={80}
-                className="hidden lg:block object-contain"
-                priority
-              />
-              <Image
-                src="/abadia.png"
-                alt="Abadia Logo"
-                width={36}
-                height={36}
-                className="lg:hidden object-contain"
-                priority
-              />
+            {/* Header / Logo */}
+            <div className="h-20 flex items-center justify-between px-4 border-b border-[var(--mv-sage)]/10 w-full relative">
+              <div className="flex items-center justify-center w-full">
+                {!isCollapsed ? (
+                  <Image
+                    src="/abadia.png"
+                    alt="Abadia Logo"
+                    width={80}
+                    height={80}
+                    className="object-contain transition-all duration-300"
+                    priority
+                  />
+                ) : (
+                  <Image
+                    src="/abadia.png"
+                    alt="Abadia Logo"
+                    width={38}
+                    height={38}
+                    className="object-contain transition-all duration-300"
+                    priority
+                  />
+                )}
+              </div>
+
+              {/* Collapse Button inside Sidebar */}
+              <button 
+                onClick={toggleSidebar}
+                className="absolute -right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center text-gray-600 hover:text-[var(--mv-blue)] hover:scale-110 transition-all z-30"
+                title={isCollapsed ? "Expandir Menú" : "Contraer Menú"}
+              >
+                {isCollapsed ? (
+                  <ChevronRightIcon className="w-4 h-4 stroke-[2.5]" />
+                ) : (
+                  <ChevronLeftIcon className="w-4 h-4 stroke-[2.5]" />
+                )}
+              </button>
             </div>
 
+            {/* Navigation items */}
             <nav className="mt-6 flex flex-col gap-2 px-3">
               {navigation.filter(item => {
                 if (!user.rol) return true;
@@ -121,40 +169,52 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
                     <TooltipTrigger asChild>
                       <Link
                         href={item.href}
-                        className={`group flex items-center lg:px-4 py-3 rounded-xl transition-all ${isActive
+                        className={`group flex items-center ${isCollapsed ? 'justify-center px-0 py-3' : 'px-4 py-3'} rounded-xl transition-all ${
+                          isActive
                             ? "bg-[var(--mv-blue)] text-white shadow-md"
                             : "text-gray-500 hover:bg-[var(--mv-blue)]/10 hover:text-[var(--mv-blue)]"
-                          }`}
+                        }`}
                       >
-                        <div className="flex w-full justify-center lg:justify-start items-center">
+                        <div className={`flex w-full ${isCollapsed ? 'justify-center' : 'justify-start'} items-center`}>
                           <item.icon className="w-6 h-6 shrink-0" />
-                          <span className="ml-3 hidden lg:block text-sm font-medium">{item.name}</span>
+                          {!isCollapsed && (
+                            <span className="ml-3 text-sm font-medium whitespace-nowrap animate-in fade-in duration-200">
+                              {item.name}
+                            </span>
+                          )}
                         </div>
                       </Link>
                     </TooltipTrigger>
-                    <TooltipContent side="right" className="lg:hidden">
-                      {item.name}
-                    </TooltipContent>
+                    {isCollapsed && (
+                      <TooltipContent side="right">
+                        {item.name}
+                      </TooltipContent>
+                    )}
                   </Tooltip>
                 );
               })}
             </nav>
           </div>
 
-          <div className="p-4 border-t border-[var(--mv-sage)]/10">
+          {/* Footer / Logout */}
+          <div className="p-3 border-t border-[var(--mv-sage)]/10">
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center justify-center lg:justify-start lg:px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 transition-colors"
+                  className={`w-full flex items-center ${isCollapsed ? 'justify-center px-0 py-3' : 'px-4 py-3'} rounded-xl text-red-500 hover:bg-red-50 transition-colors`}
                 >
                   <ArrowLeftOnRectangleIcon className="w-6 h-6 shrink-0" />
-                  <span className="ml-3 hidden lg:block text-sm font-medium">Cerrar Sesión</span>
+                  {!isCollapsed && (
+                    <span className="ml-3 text-sm font-medium whitespace-nowrap">Cerrar Sesión</span>
+                  )}
                 </button>
               </TooltipTrigger>
-              <TooltipContent side="right" className="lg:hidden text-red-100 bg-red-600">
-                Cerrar Sesión
-              </TooltipContent>
+              {isCollapsed && (
+                <TooltipContent side="right" className="text-red-100 bg-red-600">
+                  Cerrar Sesión
+                </TooltipContent>
+              )}
             </Tooltip>
           </div>
         </aside>
@@ -171,14 +231,24 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
             </div>
           )}
 
-          <header className="h-20 bg-white/80 backdrop-blur-md border-b border-[var(--mv-sage)]/10 flex items-center justify-end px-8 z-10">
+          <header className="h-20 bg-white/80 backdrop-blur-md border-b border-[var(--mv-sage)]/10 flex items-center justify-between px-6 z-10">
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={toggleSidebar}
+                className="p-2 rounded-xl text-gray-500 hover:text-[var(--mv-blue)] hover:bg-gray-100 transition-colors"
+                title={isCollapsed ? "Expandir Sidebar" : "Contraer Sidebar"}
+              >
+                <Bars3Icon className="w-6 h-6 stroke-[2]" />
+              </button>
+            </div>
+
             <div className="flex items-center gap-4">
               <a
                 href={`${API_URL}/google-calendar/auth`}
                 className="hidden md:flex items-center gap-2 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-full text-sm font-medium transition-all shadow-sm"
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24">
-                  <path fill="currentColor" d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 17.1,6.7 17.1,6.7L19,4.72C19,4.72 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1V11.1Z" />
+                  <path fill="currentColor" d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1V11.1Z" />
                 </svg>
                 Vincular Calendario
               </a>
@@ -200,3 +270,4 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
     </TooltipProvider>
   );
 }
+
