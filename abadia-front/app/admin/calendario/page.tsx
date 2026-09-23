@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import { Calendar, dateFnsLocalizer, Views } from "react-big-calendar";
-import { format, parse, startOfWeek, getDay } from "date-fns";
+import { format, parse, startOfWeek, getDay, addMonths, subMonths, getDaysInMonth, startOfMonth, isSameDay } from "date-fns";
 import { es } from "date-fns/locale/es";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { fetchApi } from "@/lib/api";
-import { UserGroupIcon, CalendarDaysIcon, Bars3BottomLeftIcon } from "@heroicons/react/24/outline";
+import { UserGroupIcon, CalendarDaysIcon, Bars3BottomLeftIcon, PlusIcon, ChevronLeftIcon, ChevronRightIcon, FunnelIcon } from "@heroicons/react/24/outline";
 import HuespedesModal from "@/components/HuespedesModal";
 import TimelineCalendar from "@/components/TimelineCalendar";
 
@@ -28,6 +28,15 @@ export default function CalendarioPage() {
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [isHuespedesModalOpen, setIsHuespedesModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'classic' | 'timeline'>('timeline');
+  
+  // Selected date state for sync with timeline
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [miniCalendarMonth, setMiniCalendarMonth] = useState<Date>(new Date());
+
+  // Filter states
+  const [filterConfirmed, setFilterConfirmed] = useState(true);
+  const [filterPending, setFilterPending] = useState(true);
+  const [filterCancelled, setFilterCancelled] = useState(false);
 
   const fetchReservas = async () => {
     try {
@@ -48,13 +57,15 @@ export default function CalendarioPage() {
           title: "María Pérez - Habitación 1",
           start: new Date(new Date().setHours(15, 0, 0, 0)),
           end: new Date(new Date(new Date().setDate(new Date().getDate() + 2)).setHours(12, 0, 0, 0)),
-          resource: "Suite Insignia"
+          resource: "Suite Insignia",
+          reservationDetails: { status: 'confirmed', cliente: { nombre: 'María Pérez' }, value: 450000 }
         },
         {
           title: "Carlos López - Habitación 2",
           start: new Date(new Date(new Date().setDate(new Date().getDate() + 1)).setHours(14, 0, 0, 0)),
           end: new Date(new Date(new Date().setDate(new Date().getDate() + 4)).setHours(11, 0, 0, 0)),
-          resource: "Refugio Rústico"
+          resource: "Refugio Rústico",
+          reservationDetails: { status: 'pending', cliente: { nombre: 'Carlos López' }, value: 320000 }
         }
       ]);
     } finally {
@@ -66,90 +77,193 @@ export default function CalendarioPage() {
     fetchReservas();
   }, []);
 
+  // Filter events according to checkboxes
+  const filteredEvents = events.filter(e => {
+    const status = e.reservationDetails?.status || 'confirmed';
+    if (status === 'confirmed' || status === 'completed') return filterConfirmed;
+    if (status === 'pending') return filterPending;
+    if (status === 'cancelled') return filterCancelled;
+    return true;
+  });
+
+  // Calculations for Mini Calendar
+  const miniDaysInMonth = getDaysInMonth(miniCalendarMonth);
+  const miniStartDayOfWeek = (startOfMonth(miniCalendarMonth).getDay() + 6) % 7; // Monday start
+  const miniDaysArray = Array.from({ length: miniDaysInMonth }, (_, i) => i + 1);
+
+  // Status counts
+  const confirmedCount = events.filter(e => e.reservationDetails?.status === 'confirmed' || e.reservationDetails?.status === 'completed').length;
+  const pendingCount = events.filter(e => e.reservationDetails?.status === 'pending').length;
+  const cancelledCount = events.filter(e => e.reservationDetails?.status === 'cancelled').length;
+
   return (
-    <div className="flex gap-4 h-[calc(100vh-140px)]">
-      {/* Sidebar */}
-      <div className="w-64 flex-shrink-0 bg-white rounded-3xl shadow-sm border border-[var(--mv-sage)]/10 p-5 flex flex-col gap-6 overflow-y-auto mv-scrollbar">
+    <div className="flex gap-5 h-[calc(100vh-140px)]">
+      {/* Sidebar Navigation Widget */}
+      <div className="w-72 flex-shrink-0 bg-white rounded-3xl shadow-xs border border-slate-200/70 p-5 flex flex-col gap-6 overflow-y-auto mv-scrollbar">
+        {/* Action Button */}
         <div>
-          <button className="w-full flex items-center justify-center gap-2 bg-[var(--mv-blue)] hover:bg-[#0b3c66] text-white px-4 py-2.5 rounded-full text-sm font-semibold transition-all shadow-md">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-            Crear Reserva
+          <button className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[var(--mv-blue)] to-[#0b3c66] hover:from-[#0b3c66] hover:to-[#082a48] text-white px-5 py-3 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all shadow-md shadow-blue-900/10 hover:shadow-lg hover:scale-[1.01] active:scale-[0.99]">
+            <PlusIcon className="w-4 h-4 stroke-[3]" />
+            Nueva Reserva
           </button>
         </div>
         
-        {/* Mini Calendar Placeholder */}
-        <div>
-          <h3 className="text-sm font-bold text-[var(--mv-ink)] mb-3">{format(new Date(), "MMMM yyyy", { locale: es })}</h3>
+        {/* Interactive Mini Calendar */}
+        <div className="bg-slate-50/70 rounded-2xl p-4 border border-slate-200/60">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-xs font-bold text-slate-800 capitalize tracking-wide">
+              {format(miniCalendarMonth, "MMMM yyyy", { locale: es })}
+            </h3>
+            <div className="flex items-center gap-1">
+              <button 
+                onClick={() => setMiniCalendarMonth(prev => subMonths(prev, 1))}
+                className="p-1 hover:bg-slate-200/60 rounded-lg text-slate-500 transition-colors"
+              >
+                <ChevronLeftIcon className="w-3.5 h-3.5" />
+              </button>
+              <button 
+                onClick={() => setMiniCalendarMonth(prev => addMonths(prev, 1))}
+                className="p-1 hover:bg-slate-200/60 rounded-lg text-slate-500 transition-colors"
+              >
+                <ChevronRightIcon className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
           <div className="grid grid-cols-7 gap-1 text-center">
-            {['D', 'L', 'M', 'M', 'J', 'V', 'S'].map(d => (
-              <div key={d} className="text-[10px] font-semibold text-gray-400">{d}</div>
+            {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((d, i) => (
+              <div key={i} className="text-[10px] font-bold text-slate-400 py-1">{d}</div>
             ))}
-            {Array.from({ length: 30 }).map((_, i) => (
-              <div key={i} className={`text-xs p-1 rounded-full ${i+1 === new Date().getDate() ? 'bg-[var(--mv-blue)] text-white font-bold' : 'text-gray-600 hover:bg-gray-100 cursor-pointer'}`}>
-                {i + 1}
-              </div>
+            
+            {/* Blank padding for start day */}
+            {Array.from({ length: miniStartDayOfWeek }).map((_, i) => (
+              <div key={`blank-${i}`} className="p-1"></div>
             ))}
+
+            {miniDaysArray.map((day) => {
+              const dayDate = new Date(miniCalendarMonth.getFullYear(), miniCalendarMonth.getMonth(), day);
+              const isToday = isSameDay(dayDate, new Date());
+              const isSelected = isSameDay(dayDate, selectedDate);
+              
+              // Check if any reservation touches this day
+              const hasReservation = events.some(e => {
+                const start = new Date(e.start);
+                const end = new Date(e.end);
+                return dayDate >= new Date(start.setHours(0,0,0,0)) && dayDate <= new Date(end.setHours(23,59,59,999));
+              });
+
+              return (
+                <button 
+                  key={day} 
+                  onClick={() => {
+                    setSelectedDate(dayDate);
+                  }}
+                  className={`text-xs p-1.5 rounded-xl flex flex-col items-center justify-center relative transition-all ${
+                    isSelected 
+                      ? 'bg-[var(--mv-blue)] text-white font-bold shadow-xs' 
+                      : isToday 
+                        ? 'bg-blue-100/80 text-[var(--mv-blue)] font-bold' 
+                        : 'text-slate-700 hover:bg-slate-200/60'
+                  }`}
+                >
+                  <span>{day}</span>
+                  {hasReservation && !isSelected && (
+                    <span className="w-1 h-1 rounded-full bg-blue-500 absolute bottom-0.5"></span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Filters */}
-        <div>
-          <h3 className="text-sm font-bold text-[var(--mv-ink)] mb-3">Filtros</h3>
+        {/* Dynamic Filters Widget */}
+        <div className="bg-slate-50/70 rounded-2xl p-4 border border-slate-200/60 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+              <FunnelIcon className="w-3.5 h-3.5 text-slate-500" />
+              Filtros
+            </h3>
+            <span className="text-[10px] text-slate-400 font-medium">({filteredEvents.length} activas)</span>
+          </div>
+
           <div className="space-y-2">
-            <label className="flex items-center gap-2 cursor-pointer group">
-              <input type="checkbox" defaultChecked className="rounded text-[var(--mv-blue)] focus:ring-[var(--mv-blue)] border-gray-300 w-4 h-4" />
-              <span className="text-xs text-gray-600 font-medium group-hover:text-gray-900 transition-colors">Confirmadas</span>
+            <label className="flex items-center justify-between p-2 rounded-xl hover:bg-white transition-colors cursor-pointer group border border-transparent hover:border-slate-200/50">
+              <div className="flex items-center gap-2.5">
+                <input 
+                  type="checkbox" 
+                  checked={filterConfirmed} 
+                  onChange={(e) => setFilterConfirmed(e.target.checked)}
+                  className="rounded text-[var(--mv-blue)] focus:ring-[var(--mv-blue)] border-slate-300 w-4 h-4 cursor-pointer" 
+                />
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span>
+                <span className="text-xs text-slate-700 font-medium group-hover:text-slate-900 transition-colors">Confirmadas</span>
+              </div>
+              <span className="text-xs font-bold text-slate-400 bg-slate-200/60 px-2 py-0.5 rounded-md">{confirmedCount}</span>
             </label>
-            <label className="flex items-center gap-2 cursor-pointer group">
-              <input type="checkbox" defaultChecked className="rounded text-[var(--mv-blue)] focus:ring-[var(--mv-blue)] border-gray-300 w-4 h-4" />
-              <span className="text-xs text-gray-600 font-medium group-hover:text-gray-900 transition-colors">Pendientes</span>
+
+            <label className="flex items-center justify-between p-2 rounded-xl hover:bg-white transition-colors cursor-pointer group border border-transparent hover:border-slate-200/50">
+              <div className="flex items-center gap-2.5">
+                <input 
+                  type="checkbox" 
+                  checked={filterPending} 
+                  onChange={(e) => setFilterPending(e.target.checked)}
+                  className="rounded text-[var(--mv-blue)] focus:ring-[var(--mv-blue)] border-slate-300 w-4 h-4 cursor-pointer" 
+                />
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-400 shrink-0"></span>
+                <span className="text-xs text-slate-700 font-medium group-hover:text-slate-900 transition-colors">Pendientes</span>
+              </div>
+              <span className="text-xs font-bold text-slate-400 bg-slate-200/60 px-2 py-0.5 rounded-md">{pendingCount}</span>
             </label>
-            <label className="flex items-center gap-2 cursor-pointer group">
-              <input type="checkbox" className="rounded text-[var(--mv-blue)] focus:ring-[var(--mv-blue)] border-gray-300 w-4 h-4" />
-              <span className="text-xs text-gray-600 font-medium group-hover:text-gray-900 transition-colors">Canceladas</span>
+
+            <label className="flex items-center justify-between p-2 rounded-xl hover:bg-white transition-colors cursor-pointer group border border-transparent hover:border-slate-200/50">
+              <div className="flex items-center gap-2.5">
+                <input 
+                  type="checkbox" 
+                  checked={filterCancelled} 
+                  onChange={(e) => setFilterCancelled(e.target.checked)}
+                  className="rounded text-[var(--mv-blue)] focus:ring-[var(--mv-blue)] border-slate-300 w-4 h-4 cursor-pointer" 
+                />
+                <span className="w-2.5 h-2.5 rounded-full bg-red-400 shrink-0"></span>
+                <span className="text-xs text-slate-700 font-medium group-hover:text-slate-900 transition-colors">Canceladas</span>
+              </div>
+              <span className="text-xs font-bold text-slate-400 bg-slate-200/60 px-2 py-0.5 rounded-md">{cancelledCount}</span>
             </label>
           </div>
         </div>
       </div>
 
       {/* Main Area */}
-      <div className="flex-1 bg-white rounded-3xl shadow-sm border border-[var(--mv-sage)]/10 p-5 flex flex-col min-w-0">
+      <div className="flex-1 bg-white rounded-3xl shadow-xs border border-slate-200/70 p-5 flex flex-col min-w-0">
         <div className="mb-4 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-             <button className="p-1.5 rounded-full hover:bg-gray-100 transition-colors text-gray-500">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-             </button>
-             <h2 className="text-lg font-bold text-[var(--mv-ink)] capitalize">{format(new Date(), "MMMM dd, yyyy", { locale: es })}</h2>
-             <button className="p-1.5 rounded-full hover:bg-gray-100 transition-colors text-gray-500">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-             </button>
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
+            <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Vista General de Ocupación</h2>
           </div>
-          <div className="flex gap-4 items-center">
-              {/* View Toggle */}
-              <div className="flex bg-gray-50 p-1 rounded-full border border-gray-100">
-                <button
-                  onClick={() => setViewMode('timeline')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                    viewMode === 'timeline' 
-                      ? 'bg-white text-[var(--mv-ink)] shadow-sm' 
-                      : 'text-gray-400 hover:text-gray-600'
-                  }`}
-                >
-                  <Bars3BottomLeftIcon className="w-3.5 h-3.5" />
-                  Timeline
-                </button>
-                <button
-                  onClick={() => setViewMode('classic')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                    viewMode === 'classic' 
-                      ? 'bg-white text-[var(--mv-ink)] shadow-sm' 
-                      : 'text-gray-400 hover:text-gray-600'
-                  }`}
-                >
-                  <CalendarDaysIcon className="w-3.5 h-3.5" />
-                  Mes
-                </button>
-              </div>
+
+          {/* View Mode Switcher */}
+          <div className="flex bg-slate-100 p-1 rounded-2xl border border-slate-200/60">
+            <button
+              onClick={() => setViewMode('timeline')}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                viewMode === 'timeline' 
+                  ? 'bg-white text-[var(--mv-ink)] shadow-xs' 
+                  : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <Bars3BottomLeftIcon className="w-4 h-4 stroke-[2.5]" />
+              Timeline
+            </button>
+            <button
+              onClick={() => setViewMode('classic')}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                viewMode === 'classic' 
+                  ? 'bg-white text-[var(--mv-ink)] shadow-xs' 
+                  : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <CalendarDaysIcon className="w-4 h-4 stroke-[2.5]" />
+              Mes Completo
+            </button>
           </div>
         </div>
         
@@ -158,32 +272,32 @@ export default function CalendarioPage() {
           .rbc-calendar { font-family: var(--font-montserrat), sans-serif; }
           .rbc-event { 
             background-color: var(--mv-blue) !important; 
-            border-radius: 4px; 
-            padding: 2px 6px; 
+            border-radius: 8px; 
+            padding: 4px 8px; 
             border: none; 
-            font-size: 0.7rem; 
+            font-size: 0.75rem; 
             font-weight: 600; 
             line-height: 1.2;
-            box-shadow: 0 2px 4px -1px rgba(15, 76, 129, 0.2); 
+            box-shadow: 0 2px 6px -1px rgba(15, 76, 129, 0.25); 
             transition: all 0.2s ease;
           }
           .rbc-event:hover {
             transform: translateY(-1px);
-            box-shadow: 0 4px 6px -1px rgba(15, 76, 129, 0.3);
-            filter: brightness(1.1);
+            box-shadow: 0 6px 12px -2px rgba(15, 76, 129, 0.35);
+            filter: brightness(1.05);
           }
-          .rbc-today { background-color: var(--mv-sage) !important; opacity: 0.1; }
-          .rbc-toolbar { margin-bottom: 24px; gap: 8px; }
+          .rbc-today { background-color: rgba(15, 76, 129, 0.05) !important; }
+          .rbc-toolbar { margin-bottom: 20px; gap: 8px; }
           .rbc-toolbar button { 
-            border-radius: 9999px;
+            border-radius: 12px;
             color: var(--mv-ink); 
-            border: 1px solid #e5e7eb; 
-            padding: 8px 20px; 
-            font-weight: 600; 
+            border: 1px solid #e2e8f0; 
+            padding: 8px 18px; 
+            font-weight: 700; 
             font-size: 0.75rem;
             text-transform: uppercase;
-            letter-spacing: 0.08em;
-            transition: all 0.3s ease;
+            letter-spacing: 0.05em;
+            transition: all 0.2s ease;
           }
           .rbc-toolbar button.rbc-active { 
             background-color: var(--mv-blue); 
@@ -197,33 +311,41 @@ export default function CalendarioPage() {
             border-color: var(--mv-blue);
           }
           .rbc-header { 
-            padding: 14px 0; 
+            padding: 12px 0; 
             font-weight: 700; 
             text-transform: uppercase; 
             font-size: 0.7rem; 
-            letter-spacing: 0.15em;
-            color: var(--mv-ink); 
-            border-bottom: 1px solid #f3f4f6;
+            letter-spacing: 0.1em;
+            color: #64748b; 
+            border-bottom: 1px solid #e2e8f0;
           }
-          .rbc-month-view { border-radius: 16px; overflow: hidden; border: 1px solid #f3f4f6; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.02); }
-          .rbc-day-bg { border-color: #f3f4f6; transition: background-color 0.2s ease; }
-          .rbc-day-bg:hover { background-color: #f9fafb; }
-          .rbc-off-range-bg { background-color: #fafafa; }
+          .rbc-month-view { border-radius: 20px; overflow: hidden; border: 1px solid #e2e8f0; background: #fff; box-shadow: 0 4px 20px rgba(0,0,0,0.02); }
+          .rbc-day-bg { border-color: #f1f5f9; transition: background-color 0.2s ease; }
+          .rbc-day-bg:hover { background-color: #f8fafc; }
+          .rbc-off-range-bg { background-color: #f8fafc; }
         `}</style>
+        
         {loading ? (
-            <div className="w-full h-full flex items-center justify-center">
-                <div className="animate-spin w-8 h-8 border-4 border-[var(--mv-blue)] border-t-transparent rounded-full"></div>
+            <div className="w-full h-full flex flex-col items-center justify-center">
+              <div className="animate-spin w-10 h-10 border-4 border-[var(--mv-blue)] border-t-transparent rounded-full mb-3"></div>
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Cargando calendario...</span>
             </div>
         ) : viewMode === 'timeline' ? (
-            <TimelineCalendar events={events} onSelectEvent={setSelectedEvent} />
+            <TimelineCalendar 
+              events={filteredEvents} 
+              onSelectEvent={setSelectedEvent} 
+              selectedDate={selectedDate}
+            />
         ) : (
             <Calendar
               localizer={localizer}
-              events={events}
+              events={filteredEvents}
               startAccessor="start"
               endAccessor="end"
               style={{ height: '100%' }}
               culture="es"
+              date={selectedDate}
+              onNavigate={(d) => setSelectedDate(d)}
               messages={{
                   next: "Sig.",
                   previous: "Ant.",
@@ -247,84 +369,104 @@ export default function CalendarioPage() {
         )}
       </div>
 
-      {/* Modal de Detalles del Evento */}
+      {/* Modern High-End Modal Details */}
       {selectedEvent && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--mv-ink)]/30 backdrop-blur-md p-4">
-          <div className="bg-white rounded-[32px] p-8 w-full max-w-lg shadow-[0_20px_60px_-15px_rgba(0,0,0,0.2)] relative animate-in fade-in zoom-in-95 duration-300">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-md p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-[32px] p-8 w-full max-w-lg shadow-[0_25px_70px_-15px_rgba(0,0,0,0.3)] relative animate-in zoom-in-95 duration-200 border border-slate-100">
             <button 
               onClick={() => setSelectedEvent(null)}
-              className="absolute top-6 right-6 text-gray-400 hover:text-gray-800 bg-gray-50 hover:bg-gray-100 rounded-full p-2 transition-all"
+              className="absolute top-6 right-6 text-slate-400 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-full p-2 transition-all"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-            <h3 className="text-2xl font-bold text-[var(--mv-ink)] mb-6 border-b border-[var(--mv-sage)]/20 pb-4">Detalles de la Reserva</h3>
+
+            <div className="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
+              <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-[var(--mv-blue)] font-bold text-lg border border-blue-100 shadow-xs">
+                {selectedEvent.reservationDetails?.cliente?.nombre?.charAt(0).toUpperCase() || 'R'}
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-slate-900">Reserva de Estancia</h3>
+                <p className="text-xs text-slate-500 font-medium">Ref ID: #{selectedEvent.reservationDetails?.id?.toString().slice(-6) || 'N/A'}</p>
+              </div>
+            </div>
+
             <div className="space-y-4">
-              <div>
-                <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Cliente</p>
-                <p className="text-gray-800 font-medium">{selectedEvent.reservationDetails?.cliente?.nombre || 'N/A'}</p>
-                <p className="text-sm text-gray-500">{selectedEvent.reservationDetails?.cliente?.correo || ''}</p>
+              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold mb-1">Huésped Principal</p>
+                <p className="text-slate-900 font-bold text-base">{selectedEvent.reservationDetails?.cliente?.nombre || selectedEvent.title || 'N/A'}</p>
+                {selectedEvent.reservationDetails?.cliente?.correo && (
+                  <p className="text-xs text-slate-500 mt-0.5">{selectedEvent.reservationDetails.cliente.correo}</p>
+                )}
               </div>
-              <div>
-                <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Habitación</p>
-                <p className="text-gray-800 font-medium">{selectedEvent.reservationDetails?.habitacion?.titulo || selectedEvent.resource || 'N/A'}</p>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
+                  <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold mb-1">Habitación</p>
+                  <p className="text-slate-800 font-bold text-sm truncate">{selectedEvent.reservationDetails?.habitacion?.titulo || selectedEvent.resource || 'N/A'}</p>
+                </div>
+                <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
+                  <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold mb-1">Estado</p>
+                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase ${
+                    selectedEvent.reservationDetails?.status === 'confirmed' || selectedEvent.reservationDetails?.status === 'completed'
+                      ? 'bg-emerald-100 text-emerald-800' 
+                      : selectedEvent.reservationDetails?.status === 'pending' 
+                        ? 'bg-amber-100 text-amber-800' 
+                        : 'bg-rose-100 text-rose-800'
+                  }`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${
+                      selectedEvent.reservationDetails?.status === 'confirmed' || selectedEvent.reservationDetails?.status === 'completed' ? 'bg-emerald-500' : 'bg-amber-500'
+                    }`}></span>
+                    {selectedEvent.reservationDetails?.status || 'Confirmada'}
+                  </span>
+                </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+
+              <div className="grid grid-cols-2 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-100">
                 <div>
-                  <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Check In</p>
-                  <p className="text-gray-800">{new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium', timeStyle: 'short' }).format(selectedEvent.start)}</p>
+                  <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold mb-0.5">Check In</p>
+                  <p className="text-slate-800 font-bold text-sm">{new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium' }).format(selectedEvent.start)}</p>
+                  <p className="text-[10px] text-slate-400">{new Intl.DateTimeFormat('es-CO', { timeStyle: 'short' }).format(selectedEvent.start)}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Check Out</p>
-                  <p className="text-gray-800">{new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium', timeStyle: 'short' }).format(selectedEvent.end)}</p>
+                  <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold mb-0.5">Check Out</p>
+                  <p className="text-slate-800 font-bold text-sm">{new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium' }).format(selectedEvent.end)}</p>
+                  <p className="text-[10px] text-slate-400">{new Intl.DateTimeFormat('es-CO', { timeStyle: 'short' }).format(selectedEvent.end)}</p>
                 </div>
               </div>
-              <div className="bg-gray-50 p-3 rounded-xl border border-gray-100 flex justify-between items-center">
+
+              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex justify-between items-center">
                 <div>
-                  <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Acompañantes ({selectedEvent.reservationDetails?.huespedes?.length || 0} Reg.)</p>
-                  <p className="text-gray-800 font-medium">
+                  <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold mb-0.5">Acompañantes</p>
+                  <p className="text-slate-800 font-bold text-sm">
                     {selectedEvent.reservationDetails?.numeroAdultos || 1} Adulto(s) 
                     {selectedEvent.reservationDetails?.numeroNinos > 0 ? `, ${selectedEvent.reservationDetails?.numeroNinos} Niño(s)` : ''}
                   </p>
                 </div>
                 <button 
                   onClick={() => setIsHuespedesModalOpen(true)}
-                  className="flex items-center gap-1 text-[var(--mv-blue)] hover:text-[#0b3c66] bg-blue-50 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors"
+                  className="flex items-center gap-1.5 text-white bg-[var(--mv-blue)] hover:bg-[#0b3c66] px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-xs"
                 >
-                  <UserGroupIcon className="w-4 h-4" />
+                  <UserGroupIcon className="w-4 h-4 stroke-[2.5]" />
                   Registro TRA
                 </button>
               </div>
-              <div className="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-100">
+
+              <div className="flex justify-between items-center bg-blue-50/70 p-4 rounded-2xl border border-blue-100">
                  <div>
-                    <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Estado</p>
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold uppercase mt-1 ${
-                      selectedEvent.reservationDetails?.status === 'completed' ? 'bg-gray-200 text-gray-700' :
-                      selectedEvent.reservationDetails?.status === 'confirmed' ? 'bg-green-200 text-green-800' : 
-                      selectedEvent.reservationDetails?.status === 'pending' ? 'bg-yellow-200 text-yellow-800' : 'bg-red-200 text-red-800'
-                    }`}>
-                      {selectedEvent.reservationDetails?.status || 'N/A'}
-                    </span>
-                 </div>
-                 <div className="text-right">
-                    <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Valor Total</p>
-                    <p className="text-lg font-bold text-[var(--mv-ink)]">
+                    <p className="text-[10px] text-blue-600 uppercase tracking-widest font-bold">Importe Total</p>
+                    <p className="text-2xl font-black text-[var(--mv-ink)]">
                       ${Number(selectedEvent.reservationDetails?.value || 0).toLocaleString('es-CO')}
                     </p>
                  </div>
               </div>
-              {selectedEvent.reservationDetails?.notas_admin && (
-                <div className="bg-yellow-50/50 p-3 rounded-xl border border-yellow-100">
-                  <p className="text-xs text-yellow-700 uppercase tracking-wider font-semibold mb-1">Notas / Mensajes</p>
-                  <p className="text-sm text-gray-700 italic">{selectedEvent.reservationDetails.notas_admin}</p>
-                </div>
-              )}
             </div>
-            <div className="mt-8 flex justify-end">
+
+            <div className="mt-6 flex justify-end">
               <button 
                 onClick={() => setSelectedEvent(null)}
-                className="inline-flex items-center justify-center rounded-full bg-[var(--mv-ink)] px-8 py-3 text-[11px] font-bold uppercase tracking-[0.15em] text-white transition hover:bg-black hover:scale-105 active:scale-95 shadow-lg"
+                className="rounded-xl bg-slate-900 px-8 py-3 text-xs font-bold uppercase tracking-wider text-white transition-all hover:bg-black hover:scale-105 active:scale-95 shadow-md"
               >
                 Cerrar
               </button>
@@ -340,8 +482,6 @@ export default function CalendarioPage() {
           reservation={selectedEvent.reservationDetails}
           onSuccess={() => {
             fetchReservas();
-            // Para actualizar los datos del modal sin cerrarlo, habría que hacer fetch de nuevo a la reserva
-            // Por simplicidad, el fetchReservas refrescará el state general en background
           }}
         />
       )}

@@ -110,8 +110,8 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
             </div>
 
             <nav className="mt-6 flex flex-col gap-2 px-3">
-              {navigation.filter(item => item.roles.includes(user.rol)).map((item) => {
-                const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+              {navigation.filter(item => item.roles.includes(user.rol?.toLowerCase())).map((item) => {
+                const isActive = item.href === '/admin' ? pathname === '/admin' : pathname.startsWith(item.href);
                 return (
                   <Tooltip key={item.name}>
                     <TooltipTrigger asChild>
@@ -167,10 +167,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
             </div>
           )}
 
-          <header className="h-20 bg-white/80 backdrop-blur-md border-b border-[var(--mv-sage)]/10 flex items-center justify-between px-8 z-10">
-            <h1 className="text-xl font-semibold text-[var(--mv-ink)] tracking-wide">
-              {navigation.find((n) => pathname === n.href || pathname.startsWith(n.href + "/"))?.name || "Panel"}
-            </h1>
+          <header className="h-20 bg-white/80 backdrop-blur-md border-b border-[var(--mv-sage)]/10 flex items-center justify-end px-8 z-10">
             <div className="flex items-center gap-4">
               <a
                 href={`${API_URL}/google-calendar/auth`}
