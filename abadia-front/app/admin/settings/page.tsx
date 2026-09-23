@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { fetchApi } from "@/lib/api";
+import { useAuthStore } from "@/store/authStore";
 import { 
   PlusIcon, 
   TrashIcon, 
@@ -15,7 +16,11 @@ import {
   InformationCircleIcon,
   ArrowUpTrayIcon,
   FunnelIcon,
-  ShieldCheckIcon
+  ShieldCheckIcon,
+  UserIcon,
+  LockClosedIcon,
+  EyeIcon,
+  EyeSlashIcon
 } from "@heroicons/react/24/outline";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/Tooltip";
 
@@ -26,7 +31,6 @@ interface Setting {
   isNew?: boolean;
 }
 
-// Map of predefined known keys with human-friendly metadata
 const PREDEFINED_KEYS: Record<string, { label: string; category: 'contact' | 'social' | 'general' | 'integrations'; description: string; placeholder: string; type?: string }> = {
   telefono: { label: "Teléfono Principal", category: "contact", description: "Número de teléfono para contacto directo y reservas.", placeholder: "+57 300 000 0000", type: "tel" },
   whatsapp: { label: "Número de WhatsApp", category: "contact", description: "WhatsApp oficial donde se enviarán consultas de huéspedes.", placeholder: "+57 300 000 0000", type: "tel" },
@@ -48,15 +52,54 @@ const PREDEFINED_KEYS: Record<string, { label: string; category: 'contact' | 'so
 };
 
 export default function SettingsPage() {
+  const { user, setUser } = useAuthStore();
   const [settings, setSettings] = useState<Setting[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
-  const [activeTab, setActiveTab] = useState<'contact' | 'social' | 'general' | 'integrations' | 'advanced'>('contact');
+  const [activeTab, setActiveTab] = useState<'account' | 'contact' | 'social' | 'general' | 'integrations' | 'advanced'>('account');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [newKeyModal, setNewKeyModal] = useState(false);
   const [customKeyInput, setCustomKeyInput] = useState({ key: "", value: "", description: "" });
-  const [uploadingKey, setUploadingKey] = useState<string | null>(null);
+
+  // Profile form state
+  const [userProfile, setUserProfile] = useState({
+    username: "",
+    nombre: "",
+    email: "",
+    telefono: ""
+  });
+  const [userSaving, setUserSaving] = useState(false);
+  const [accountMsg, setAccountMsg] = useState("");
+  const [accountError, setAccountError] = useState("");
+
+  // Change password form state
+  const [passwordForm, setPasswordForm] = useState({
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: ""
+  });
+  const [showOldPass, setShowOldPass] = useState(false);
+  const [showNewPass, setShowNewPass] = useState(false);
+  const [passwordSaving, setPasswordSaving] = useState(false);
+  const [passwordMsg, setPasswordMsg] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+
+  const fetchProfile = async () => {
+    try {
+      const data = await fetchApi("/users/profile");
+      if (data) {
+        setUserProfile({
+          username: data.username || "",
+          nombre: data.nombre || "",
+          email: data.email || "",
+          telefono: data.telefono || ""
+        });
+      }
+    } catch (err) {
+      console.error("Error cargando perfil", err);
+    }
+  };
 
   const fetchSettings = async () => {
     setLoading(true);
@@ -64,7 +107,6 @@ export default function SettingsPage() {
       const data = await fetchApi("/settings");
       const fetchedSettings: Setting[] = Array.isArray(data) ? data : (data?.data || []);
       
-      // Ensure all predefined keys exist in state
       const existingKeysMap = new Map(fetchedSettings.map(s => [s.key, s]));
       const fullList: Setting[] = [...fetchedSettings];
 
@@ -89,8 +131,73 @@ export default function SettingsPage() {
   };
 
   useEffect(() => {
+    fetchProfile();
     fetchSettings();
   }, []);
+
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setUserSaving(true);
+    setAccountMsg("");
+    setAccountError("");
+    try {
+      const updatedUser = await fetchApi("/users/profile", {
+        method: "PATCH",
+        body: JSON.stringify({
+          username: userProfile.username,
+          nombre: userProfile.nombre,
+          email: userProfile.email,
+          telefono: userProfile.telefono
+        }),
+      });
+
+      if (updatedUser) {
+        setUser(updatedUser);
+      }
+      setAccountMsg("¡Perfil y nombre de usuario actualizados con éxito!");
+      setTimeout(() => setAccountMsg(""), 4000);
+    } catch (err: any) {
+      setAccountError(err.message || "Error al actualizar el perfil.");
+    } finally {
+      setUserSaving(false);
+    }
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordSaving(true);
+    setPasswordMsg("");
+    setPasswordError("");
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordError("Las contraseñas nuevas no coinciden.");
+      setPasswordSaving(false);
+      return;
+    }
+
+    if (passwordForm.newPassword.length < 6) {
+      setPasswordError("La nueva contraseña debe tener al menos 6 caracteres.");
+      setPasswordSaving(false);
+      return;
+    }
+
+    try {
+      await fetchApi("/users/profile/change-password", {
+        method: "POST",
+        body: JSON.stringify({
+          oldPassword: passwordForm.oldPassword,
+          newPassword: passwordForm.newPassword,
+        }),
+      });
+      setPasswordMsg("¡Contraseña actualizada exitosamente!");
+      setPasswordForm({ oldPassword: "", newPassword: "", confirmPassword: "" });
+      setTimeout(() => setPasswordMsg(""), 4000);
+    } catch (err: any) {
+      setPasswordError(err.message || "Error al cambiar la contraseña. Verifica tu contraseña actual.");
+    } finally {
+      setPasswordSaving(false);
+    }
+  };
 
   const updateSettingValue = (key: string, value: string, description?: string) => {
     setHasUnsavedChanges(true);
@@ -135,7 +242,7 @@ export default function SettingsPage() {
           }))
         })
       });
-      setSuccessMsg("Configuración guardada exitosamente");
+      setSuccessMsg("Configuración del sitio guardada exitosamente");
       setHasUnsavedChanges(false);
       setTimeout(() => setSuccessMsg(""), 4000);
       fetchSettings();
@@ -147,31 +254,6 @@ export default function SettingsPage() {
     }
   };
 
-  const handleFileUpload = async (key: string, file: File) => {
-    setUploadingKey(key);
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      
-      const response = await fetchApi(`/settings/upload-image/${key}`, {
-        method: "POST",
-        body: formData,
-        isFormData: true
-      });
-
-      if (response && response.value) {
-        updateSettingValue(key, response.value);
-      }
-      fetchSettings();
-    } catch (error) {
-      console.error("Error subiendo archivo", error);
-      alert("Error al subir el archivo.");
-    } finally {
-      setUploadingKey(null);
-    }
-  };
-
-  // Filter settings for advanced tab (keys that are not in PREDEFINED_KEYS)
   const customSettings = settings.filter(s => !PREDEFINED_KEYS[s.key]);
 
   return (
@@ -183,40 +265,54 @@ export default function SettingsPage() {
             <span className="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
             <h2 className="text-xl font-extrabold text-[var(--mv-ink)] tracking-tight">Centro de Configuración</h2>
           </div>
-          <p className="text-slate-500 mt-1 text-xs font-medium">Administra la información de contacto, redes sociales y variables globales del hotel.</p>
+          <p className="text-slate-500 mt-1 text-xs font-medium">Administra tu cuenta de acceso, contraseñas, datos de contacto y contenido del sitio.</p>
         </div>
         
-        <div className="flex items-center gap-3 shrink-0">
-          {successMsg && (
-            <span className="text-xs text-emerald-700 font-bold bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 flex items-center gap-1.5 animate-in fade-in">
-              <CheckIcon className="w-4 h-4 stroke-[3]" /> {successMsg}
-            </span>
-          )}
-
-          {hasUnsavedChanges && !successMsg && (
-            <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-200 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-              Cambios sin guardar
-            </span>
-          )}
-
-          <button 
-            onClick={handleSaveAll}
-            disabled={saving || loading}
-            className="flex items-center gap-2 bg-gradient-to-r from-[var(--mv-blue)] to-[#0b3c66] hover:from-[#0b3c66] hover:to-[#082a48] text-white px-6 py-2.5 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all shadow-md shadow-blue-900/10 hover:shadow-lg hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
-          >
-            {saving ? (
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-            ) : (
-              <CheckIcon className="w-4 h-4 stroke-[2.5]" />
+        {activeTab !== 'account' && (
+          <div className="flex items-center gap-3 shrink-0">
+            {successMsg && (
+              <span className="text-xs text-emerald-700 font-bold bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 flex items-center gap-1.5 animate-in fade-in">
+                <CheckIcon className="w-4 h-4 stroke-[3]" /> {successMsg}
+              </span>
             )}
-            Guardar Cambios
-          </button>
-        </div>
+
+            {hasUnsavedChanges && !successMsg && (
+              <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-200 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                Cambios sin guardar
+              </span>
+            )}
+
+            <button 
+              onClick={handleSaveAll}
+              disabled={saving || loading}
+              className="flex items-center gap-2 bg-gradient-to-r from-[var(--mv-blue)] to-[#0b3c66] hover:from-[#0b3c66] hover:to-[#082a48] text-white px-6 py-2.5 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all shadow-md shadow-blue-900/10 hover:shadow-lg hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+            >
+              {saving ? (
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                <CheckIcon className="w-4 h-4 stroke-[2.5]" />
+              )}
+              Guardar Cambios
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Tabs Navigation */}
       <div className="flex bg-slate-100/80 p-1.5 rounded-2xl border border-slate-200/70 overflow-x-auto mv-scrollbar gap-1">
+        <button
+          onClick={() => setActiveTab('account')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
+            activeTab === 'account' 
+              ? 'bg-white text-[var(--mv-blue)] shadow-xs' 
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+          }`}
+        >
+          <UserIcon className="w-4 h-4 stroke-[2.5]" />
+          Mi Cuenta y Seguridad
+        </button>
+
         <button
           onClick={() => setActiveTab('contact')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
@@ -283,11 +379,208 @@ export default function SettingsPage() {
         {loading ? (
           <div className="py-20 flex flex-col items-center justify-center">
             <div className="animate-spin w-10 h-10 border-4 border-[var(--mv-blue)] border-t-transparent rounded-full mb-3"></div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Cargando ajustes...</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Cargando datos...</span>
           </div>
         ) : (
           <div className="space-y-6">
             
+            {/* Category: Account & Security */}
+            {activeTab === 'account' && (
+              <div className="space-y-8 animate-in fade-in duration-200">
+                {/* User Profile Form */}
+                <form onSubmit={handleUpdateProfile} className="space-y-5 bg-slate-50/70 p-6 rounded-3xl border border-slate-200/60">
+                  <div className="border-b border-slate-200/60 pb-3 flex items-center justify-between">
+                    <div>
+                      <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                        <UserIcon className="w-5 h-5 text-blue-600" />
+                        Perfil y Nombre de Usuario
+                      </h3>
+                      <p className="text-xs text-slate-500 font-medium mt-0.5">Modifica tu usuario de inicio de sesión y datos personales de cuenta.</p>
+                    </div>
+
+                    {accountMsg && (
+                      <span className="text-xs text-emerald-700 font-bold bg-emerald-100/80 px-3 py-1.5 rounded-xl border border-emerald-200 animate-in fade-in">
+                        {accountMsg}
+                      </span>
+                    )}
+                  </div>
+
+                  {accountError && (
+                    <div className="p-3 bg-rose-50 text-rose-700 rounded-xl text-xs font-semibold border border-rose-200">
+                      {accountError}
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                        Nombre de Usuario (Username)
+                      </label>
+                      <input 
+                        type="text" 
+                        value={userProfile.username}
+                        onChange={(e) => setUserProfile({ ...userProfile, username: e.target.value })}
+                        required
+                        placeholder="superadmin"
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-bold focus:ring-2 focus:ring-[var(--mv-blue)]/30 focus:border-[var(--mv-blue)] outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                        Nombre Completo
+                      </label>
+                      <input 
+                        type="text" 
+                        value={userProfile.nombre}
+                        onChange={(e) => setUserProfile({ ...userProfile, nombre: e.target.value })}
+                        placeholder="Administrador General"
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium focus:ring-2 focus:ring-[var(--mv-blue)]/30 focus:border-[var(--mv-blue)] outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                        Correo Electrónico
+                      </label>
+                      <input 
+                        type="email" 
+                        value={userProfile.email}
+                        onChange={(e) => setUserProfile({ ...userProfile, email: e.target.value })}
+                        required
+                        placeholder="admin@abadia.com"
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium focus:ring-2 focus:ring-[var(--mv-blue)]/30 focus:border-[var(--mv-blue)] outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                        Teléfono
+                      </label>
+                      <input 
+                        type="tel" 
+                        value={userProfile.telefono}
+                        onChange={(e) => setUserProfile({ ...userProfile, telefono: e.target.value })}
+                        placeholder="+57 300 123 4567"
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium focus:ring-2 focus:ring-[var(--mv-blue)]/30 focus:border-[var(--mv-blue)] outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end pt-2">
+                    <button
+                      type="submit"
+                      disabled={userSaving}
+                      className="px-6 py-2.5 bg-[var(--mv-blue)] hover:bg-[#0b3c66] text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center gap-2"
+                    >
+                      {userSaving && <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>}
+                      Guardar Datos de Usuario
+                    </button>
+                  </div>
+                </form>
+
+                {/* Change Password Form */}
+                <form onSubmit={handleChangePassword} className="space-y-5 bg-slate-50/70 p-6 rounded-3xl border border-slate-200/60">
+                  <div className="border-b border-slate-200/60 pb-3 flex items-center justify-between">
+                    <div>
+                      <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                        <LockClosedIcon className="w-5 h-5 text-amber-600" />
+                        Cambiar Contraseña
+                      </h3>
+                      <p className="text-xs text-slate-500 font-medium mt-0.5">Actualiza tu contraseña de acceso para garantizar la seguridad de tu cuenta.</p>
+                    </div>
+
+                    {passwordMsg && (
+                      <span className="text-xs text-emerald-700 font-bold bg-emerald-100/80 px-3 py-1.5 rounded-xl border border-emerald-200 animate-in fade-in">
+                        {passwordMsg}
+                      </span>
+                    )}
+                  </div>
+
+                  {passwordError && (
+                    <div className="p-3 bg-rose-50 text-rose-700 rounded-xl text-xs font-semibold border border-rose-200">
+                      {passwordError}
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                        Contraseña Actual
+                      </label>
+                      <div className="relative">
+                        <input 
+                          type={showOldPass ? "text" : "password"} 
+                          value={passwordForm.oldPassword}
+                          onChange={(e) => setPasswordForm({ ...passwordForm, oldPassword: e.target.value })}
+                          required
+                          placeholder="••••••••"
+                          className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 pr-10 text-xs text-slate-800 font-medium focus:ring-2 focus:ring-amber-400 outline-none"
+                        />
+                        <button 
+                          type="button" 
+                          onClick={() => setShowOldPass(!showOldPass)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                        >
+                          {showOldPass ? <EyeSlashIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                        Nueva Contraseña
+                      </label>
+                      <div className="relative">
+                        <input 
+                          type={showNewPass ? "text" : "password"} 
+                          value={passwordForm.newPassword}
+                          onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                          required
+                          minLength={6}
+                          placeholder="Mínimo 6 caracteres"
+                          className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 pr-10 text-xs text-slate-800 font-medium focus:ring-2 focus:ring-amber-400 outline-none"
+                        />
+                        <button 
+                          type="button" 
+                          onClick={() => setShowNewPass(!showNewPass)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                        >
+                          {showNewPass ? <EyeSlashIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                        Confirmar Nueva Contraseña
+                      </label>
+                      <input 
+                        type={showNewPass ? "text" : "password"} 
+                        value={passwordForm.confirmPassword}
+                        onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                        required
+                        minLength={6}
+                        placeholder="Repite la nueva contraseña"
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium focus:ring-2 focus:ring-amber-400 outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end pt-2">
+                    <button
+                      type="submit"
+                      disabled={passwordSaving}
+                      className="px-6 py-2.5 bg-slate-900 hover:bg-black text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center gap-2"
+                    >
+                      {passwordSaving && <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>}
+                      Cambiar Contraseña
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
+
             {/* Category: Contacto y Ubicación */}
             {activeTab === 'contact' && (
               <div className="space-y-5 animate-in fade-in duration-200">
@@ -444,7 +737,7 @@ export default function SettingsPage() {
               </div>
             )}
 
-            {/* Category: Ajustes Avanzados (Technical Key-Value Manager) */}
+            {/* Category: Ajustes Avanzados */}
             {activeTab === 'advanced' && (
               <div className="space-y-5 animate-in fade-in duration-200">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-100 pb-3 gap-3">
@@ -517,7 +810,7 @@ export default function SettingsPage() {
             <div className="mt-8 p-4 bg-slate-50 rounded-2xl border border-slate-200/60 text-xs text-slate-600 flex items-start gap-3">
               <ShieldCheckIcon className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
               <div>
-                <strong className="text-slate-800">Seguridad & Privacidad:</strong> Estas son configuraciones públicas de contenido. Las contraseñas, secretos de API y credenciales privadas están protegidas únicamente en las variables de entorno del servidor.
+                <strong className="text-slate-800">Seguridad & Privacidad:</strong> Las contraseñas se almacenan encriptadas con algoritmos de hashing seguro (Bcrypt). El token de sesión expira automáticamente para proteger el acceso.
               </div>
             </div>
           </div>
@@ -594,4 +887,3 @@ export default function SettingsPage() {
     </div>
   );
 }
-
