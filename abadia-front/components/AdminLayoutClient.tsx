@@ -110,7 +110,11 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
             </div>
 
             <nav className="mt-6 flex flex-col gap-2 px-3">
-              {navigation.filter(item => item.roles.includes(user.rol?.toLowerCase())).map((item) => {
+              {navigation.filter(item => {
+                if (!user.rol) return true;
+                const userRoleNorm = user.rol.toLowerCase().replace(/_/g, '');
+                return item.roles.some(r => r.toLowerCase().replace(/_/g, '') === userRoleNorm);
+              }).map((item) => {
                 const isActive = item.href === '/admin' ? pathname === '/admin' : pathname.startsWith(item.href);
                 return (
                   <Tooltip key={item.name}>

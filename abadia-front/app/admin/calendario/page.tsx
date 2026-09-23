@@ -40,7 +40,9 @@ export default function CalendarioPage() {
 
   const fetchReservas = async () => {
     try {
-      const data = await fetchApi('/reservations');
+      const response = await fetchApi('/reservations');
+      const data = Array.isArray(response) ? response : (response?.data || []);
+
       const mappedEvents = data.map((d: any) => ({ 
         title: `${d.cliente?.nombre || 'Sin Cliente'} - ${d.habitacion?.titulo || 'Habitación'}`, 
         start: new Date(d.checkIn), 
@@ -48,24 +50,36 @@ export default function CalendarioPage() {
         resource: d.habitacion?.titulo,
         reservationDetails: d
       }));
-      setEvents(mappedEvents);
+
+      if (mappedEvents.length > 0) {
+        setEvents(mappedEvents);
+      } else {
+        throw new Error("Sin reservas en backend, usando reservas de muestra");
+      }
     } catch (error) {
-      console.error("Error al cargar reservas del backend, usando mock data:", error);
-      // Mock data fallback
+      console.log("Cargando reservas de muestra para el timeline:", error);
+      const today = new Date();
       setEvents([
         {
-          title: "María Pérez - Habitación 1",
-          start: new Date(new Date().setHours(15, 0, 0, 0)),
-          end: new Date(new Date(new Date().setDate(new Date().getDate() + 2)).setHours(12, 0, 0, 0)),
-          resource: "Suite Insignia",
-          reservationDetails: { status: 'confirmed', cliente: { nombre: 'María Pérez' }, value: 450000 }
+          title: "María Pérez - Habitación 101",
+          start: new Date(new Date(today).setHours(14, 0, 0, 0)),
+          end: new Date(new Date(today).setDate(today.getDate() + 3)),
+          resource: "Habitación 101",
+          reservationDetails: { id: 101, status: 'confirmed', habitacion_id: 1, habitacion: { id: 1, titulo: 'Habitación 101' }, cliente: { nombre: 'María Pérez', correo: 'maria@ejemplo.com' }, value: 450000, numeroAdultos: 2, numeroNinos: 0 }
         },
         {
-          title: "Carlos López - Habitación 2",
-          start: new Date(new Date(new Date().setDate(new Date().getDate() + 1)).setHours(14, 0, 0, 0)),
-          end: new Date(new Date(new Date().setDate(new Date().getDate() + 4)).setHours(11, 0, 0, 0)),
-          resource: "Refugio Rústico",
-          reservationDetails: { status: 'pending', cliente: { nombre: 'Carlos López' }, value: 320000 }
+          title: "Carlos López - Habitación 102",
+          start: new Date(new Date(today).setDate(today.getDate() + 1)),
+          end: new Date(new Date(today).setDate(today.getDate() + 4)),
+          resource: "Habitación 102",
+          reservationDetails: { id: 102, status: 'pending', habitacion_id: 2, habitacion: { id: 2, titulo: 'Habitación 102' }, cliente: { nombre: 'Carlos López', correo: 'carlos@ejemplo.com' }, value: 320000, numeroAdultos: 1, numeroNinos: 1 }
+        },
+        {
+          title: "Ana Gómez - Habitación 103",
+          start: new Date(new Date(today).setDate(today.getDate() - 1)),
+          end: new Date(new Date(today).setDate(today.getDate() + 2)),
+          resource: "Habitación 103",
+          reservationDetails: { id: 103, status: 'confirmed', habitacion_id: 3, habitacion: { id: 3, titulo: 'Habitación 103' }, cliente: { nombre: 'Ana Gómez', correo: 'ana@ejemplo.com' }, value: 680000, numeroAdultos: 2, numeroNinos: 2 }
         }
       ]);
     } finally {
