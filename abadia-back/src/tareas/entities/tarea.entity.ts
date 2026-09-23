@@ -20,17 +20,17 @@ export class Tarea {
 
   @ManyToOne(() => User)
   @JoinColumn({ name: 'asignado_a_id' })
-  asignado_a: User;
+  asignado_a: User | null;
 
   @Column({ type: 'int', nullable: true })
-  asignado_a_id: number;
+  asignado_a_id: number | null;
 
   @ManyToOne(() => User)
   @JoinColumn({ name: 'creado_por_id' })
-  creado_por: User;
+  creado_por: User | null;
 
   @Column({ type: 'int', nullable: true })
-  creado_por_id: number;
+  creado_por_id: number | null;
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
