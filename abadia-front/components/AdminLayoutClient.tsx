@@ -21,7 +21,8 @@ import {
   ClipboardDocumentCheckIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  Bars3Icon
+  Bars3Icon,
+  XMarkIcon
 } from "@heroicons/react/24/outline";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/Tooltip";
 import { useAuthStore } from "../store/authStore";
@@ -46,7 +47,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
 
   // Sidebar collapse state: default true (collapsed pill mode)
   const [isCollapsed, setIsCollapsed] = useState<boolean>(true);
-  const [isMounted, setIsMounted] = useState<boolean>(false);
+  const [isMobileOpen, setIsMobileOpen] = useState<boolean>(false);
 
   useEffect(() => {
     checkSession();
@@ -61,7 +62,6 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
       } else {
         setIsCollapsed(true); // Default collapsed
       }
-      setIsMounted(true);
     }
   }, []);
 
@@ -112,40 +112,50 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
 
   return (
     <TooltipProvider delayDuration={200}>
-      <div className="flex h-screen bg-[var(--mv-cream)] overflow-hidden">
-        {/* Sidebar */}
-        <aside className={`${
-          isCollapsed ? 'w-20' : 'w-64'
-        } bg-white border-r border-[var(--mv-sage)]/10 flex flex-col justify-between transition-all duration-300 shadow-sm z-20 relative`}>
+      <div className="flex h-screen bg-[var(--mv-cream)] overflow-hidden relative">
+        {/* Mobile Backdrop Overlay */}
+        {isMobileOpen && (
+          <div 
+            onClick={() => setIsMobileOpen(false)}
+            className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-40 md:hidden animate-in fade-in"
+          ></div>
+        )}
+
+        {/* Sidebar (Responsive Desktop & Mobile Drawer) */}
+        <aside className={`fixed md:static inset-y-0 left-0 z-50 bg-white border-r border-[var(--mv-sage)]/10 flex flex-col justify-between transition-all duration-300 shadow-md md:shadow-none ${
+          isMobileOpen ? 'translate-x-0 w-64' : '-translate-x-full md:translate-x-0'
+        } ${
+          isCollapsed ? 'md:w-20' : 'md:w-64'
+        }`}>
           <div>
-            {/* Header / Logo */}
-            <div className="h-20 flex items-center justify-between px-4 border-b border-[var(--mv-sage)]/10 w-full relative">
-              <div className="flex items-center justify-center w-full">
-                {!isCollapsed ? (
+            {/* Header / Bigger Logo with minimal padding */}
+            <div className="h-20 flex items-center justify-between px-3 border-b border-[var(--mv-sage)]/10 w-full relative">
+              <div className="flex items-center justify-center w-full py-1">
+                {(!isCollapsed || isMobileOpen) ? (
                   <Image
                     src="/abadia.png"
                     alt="Abadia Logo"
-                    width={80}
-                    height={80}
-                    className="object-contain transition-all duration-300"
+                    width={110}
+                    height={110}
+                    className="object-contain transition-all duration-300 max-h-16"
                     priority
                   />
                 ) : (
                   <Image
                     src="/abadia.png"
                     alt="Abadia Logo"
-                    width={38}
-                    height={38}
-                    className="object-contain transition-all duration-300"
+                    width={48}
+                    height={48}
+                    className="object-contain transition-all duration-300 max-h-14"
                     priority
                   />
                 )}
               </div>
 
-              {/* Collapse Button inside Sidebar */}
+              {/* Desktop Arrow Toggle Button */}
               <button 
                 onClick={toggleSidebar}
-                className="absolute -right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center text-gray-600 hover:text-[var(--mv-blue)] hover:scale-110 transition-all z-30"
+                className="hidden md:flex absolute -right-3.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white border border-gray-200 shadow-md items-center justify-center text-gray-600 hover:text-[var(--mv-blue)] hover:scale-110 transition-all z-30"
                 title={isCollapsed ? "Expandir Menú" : "Contraer Menú"}
               >
                 {isCollapsed ? (
@@ -154,30 +164,41 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
                   <ChevronLeftIcon className="w-4 h-4 stroke-[2.5]" />
                 )}
               </button>
+
+              {/* Mobile Close Button */}
+              <button
+                onClick={() => setIsMobileOpen(false)}
+                className="md:hidden absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-700"
+              >
+                <XMarkIcon className="w-6 h-6 stroke-[2]" />
+              </button>
             </div>
 
             {/* Navigation items */}
-            <nav className="mt-6 flex flex-col gap-2 px-3">
+            <nav className="mt-5 flex flex-col gap-1.5 px-2.5">
               {navigation.filter(item => {
                 if (!user.rol) return true;
                 const userRoleNorm = user.rol.toLowerCase().replace(/_/g, '');
                 return item.roles.some(r => r.toLowerCase().replace(/_/g, '') === userRoleNorm);
               }).map((item) => {
                 const isActive = item.href === '/admin' ? pathname === '/admin' : pathname.startsWith(item.href);
+                const isItemCollapsed = isCollapsed && !isMobileOpen;
+
                 return (
                   <Tooltip key={item.name}>
                     <TooltipTrigger asChild>
                       <Link
                         href={item.href}
-                        className={`group flex items-center ${isCollapsed ? 'justify-center px-0 py-3' : 'px-4 py-3'} rounded-xl transition-all ${
+                        onClick={() => setIsMobileOpen(false)}
+                        className={`group flex items-center ${isItemCollapsed ? 'justify-center px-0 py-3' : 'px-3.5 py-3'} rounded-xl transition-all ${
                           isActive
                             ? "bg-[var(--mv-blue)] text-white shadow-md"
                             : "text-gray-500 hover:bg-[var(--mv-blue)]/10 hover:text-[var(--mv-blue)]"
                         }`}
                       >
-                        <div className={`flex w-full ${isCollapsed ? 'justify-center' : 'justify-start'} items-center`}>
+                        <div className={`flex w-full ${isItemCollapsed ? 'justify-center' : 'justify-start'} items-center`}>
                           <item.icon className="w-6 h-6 shrink-0" />
-                          {!isCollapsed && (
+                          {(!isCollapsed || isMobileOpen) && (
                             <span className="ml-3 text-sm font-medium whitespace-nowrap animate-in fade-in duration-200">
                               {item.name}
                             </span>
@@ -185,7 +206,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
                         </div>
                       </Link>
                     </TooltipTrigger>
-                    {isCollapsed && (
+                    {isItemCollapsed && (
                       <TooltipContent side="right">
                         {item.name}
                       </TooltipContent>
@@ -202,15 +223,15 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
               <TooltipTrigger asChild>
                 <button
                   onClick={handleLogout}
-                  className={`w-full flex items-center ${isCollapsed ? 'justify-center px-0 py-3' : 'px-4 py-3'} rounded-xl text-red-500 hover:bg-red-50 transition-colors`}
+                  className={`w-full flex items-center ${(isCollapsed && !isMobileOpen) ? 'justify-center px-0 py-3' : 'px-3.5 py-3'} rounded-xl text-red-500 hover:bg-red-50 transition-colors`}
                 >
                   <ArrowLeftOnRectangleIcon className="w-6 h-6 shrink-0" />
-                  {!isCollapsed && (
+                  {(!isCollapsed || isMobileOpen) && (
                     <span className="ml-3 text-sm font-medium whitespace-nowrap">Cerrar Sesión</span>
                   )}
                 </button>
               </TooltipTrigger>
-              {isCollapsed && (
+              {(isCollapsed && !isMobileOpen) && (
                 <TooltipContent side="right" className="text-red-100 bg-red-600">
                   Cerrar Sesión
                 </TooltipContent>
@@ -220,7 +241,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 flex flex-col relative overflow-hidden">
+        <main className="flex-1 flex flex-col relative overflow-hidden min-w-0">
           {/* Toast Notification */}
           {toastMessage && (
             <div className="absolute top-4 right-8 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg flex items-center gap-3 z-50 animate-in fade-in slide-in-from-top-4">
@@ -232,13 +253,14 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
           )}
 
           <header className="h-20 bg-white/80 backdrop-blur-md border-b border-[var(--mv-sage)]/10 flex items-center justify-between px-6 z-10">
+            {/* Mobile-Only Hamburger Toggle */}
             <div className="flex items-center gap-3">
               <button 
-                onClick={toggleSidebar}
-                className="p-2 rounded-xl text-gray-500 hover:text-[var(--mv-blue)] hover:bg-gray-100 transition-colors"
-                title={isCollapsed ? "Expandir Sidebar" : "Contraer Sidebar"}
+                onClick={() => setIsMobileOpen(prev => !prev)}
+                className="md:hidden p-2 rounded-xl text-gray-600 hover:text-[var(--mv-blue)] hover:bg-gray-100 transition-colors"
+                title="Abrir Menú Móvil"
               >
-                <Bars3Icon className="w-6 h-6 stroke-[2]" />
+                <Bars3Icon className="w-6 h-6 stroke-[2.5]" />
               </button>
             </div>
 
@@ -262,7 +284,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
             </div>
           </header>
 
-          <div className="flex-1 overflow-auto p-8 mv-scrollbar">
+          <div className="flex-1 overflow-auto p-4 sm:p-6 md:p-8 mv-scrollbar">
             {children}
           </div>
         </main>
@@ -270,4 +292,5 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
     </TooltipProvider>
   );
 }
+
 

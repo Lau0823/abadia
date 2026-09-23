@@ -9,6 +9,7 @@ import { fetchApi } from "@/lib/api";
 import { UserGroupIcon, CalendarDaysIcon, Bars3BottomLeftIcon, PlusIcon, ChevronLeftIcon, ChevronRightIcon, FunnelIcon } from "@heroicons/react/24/outline";
 import HuespedesModal from "@/components/HuespedesModal";
 import TimelineCalendar from "@/components/TimelineCalendar";
+import NuevaReservaModal from "@/components/NuevaReservaModal";
 
 const locales = {
   es: es,
@@ -27,6 +28,7 @@ export default function CalendarioPage() {
   const [loading, setLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [isHuespedesModalOpen, setIsHuespedesModalOpen] = useState(false);
+  const [isNuevaReservaModalOpen, setIsNuevaReservaModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'classic' | 'timeline'>('timeline');
   
   // Selected date state for sync with timeline
@@ -111,12 +113,15 @@ export default function CalendarioPage() {
   const cancelledCount = events.filter(e => e.reservationDetails?.status === 'cancelled').length;
 
   return (
-    <div className="flex gap-5 h-[calc(100vh-140px)]">
+    <div className="flex flex-col lg:flex-row gap-5 h-auto lg:h-[calc(100vh-140px)]">
       {/* Sidebar Navigation Widget */}
-      <div className="w-72 flex-shrink-0 bg-white rounded-3xl shadow-xs border border-slate-200/70 p-5 flex flex-col gap-6 overflow-y-auto mv-scrollbar">
+      <div className="w-full lg:w-72 flex-shrink-0 bg-white rounded-3xl shadow-xs border border-slate-200/70 p-5 flex flex-col gap-6 overflow-y-auto mv-scrollbar">
         {/* Action Button */}
         <div>
-          <button className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[var(--mv-blue)] to-[#0b3c66] hover:from-[#0b3c66] hover:to-[#082a48] text-white px-5 py-3 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all shadow-md shadow-blue-900/10 hover:shadow-lg hover:scale-[1.01] active:scale-[0.99]">
+          <button 
+            onClick={() => setIsNuevaReservaModalOpen(true)}
+            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[var(--mv-blue)] to-[#0b3c66] hover:from-[#0b3c66] hover:to-[#082a48] text-white px-5 py-3 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all shadow-md shadow-blue-900/10 hover:shadow-lg hover:scale-[1.01] active:scale-[0.99]"
+          >
             <PlusIcon className="w-4 h-4 stroke-[3]" />
             Nueva Reserva
           </button>
@@ -499,7 +504,14 @@ export default function CalendarioPage() {
           }}
         />
       )}
+
+      <NuevaReservaModal
+        isOpen={isNuevaReservaModalOpen}
+        onClose={() => setIsNuevaReservaModalOpen(false)}
+        onSuccess={() => fetchReservas()}
+      />
       </div>
     </div>
   );
 }
+
