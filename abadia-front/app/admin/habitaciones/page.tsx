@@ -87,109 +87,83 @@ export default function HabitacionesPage() {
         </button>
       </div>
 
-      <div className="bg-white rounded-3xl shadow-sm border border-(--mv-sage)/10 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-(--mv-cream)/50 border-b border-(--mv-sage)/10">
-                <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-widest">Habitación</th>
-                <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-widest">Precio Noche</th>
-                <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-widest">Ocupación</th>
-                <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-widest">Aseo</th>
-                <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-widest">Estado</th>
-                <th className="p-4 text-xs font-semibold text-gray-500 uppercase tracking-widest text-right">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-(--mv-sage)/10">
-              {loading ? (
-                <tr>
-                  <td colSpan={5} className="p-8 text-center text-gray-400">
-                    <div className="animate-pulse flex flex-col items-center gap-2">
-                        <div className="w-6 h-6 border-2 border-(--mv-blue) border-t-transparent rounded-full animate-spin"></div>
-                        <span>Cargando...</span>
-                    </div>
-                  </td>
-                </tr>
-              ) : habitaciones.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="p-8 text-center text-gray-400">No hay habitaciones registradas.</td>
-                </tr>
-              ) : (
-                habitaciones.map((hab) => (
-                  <tr key={hab.id} className="hover:bg-gray-50/50 transition-colors group">
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        {hab.imagenes && hab.imagenes.length > 0 ? (
-                          <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 shrink-0 shadow-sm border border-gray-200 relative group/img" title={hab.imagenes.length > 1 ? `Múltiples imágenes adjuntas (${hab.imagenes.length})` : 'Imagen de la habitación'}>
-                            <img src={hab.imagenes[0]} alt={hab.titulo} className="w-full h-full object-cover" />
-                            {hab.imagenes.length > 1 && (
-                              <div className="absolute bottom-0 right-0 bg-black/60 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-tl-md">
-                                +{hab.imagenes.length - 1}
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center shrink-0 shadow-sm border border-gray-200">
-                            <span className="text-[10px] text-gray-400 font-medium">Sin foto</span>
-                          </div>
-                        )}
-                        <div className="flex flex-col">
-                          <span className="font-semibold text-(--mv-ink)">{hab.titulo}</span>
-                          <span className="text-xs text-gray-500 uppercase tracking-wider">{hab.subtitulo}</span>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {loading ? (
+          <div className="col-span-full flex flex-col items-center justify-center p-12 text-gray-400">
+            <div className="w-8 h-8 border-4 border-[var(--mv-blue)] border-t-transparent rounded-full animate-spin mb-4"></div>
+            <span className="text-sm font-medium uppercase tracking-widest">Cargando habitaciones...</span>
+          </div>
+        ) : habitaciones.length === 0 ? (
+          <div className="col-span-full bg-white rounded-3xl p-12 text-center text-gray-400 border border-[var(--mv-sage)]/10 shadow-sm">
+            No hay habitaciones registradas.
+          </div>
+        ) : (
+          habitaciones.map((hab) => (
+            <div key={hab.id} className="bg-white rounded-3xl p-5 shadow-sm border border-[var(--mv-sage)]/10 flex flex-col gap-5 hover:shadow-md transition-all group hover:-translate-y-1">
+              <div className="flex justify-between items-start">
+                <div className="flex items-center gap-3">
+                  {hab.imagenes && hab.imagenes.length > 0 ? (
+                    <div className="w-14 h-14 rounded-2xl overflow-hidden bg-gray-100 shrink-0 shadow-sm border border-gray-200 relative" title={hab.imagenes.length > 1 ? `Múltiples imágenes adjuntas (${hab.imagenes.length})` : 'Imagen de la habitación'}>
+                      <img src={hab.imagenes[0]} alt={hab.titulo} className="w-full h-full object-cover" />
+                      {hab.imagenes.length > 1 && (
+                        <div className="absolute bottom-0 right-0 bg-black/60 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-tl-md">
+                          +{hab.imagenes.length - 1}
                         </div>
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <span className="font-medium text-(--mv-ink)">
-                        ${Number(hab.precio).toLocaleString("es-CO")}
-                      </span>
-                    </td>
-                    <td className="p-4">
-                      <span className="text-sm text-gray-600">{hab.ocupacion}</span>
-                    </td>
-                    <td className="p-4">
-                      <button 
-                        onClick={() => handleToggleLimpieza(hab)}
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase transition-all shadow-sm border ${
-                          hab.estadoLimpieza === 'LIMPIA' 
-                            ? 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100' 
-                            : 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100'
-                        }`}
-                        title="Clic para cambiar estado de limpieza"
-                      >
-                        {hab.estadoLimpieza === 'LIMPIA' ? '✨ Limpia' : '🧹 Por Asear'}
-                      </button>
-                    </td>
-                    <td className="p-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-widest uppercase ${
-                        hab.estado === 'DISPONIBLE' ? 'bg-green-100 text-green-700' : 
-                        hab.estado === 'MANTENIMIENTO' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
-                      }`}>
-                        {hab.estado}
-                      </span>
-                    </td>
-                    <td className="p-4 text-right">
-                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button 
-                          onClick={() => handleOpenEdit(hab)}
-                          className="p-2 text-gray-400 hover:text-(--mv-blue) hover:bg-(--mv-blue)/10 rounded-lg transition-all"
-                        >
-                          <PencilIcon className="w-5 h-5" />
-                        </button>
-                        <button 
-                          onClick={() => handleDelete(hab.id)}
-                          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                        >
-                          <TrashIcon className="w-5 h-5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center shrink-0 shadow-sm border border-blue-100">
+                      <span className="text-[10px] text-blue-400 font-bold uppercase">Sin foto</span>
+                    </div>
+                  )}
+                  <div className="flex flex-col">
+                    <span className="font-bold text-[var(--mv-ink)] text-lg leading-tight">{hab.titulo}</span>
+                    <span className="text-[10px] text-gray-500 uppercase tracking-widest font-semibold mt-0.5">{hab.subtitulo}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button onClick={() => handleOpenEdit(hab)} className="p-1.5 text-gray-400 hover:text-[var(--mv-blue)] hover:bg-[var(--mv-blue)]/10 rounded-xl transition-all">
+                    <PencilIcon className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => handleDelete(hab.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all">
+                    <TrashIcon className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+              
+              <div className="flex gap-2 flex-wrap">
+                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[9px] font-bold tracking-widest uppercase ${
+                  hab.estado === 'DISPONIBLE' ? 'bg-emerald-100 text-emerald-700' : 
+                  hab.estado === 'MANTENIMIENTO' ? 'bg-orange-100 text-orange-700' : 'bg-red-100 text-red-700'
+                }`}>
+                  {hab.estado}
+                </span>
+                <button 
+                  onClick={() => handleToggleLimpieza(hab)}
+                  className={`inline-flex items-center px-2.5 py-1 rounded-full text-[9px] font-bold tracking-widest uppercase transition-all shadow-sm border ${
+                    hab.estadoLimpieza === 'LIMPIA' 
+                      ? 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100' 
+                      : 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100'
+                  }`}
+                  title="Clic para cambiar estado de limpieza"
+                >
+                  {hab.estadoLimpieza === 'LIMPIA' ? '✨ Limpia' : '🧹 Por Asear'}
+                </button>
+              </div>
+
+              <div className="mt-auto flex items-end justify-between pt-4 border-t border-gray-50">
+                <div>
+                  <p className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold mb-0.5">Precio Noche</p>
+                  <p className="font-bold text-[var(--mv-ink)]">${Number(hab.precio).toLocaleString("es-CO")}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold mb-0.5">Ocupación</p>
+                  <p className="font-semibold text-gray-700 text-sm">{hab.ocupacion}</p>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
       <HabitacionModal 

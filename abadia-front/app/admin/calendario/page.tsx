@@ -67,47 +67,93 @@ export default function CalendarioPage() {
   }, []);
 
   return (
-    <div className="bg-white rounded-3xl shadow-sm border border-[var(--mv-sage)]/10 p-6 h-[calc(100vh-140px)] flex flex-col">
-      <div className="mb-6 flex justify-between items-end">
+    <div className="flex gap-4 h-[calc(100vh-140px)]">
+      {/* Sidebar */}
+      <div className="w-64 flex-shrink-0 bg-white rounded-3xl shadow-sm border border-[var(--mv-sage)]/10 p-5 flex flex-col gap-6 overflow-y-auto mv-scrollbar">
         <div>
-          <h2 className="text-2xl font-bold text-[var(--mv-ink)] uppercase tracking-[0.05em]">Calendario de Ocupación</h2>
-          <p className="text-gray-500 mt-2 text-sm font-medium">Visualiza los ingresos y salidas de las estancias.</p>
+          <button className="w-full flex items-center justify-center gap-2 bg-[var(--mv-blue)] hover:bg-[#0b3c66] text-white px-4 py-2.5 rounded-full text-sm font-semibold transition-all shadow-md">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+            Crear Reserva
+          </button>
         </div>
-        <div className="flex gap-4 items-center">
-            <div className="flex items-center gap-2 mr-4">
-                <div className="w-3 h-3 rounded-full bg-[var(--mv-blue)] shadow-sm"></div>
-                <span className="text-xs text-gray-600 font-medium uppercase tracking-wider">Reservas</span>
-            </div>
-            
-            {/* View Toggle */}
-            <div className="flex bg-gray-100 p-1 rounded-full border border-gray-200">
-              <button
-                onClick={() => setViewMode('timeline')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all ${
-                  viewMode === 'timeline' 
-                    ? 'bg-white text-[var(--mv-blue)] shadow-sm' 
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                <Bars3BottomLeftIcon className="w-4 h-4" />
-                Línea de Tiempo
-              </button>
-              <button
-                onClick={() => setViewMode('classic')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all ${
-                  viewMode === 'classic' 
-                    ? 'bg-white text-[var(--mv-blue)] shadow-sm' 
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                <CalendarDaysIcon className="w-4 h-4" />
-                Mes
-              </button>
-            </div>
+        
+        {/* Mini Calendar Placeholder */}
+        <div>
+          <h3 className="text-sm font-bold text-[var(--mv-ink)] mb-3">{format(new Date(), "MMMM yyyy", { locale: es })}</h3>
+          <div className="grid grid-cols-7 gap-1 text-center">
+            {['D', 'L', 'M', 'M', 'J', 'V', 'S'].map(d => (
+              <div key={d} className="text-[10px] font-semibold text-gray-400">{d}</div>
+            ))}
+            {Array.from({ length: 30 }).map((_, i) => (
+              <div key={i} className={`text-xs p-1 rounded-full ${i+1 === new Date().getDate() ? 'bg-[var(--mv-blue)] text-white font-bold' : 'text-gray-600 hover:bg-gray-100 cursor-pointer'}`}>
+                {i + 1}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Filters */}
+        <div>
+          <h3 className="text-sm font-bold text-[var(--mv-ink)] mb-3">Filtros</h3>
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 cursor-pointer group">
+              <input type="checkbox" defaultChecked className="rounded text-[var(--mv-blue)] focus:ring-[var(--mv-blue)] border-gray-300 w-4 h-4" />
+              <span className="text-xs text-gray-600 font-medium group-hover:text-gray-900 transition-colors">Confirmadas</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer group">
+              <input type="checkbox" defaultChecked className="rounded text-[var(--mv-blue)] focus:ring-[var(--mv-blue)] border-gray-300 w-4 h-4" />
+              <span className="text-xs text-gray-600 font-medium group-hover:text-gray-900 transition-colors">Pendientes</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer group">
+              <input type="checkbox" className="rounded text-[var(--mv-blue)] focus:ring-[var(--mv-blue)] border-gray-300 w-4 h-4" />
+              <span className="text-xs text-gray-600 font-medium group-hover:text-gray-900 transition-colors">Canceladas</span>
+            </label>
+          </div>
         </div>
       </div>
-      
-      <div className="flex-1 min-h-0">
+
+      {/* Main Area */}
+      <div className="flex-1 bg-white rounded-3xl shadow-sm border border-[var(--mv-sage)]/10 p-5 flex flex-col min-w-0">
+        <div className="mb-4 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+             <button className="p-1.5 rounded-full hover:bg-gray-100 transition-colors text-gray-500">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+             </button>
+             <h2 className="text-lg font-bold text-[var(--mv-ink)] capitalize">{format(new Date(), "MMMM dd, yyyy", { locale: es })}</h2>
+             <button className="p-1.5 rounded-full hover:bg-gray-100 transition-colors text-gray-500">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+             </button>
+          </div>
+          <div className="flex gap-4 items-center">
+              {/* View Toggle */}
+              <div className="flex bg-gray-50 p-1 rounded-full border border-gray-100">
+                <button
+                  onClick={() => setViewMode('timeline')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                    viewMode === 'timeline' 
+                      ? 'bg-white text-[var(--mv-ink)] shadow-sm' 
+                      : 'text-gray-400 hover:text-gray-600'
+                  }`}
+                >
+                  <Bars3BottomLeftIcon className="w-3.5 h-3.5" />
+                  Timeline
+                </button>
+                <button
+                  onClick={() => setViewMode('classic')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                    viewMode === 'classic' 
+                      ? 'bg-white text-[var(--mv-ink)] shadow-sm' 
+                      : 'text-gray-400 hover:text-gray-600'
+                  }`}
+                >
+                  <CalendarDaysIcon className="w-3.5 h-3.5" />
+                  Mes
+                </button>
+              </div>
+          </div>
+        </div>
+        
+        <div className="flex-1 min-h-0">
         <style>{`
           .rbc-calendar { font-family: var(--font-montserrat), sans-serif; }
           .rbc-event { 
@@ -299,6 +345,7 @@ export default function CalendarioPage() {
           }}
         />
       )}
+      </div>
     </div>
   );
 }

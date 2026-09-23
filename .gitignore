@@ -11,3 +11,6 @@ abadia-front/.next/
 abadia-front/node_modules/
 abadia-back/node_modules/
 abadia-back/dist/
+
+# Antigravity local agents tools and binaries
+.agents/

@@ -71,20 +71,38 @@ export default function TimelineCalendar({ events, onSelectEvent }: TimelineCale
     const width = (endOffset - startOffset);
     
     if (width <= 0) return null;
+    const colorFamilies = [
+      { pending: { bg: 'bg-blue-100', border: 'border-blue-200', text: 'text-blue-800' }, confirmed: { bg: 'bg-blue-500', border: 'border-blue-600', text: 'text-white' } },
+      { pending: { bg: 'bg-purple-100', border: 'border-purple-200', text: 'text-purple-800' }, confirmed: { bg: 'bg-purple-500', border: 'border-purple-600', text: 'text-white' } },
+      { pending: { bg: 'bg-emerald-100', border: 'border-emerald-200', text: 'text-emerald-800' }, confirmed: { bg: 'bg-emerald-500', border: 'border-emerald-600', text: 'text-white' } },
+      { pending: { bg: 'bg-rose-100', border: 'border-rose-200', text: 'text-rose-800' }, confirmed: { bg: 'bg-rose-500', border: 'border-rose-600', text: 'text-white' } },
+      { pending: { bg: 'bg-amber-100', border: 'border-amber-200', text: 'text-amber-800' }, confirmed: { bg: 'bg-amber-500', border: 'border-amber-600', text: 'text-white' } },
+      { pending: { bg: 'bg-cyan-100', border: 'border-cyan-200', text: 'text-cyan-800' }, confirmed: { bg: 'bg-cyan-500', border: 'border-cyan-600', text: 'text-white' } },
+      { pending: { bg: 'bg-indigo-100', border: 'border-indigo-200', text: 'text-indigo-800' }, confirmed: { bg: 'bg-indigo-500', border: 'border-indigo-600', text: 'text-white' } },
+      { pending: { bg: 'bg-pink-100', border: 'border-pink-200', text: 'text-pink-800' }, confirmed: { bg: 'bg-pink-500', border: 'border-pink-600', text: 'text-white' } },
+    ];
+    
+    // Hash the habId to consistently pick a color family
+    const habIndex = typeof habId === 'number' ? habId : String(habId).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const family = colorFamilies[habIndex % colorFamilies.length];
 
-    let bgColor = 'bg-[var(--mv-blue)]';
-    let borderColor = 'border-[#0b3c66]';
+    let bgColor, borderColor, textColor;
     
     const status = event.reservationDetails?.status;
-    if (status === 'confirmed') { bgColor = 'bg-green-500'; borderColor = 'border-green-700'; }
-    if (status === 'pending') { bgColor = 'bg-yellow-500'; borderColor = 'border-yellow-700'; }
-    if (status === 'cancelled') { bgColor = 'bg-red-500'; borderColor = 'border-red-700'; }
+    if (status === 'confirmed' || status === 'completed') { 
+      bgColor = family.confirmed.bg; borderColor = family.confirmed.border; textColor = family.confirmed.text;
+    } else if (status === 'cancelled') { 
+      bgColor = 'bg-red-100'; borderColor = 'border-red-200'; textColor = 'text-red-800'; 
+    } else { 
+      bgColor = family.pending.bg; borderColor = family.pending.border; textColor = family.pending.text;
+    }
 
     return {
       left: `${(startOffset / daysInMonth) * 100}%`,
       width: `${(width / daysInMonth) * 100}%`,
       bgColor,
-      borderColor
+      borderColor,
+      textColor
     };
   };
 
@@ -177,12 +195,15 @@ export default function TimelineCalendar({ events, onSelectEvent }: TimelineCale
                       <div
                         key={eventIdx}
                         onClick={() => onSelectEvent(event)}
-                        className={`absolute top-2 bottom-2 ${style.bgColor} border ${style.borderColor} rounded-md shadow-sm z-10 flex items-center px-2 overflow-hidden cursor-pointer hover:brightness-110 transition-all hover:shadow-md hover:scale-[1.02]`}
+                        className={`absolute top-1.5 bottom-1.5 ${style.bgColor} border ${style.borderColor} rounded-full shadow-sm z-10 flex flex-col justify-center px-3 overflow-hidden cursor-pointer hover:brightness-95 transition-all hover:shadow hover:scale-[1.01]`}
                         style={{ left: style.left, width: style.width }}
                         title={event.title}
                       >
-                        <span className="text-xs font-bold text-white truncate drop-shadow-md whitespace-nowrap">
+                        <span className={`text-[10px] font-bold ${style.textColor} truncate whitespace-nowrap leading-tight`}>
                           {event.reservationDetails?.cliente?.nombre || event.title}
+                        </span>
+                        <span className={`text-[9px] ${style.textColor} opacity-80 truncate whitespace-nowrap leading-tight hidden sm:block`}>
+                          {format(new Date(event.start), 'HH:mm')} - {format(new Date(event.end), 'HH:mm')}
                         </span>
                       </div>
                     );
