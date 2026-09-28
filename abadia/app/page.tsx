@@ -74,11 +74,12 @@ const Icons = {
   )
 };
 
-// Función auxiliar para detectar videos .mov y otros formatos
-const esVideo = (url: string) => {
+// Función auxiliar robusta para detectar videos .mov y otros formatos (insensible a mayúsculas)
+const esVideo = (url?: string) => {
   if (!url) return false;
-  const extensiones = ['.mov', '.mp4', '.webm', '.ogg'];
-  return extensiones.some(ext => url.toLowerCase().includes(ext));
+  const limpio = url.split('?')[0].toLowerCase();
+  const extensiones = ['.mov', '.mp4', '.webm', '.ogg', '.m4v'];
+  return extensiones.some((ext) => limpio.endsWith(ext));
 };
 
 // --- DATA: 6 HABITACIONES ---
@@ -201,32 +202,34 @@ const HABITACIONES: Habitacion[] = [
   }
 ];
 
-// --- OTROS ESPACIOS DE LA CASA ---
-const OTROS_ESPACIOS = [
+// --- OTROS ESPACIOS DE LA CASA (CON PISCINA Y PARQUEADERO INTEGRADOS) ---
+interface EspacioCasa {
+  id: string;
+  tag: string;
+  titulo: string;
+  descripcion: string;
+  recurso: string;
+}
+
+const OTROS_ESPACIOS: EspacioCasa[] = [
   {
     id: "Piscina",
-    tag: "01 • Recreación",
-    titulo: "Diversión y Áreas Infantiles",
-    descripcion: "Deck superior elevado entre palmeras para contemplar atardeceres dorados y noches serenas.",
-    imagen: "https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&w=1920&q=85"
+    tag: "01 • Recreación & Relax",
+    titulo: "Piscina Abadía",
+    descripcion: "Área de agua cristalina rodeada de palmeras tropicales y asoleadoras privadas para relajarte a cualquier hora.",
+    recurso: "/IMG_2254.mov"
   },
   {
-    id: "Patio",
-    tag: "02 • Santuario Verde",
-    titulo: "Patio de las Fuentes",
-    descripcion: "Claustro colonial fresco con fuentes de piedra balinesa y vegetación nativa.",
-    imagen: "https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=1920&q=85"
+    id: "Parqueadero",
+    tag: "02 • Acceso & Seguridad",
+    titulo: "Entrada y Parqueadero Privado",
+    descripcion: "Acceso vehicular cerrado, vigilado y cómodo dentro del predio para la completa seguridad de tu vehículo.",
+    recurso: "/IMG_2396.MOV"
   },
-  {
-    id: "Solarium",
-    tag: "03 • Relajación & Mar",
-    titulo: "Solárium de Palmeras",
-    descripcion: "Camas balinesas individuales sobre arena blanca con servicio de coctelería tropical.",
-    imagen: "/piscina.png"
-  }
+ 
 ];
 
-// --- 7 EXPERIENCIAS EN SAN ANTERO (ADMITE FOTOS O VIDEOS .MOV) ---
+// --- EXPERIENCIAS EN SAN ANTERO (SOLO PLANES Y DESTINOS EXTERNOS) ---
 interface Experiencia {
   id: string;
   tag: string;
@@ -238,14 +241,14 @@ interface Experiencia {
 const EXPERIENCIAS_SAN_ANTERO: Experiencia[] = [
   {
     id: "vicenta",
-    tag: "Gastronomía Típica",
-    titulo: "Vicenta arepa de huevo",
+    tag: "Gastronomía Tradicional",
+    titulo: "Vicenta Arepa de Huevo",
     descripcion: "La tradición culinaria más emblemática de la región. Crujientes, recién preparadas y con el auténtico sabor costeño.",
-    recurso: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=1920&q=85"
+    recurso: "/vicenta.MOV"
   },
   {
     id: "punta-bonita",
-    tag: "Mirador & Paisaje",
+    tag: "Mirador & Atardeceres",
     titulo: "Punta Bonita",
     descripcion: "Un rincón paradisíaco con vistas panorámicas privilegiadas sobre el mar y atardeceres dorados inolvidables.",
     recurso: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=85"
@@ -255,32 +258,18 @@ const EXPERIENCIAS_SAN_ANTERO: Experiencia[] = [
     tag: "Aguas Calmas",
     titulo: "Playa",
     descripcion: "Arena suave y mar sereno a solo unos pasos de tu habitación. Ideal para nadar, caminar y descansar bajo la brisa.",
-    recurso: "/caimanera.png"
-  },
-  {
-    id: "piscina",
-    tag: "Oasis & Confort",
-    titulo: "Piscina",
-    descripcion: "Espacio de agua cristalina rodeado de palmeras y asoleadoras para relajarte a cualquier hora del día.",
-    recurso: "/piscina.png"
+    recurso: "/mar.mp4"
   },
   {
     id: "moto-acuatica",
     tag: "Aventura Náutica",
     titulo: "Moto Acuática",
-    descripcion: "Adrenalina sobre las olas del Golfo de Morrosquillo. Recorridos guiados y diversión marina con total seguridad.",
-    recurso: "https://images.unsplash.com/photo-1559827291-72ee739d0d9a?auto=format&fit=crop&w=1920&q=85"
-  },
-  {
-    id: "parqueadero",
-    tag: "Seguridad & Acceso",
-    titulo: "Entrada y parqueadero",
-    descripcion: "Acceso vehicular privado, cómodo y vigilado para que viajes con total tranquilidad durante toda tu estancia.",
-    recurso: "https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=1920&q=85"
+    descripcion: "Adrenalina y velocidad recorriendo los puntos clave de la bahía con instructores certificados de la zona.",
+    recurso: "/WhatsApp Video 2026-09-28 at 15.36.44.mp4"
   },
   {
     id: "artesanias",
-    tag: "Cultura & Recuerdos",
+    tag: "Cultura Zenú",
     titulo: "Artesanía Mariana",
     descripcion: "Creaciones locales hechas a mano, sombreros vueltiaos y recuerdos únicos que capturan el espíritu caribeño.",
     recurso: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1920&q=85"
@@ -467,12 +456,15 @@ export default function HomePage() {
   const [videoHeroActivo, setVideoHeroActivo] = useState(0);
   const [heroSonido, setHeroSonido] = useState(false);
   const [habitacionSonido, setHabitacionSonido] = useState(false);
+  const [espacioSonido, setEspacioSonido] = useState(false);
   const [experienciaSonido, setExperienciaSonido] = useState(false);
 
+  // Habitaciones
   const [habitacionActivaIndex, setHabitacionActivaIndex] = useState(0);
   const [fotoHabitacionIndex, setFotoHabitacionIndex] = useState(0);
   const [llavesDesplegadas, setLlavesDesplegadas] = useState(false);
 
+  // Otros espacios y Experiencias de destino
   const [espacioActivoIndex, setEspacioActivoIndex] = useState(0);
   const [experienciaActivaIndex, setExperienciaActivaIndex] = useState(0);
   const [isMounted, setIsMounted] = useState(false);
@@ -481,21 +473,32 @@ export default function HomePage() {
     setIsMounted(true);
   }, []);
 
-  // Transición automática entre los 2 videos del hero cada 9 segundos
+  // 1. Transición automática de los 2 videos del Hero (cada 9 segundos)
   useEffect(() => {
     if (!isMounted || splashActivo) return;
-    const interval = setInterval(() => {
+    const intervalHero = setInterval(() => {
       setVideoHeroActivo((prev) => (prev + 1) % VIDEOS_HERO.length);
     }, 9000);
-    return () => clearInterval(interval);
+    return () => clearInterval(intervalHero);
+  }, [isMounted, splashActivo]);
+
+  // 2. Carrusel automático de las Experiencias en San Antero (cada 7 segundos)
+  useEffect(() => {
+    if (!isMounted || splashActivo) return;
+    const intervalExp = setInterval(() => {
+      setExperienciaActivaIndex((prev) => (prev + 1) % EXPERIENCIAS_SAN_ANTERO.length);
+    }, 7000);
+    return () => clearInterval(intervalExp);
   }, [isMounted, splashActivo]);
 
   const habitacionActual = HABITACIONES[habitacionActivaIndex];
   const espacioActual = OTROS_ESPACIOS[espacioActivoIndex];
   const experienciaActual = EXPERIENCIAS_SAN_ANTERO[experienciaActivaIndex];
+
   const medioActual = habitacionActual.medios[fotoHabitacionIndex];
   const esRecursoVideo = esVideo(medioActual);
   const videoActualHero = VIDEOS_HERO[videoHeroActivo];
+  const espacioEsVideo = esVideo(espacioActual.recurso);
   const experienciaEsVideo = esVideo(experienciaActual.recurso);
 
   const siguienteFoto = () => {
@@ -504,6 +507,16 @@ export default function HomePage() {
 
   const anteriorFoto = () => {
     setFotoHabitacionIndex((prev) => (prev === 0 ? habitacionActual.medios.length - 1 : prev - 1));
+  };
+
+  const siguienteExperiencia = () => {
+    setExperienciaActivaIndex((prev) => (prev + 1) % EXPERIENCIAS_SAN_ANTERO.length);
+  };
+
+  const anteriorExperiencia = () => {
+    setExperienciaActivaIndex((prev) =>
+      prev === 0 ? EXPERIENCIAS_SAN_ANTERO.length - 1 : prev - 1
+    );
   };
 
   const seleccionarHabitacionLlave = (index: number) => {
@@ -532,8 +545,6 @@ export default function HomePage() {
           1. BANNER PRINCIPAL (2 VIDEOS .MOV EN EL HERO - RESPONSIVE 100dvh)
           ======================================================== */}
       <section className="relative h-[100dvh] w-full overflow-hidden bg-black flex flex-col justify-end pb-8 sm:pb-16 items-center">
-
-        {/* VIDEOS DE FONDO CON FUNDIDO DE OPACIDAD SUAVE */}
         {VIDEOS_HERO.map((video, idx) => {
           const activo = idx === videoHeroActivo;
           return (
@@ -550,12 +561,14 @@ export default function HomePage() {
                 loop
                 playsInline
                 preload="auto"
+                onLoadedData={(e) => {
+                  e.currentTarget.play().catch(() => {});
+                }}
                 className="w-full h-full object-cover scale-105"
               >
                 <source src={video.src} type="video/quicktime" />
                 <source src={video.src} type="video/mp4" />
               </video>
-
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/35 pointer-events-none" />
             </div>
           );
@@ -622,7 +635,7 @@ export default function HomePage() {
       <section className="bg-[#FAF7F2] py-10 sm:py-16 px-4 sm:px-6 text-center border-b border-[#E8DDD0]">
         <div className="max-w-2xl mx-auto space-y-2">
           <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.35em] text-[#8c7355] font-semibold block">
-            — COLECCIÓN EXCLUSIVA
+            
           </span>
           <h2 className="text-xl sm:text-3xl md:text-4xl font-semibold uppercase tracking-wide text-[#C5A059]">
             Nuestras Habitaciones
@@ -634,7 +647,7 @@ export default function HomePage() {
       </section>
 
       {/* ========================================================
-          2. SECCIÓN: HABITACIÓN FULL SCREEN (FOTO O VIDEO 100% LIMPIO - RESPONSIVE 80dvh/100dvh)
+          2. SECCIÓN: HABITACIÓN FULL SCREEN (FOTO O VIDEO 100% LIMPIO Y SIN BLOQUEOS)
           ======================================================== */}
       <section 
         id="seccion-habitaciones" 
@@ -642,7 +655,6 @@ export default function HomePage() {
       >
         <div className="absolute inset-0 z-0">
           {esRecursoVideo ? (
-            /* RENDERIZADO DE VIDEO EN HABITACIÓN */
             <video
               key={medioActual}
               autoPlay
@@ -650,14 +662,17 @@ export default function HomePage() {
               loop
               playsInline
               preload="auto"
+              onLoadedData={(e) => {
+                e.currentTarget.play().catch(() => {});
+              }}
               className="w-full h-full object-cover transition-all duration-700"
             >
               <source src={medioActual} type="video/quicktime" />
               <source src={medioActual} type="video/mp4" />
             </video>
           ) : (
-            /* RENDERIZADO DE IMAGEN EN HABITACIÓN */
             <Image
+              key={medioActual}
               src={medioActual}
               alt={`${habitacionActual.titulo} medio ${fotoHabitacionIndex + 1}`}
               fill
@@ -741,7 +756,7 @@ export default function HomePage() {
                 <div className="grid grid-cols-3 gap-2">
                   {HABITACIONES.map((h, i) => {
                     const esSeleccionada = habitacionActivaIndex === i;
-                    const tieneVideo = h.medios.some(m => esVideo(m));
+                    const tieneVideo = h.medios.some((m) => esVideo(m));
 
                     return (
                       <button
@@ -816,7 +831,7 @@ export default function HomePage() {
       </section>
 
       {/* ========================================================
-          3. INFORMACIÓN DE LA HABITACIÓN DEBAJO DEL FULL SCREEN (RESPONSIVE)
+          3. INFORMACIÓN DE LA HABITACIÓN DEBAJO DEL FULL SCREEN
           ======================================================== */}
       <section className="bg-white py-10 sm:py-16 px-4 sm:px-12 border-b border-[#E8DDD0]">
         <div className="max-w-6xl mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-8 sm:gap-10 text-left">
@@ -854,7 +869,6 @@ export default function HomePage() {
                 <span className="font-semibold text-stone-800">🛏️ {habitacionActual.camas}</span>
               </div>
 
-              {/* COMODIDADES INCLUIDAS EN TODAS LAS HABITACIONES */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
                 <div className="bg-[#FAF7F2] p-2.5 rounded-xl border border-[#E8DDD0] text-xs text-stone-800 flex items-center gap-1.5">
                   <span className="text-[#8c7355] font-bold">✓</span>
@@ -922,6 +936,9 @@ export default function HomePage() {
           loop
           playsInline
           preload="auto"
+          onLoadedData={(e) => {
+            e.currentTarget.play().catch(() => {});
+          }}
           className="w-full h-full object-cover"
         >
           <source src={VIDEO_MID.src} type="video/quicktime" />
@@ -930,7 +947,7 @@ export default function HomePage() {
       </section>
 
       {/* ========================================================
-          TRANSICIÓN 2: OTROS ESPACIOS
+          TRANSICIÓN 2: OTROS ESPACIOS DE LA CASA
           ======================================================== */}
       <section className="bg-[#FAF7F2] py-10 sm:py-16 px-4 sm:px-6 text-center border-b border-[#E8DDD0]">
         <div className="max-w-2xl mx-auto space-y-2">
@@ -941,39 +958,61 @@ export default function HomePage() {
             Otros Espacios de la Casa
           </h2>
           <p className="text-xs sm:text-sm text-stone-600 font-light leading-relaxed">
-            Descubre las áreas comunes, patios coloniales y zonas de descanso diseñadas para la desconexión total.
+            Descubre las áreas comunes, piscina, patios y estacionamiento privado diseñados para tu comodidad absoluta.
           </p>
         </div>
       </section>
 
       {/* ========================================================
-          5. SECCIÓN: OTROS ESPACIOS (RESPONSIVE 80dvh/100dvh + TARJETA SUSPENDIDA)
+          5. SECCIÓN: OTROS ESPACIOS (PISCINA Y PARQUEADERO AQUÍ CON SOPORTE DE VIDEO)
           ======================================================== */}
       <section 
         id="seccion-otros-espacios" 
         className="relative h-[80dvh] sm:h-[100dvh] w-full overflow-hidden bg-black flex flex-col justify-between"
       >
         <div className="absolute inset-0 z-0">
-          <Image
-            src={espacioActual.imagen}
-            alt={espacioActual.titulo}
-            fill
-            unoptimized
-            className="object-cover transition-transform duration-1000"
-          />
+          {espacioEsVideo ? (
+            <video
+              key={espacioActual.recurso}
+              autoPlay
+              muted={!espacioSonido}
+              loop
+              playsInline
+              preload="auto"
+              onLoadedData={(e) => {
+                e.currentTarget.play().catch(() => {});
+              }}
+              className="w-full h-full object-cover transition-all duration-700"
+            >
+              <source src={espacioActual.recurso} type="video/quicktime" />
+              <source src={espacioActual.recurso} type="video/mp4" />
+            </video>
+          ) : (
+            <Image
+              key={espacioActual.recurso}
+              src={espacioActual.recurso}
+              alt={espacioActual.titulo}
+              fill
+              unoptimized
+              className="object-cover transition-transform duration-1000"
+            />
+          )}
+          <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" />
         </div>
 
+        {/* Barra superior de Otros Espacios */}
         <div className="relative z-20 pt-16 sm:pt-24 px-4 sm:px-12 flex items-center justify-between text-stone-900">
-          <span className="bg-white/85 backdrop-blur-xl border border-white/60 px-3 sm:px-4 py-1.5 rounded-full text-[11px] sm:text-xs font-semibold text-stone-900 shadow-lg">
+          <span className="bg-white/85 backdrop-blur-xl border border-white/60 px-3 sm:px-4 py-1.5 rounded-full text-[11px] sm:text-xs font-semibold text-stone-900 shadow-lg flex items-center gap-1.5">
+            {espacioEsVideo && <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />}
             {espacioActual.tag}
           </span>
-          <div className="flex gap-2 bg-black/30 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20">
+          <div className="flex gap-2 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20">
             {OTROS_ESPACIOS.map((_, i) => (
               <button
                 key={i}
                 onClick={() => setEspacioActivoIndex(i)}
                 className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full transition-all cursor-pointer ${
-                  i === espacioActivoIndex ? 'bg-white scale-125' : 'bg-white/40 hover:bg-white/70'
+                  i === espacioActivoIndex ? 'bg-[#C5A059] scale-125' : 'bg-white/40 hover:bg-white/70'
                 }`}
                 aria-label={`Ver espacio ${i + 1}`}
               />
@@ -981,11 +1020,26 @@ export default function HomePage() {
           </div>
         </div>
 
+        {/* Botón flotante de audio para el espacio si es video */}
+        {espacioEsVideo && (
+          <button
+            onClick={() => setEspacioSonido(!espacioSonido)}
+            className="absolute top-32 right-4 sm:right-12 z-30 bg-black/45 hover:bg-black/70 text-white p-2.5 rounded-full backdrop-blur-xl border border-white/20 transition-all shadow-xl active:scale-90 cursor-pointer flex items-center gap-1.5"
+            aria-label={espacioSonido ? "Silenciar video" : "Activar sonido"}
+          >
+            {espacioSonido ? <Icons.VolumeUp /> : <Icons.VolumeMute />}
+            <span className="text-[9px] uppercase font-mono tracking-wider hidden sm:inline">
+              {espacioSonido ? "Audio ON" : "Audio OFF"}
+            </span>
+          </button>
+        )}
+
+        {/* Tarjeta suspendida inferior de Otros Espacios */}
         <div className="relative z-20 w-full px-4 sm:px-12 pb-6 sm:pb-10">
           <div className="max-w-6xl mx-auto bg-white/85 backdrop-blur-2xl border border-white/60 p-5 sm:p-8 md:p-10 rounded-2xl sm:rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.25)] flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6 text-left text-stone-900">
             <div className="space-y-1">
               <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.25em] text-[#8c7355] font-bold block">
-                Arquitectura & Calma
+                Comodidades del Hotel
               </span>
               <h3 className="text-xl sm:text-3xl md:text-4xl font-semibold uppercase tracking-wide text-stone-950">
                 {espacioActual.titulo}
@@ -1006,7 +1060,7 @@ export default function HomePage() {
       </section>
 
       {/* ========================================================
-          TRANSICIÓN 3: GUÍA DE DESTINO (7 ESPACIOS)
+          TRANSICIÓN 3: GUÍA DE DESTINO (SAN ANTERO & ALREDEDORES)
           ======================================================== */}
       <section className="bg-[#FAF7F2] py-10 sm:py-16 px-4 sm:px-6 text-center border-b border-[#E8DDD0]">
         <div className="max-w-3xl mx-auto space-y-2">
@@ -1017,19 +1071,19 @@ export default function HomePage() {
             ¿Qué hacer en San Antero y sus Alrededores?
           </h2>
           <p className="text-xs sm:text-sm text-stone-600 font-light leading-relaxed">
-            Gastronomía típica, diversión náutica, relax y cultura local. Desliza en la barra para explorar cada lugar.
+            Gastronomía típica, diversión náutica, playas y cultura local. El carrusel avanza automáticamente o puedes navegarlo con las flechas.
           </p>
         </div>
       </section>
 
       {/* ========================================================
-          6. SECCIÓN: DESTINO (7 ESPACIOS - RESPONSIVE 85dvh/100dvh + CAROUSEL HORIZONTAL TÁCTIL)
+          6. SECCIÓN: DESTINO (CARRUSEL AUTOMÁTICO 100% LIMPIO - SIN BARRA DE BOTONES)
           ======================================================== */}
       <section 
         id="seccion-que-hacer" 
-        className="relative h-[85dvh] sm:h-[100dvh] w-full overflow-hidden bg-black flex flex-col justify-between"
+        className="relative h-[75dvh] sm:h-[90dvh] w-full overflow-hidden bg-black flex flex-col justify-between select-none"
       >
-        {/* RECURSO 100% LIMPIO (FOTO O VIDEO .MOV) */}
+        {/* RECURSO VISUAL LIMPIO DE BORDE A BORDE */}
         <div className="absolute inset-0 z-0">
           {experienciaEsVideo ? (
             <video
@@ -1039,6 +1093,9 @@ export default function HomePage() {
               loop
               playsInline
               preload="auto"
+              onLoadedData={(e) => {
+                e.currentTarget.play().catch(() => {});
+              }}
               className="w-full h-full object-cover transition-all duration-700"
             >
               <source src={experienciaActual.recurso} type="video/quicktime" />
@@ -1046,6 +1103,7 @@ export default function HomePage() {
             </video>
           ) : (
             <Image
+              key={experienciaActual.recurso}
               src={experienciaActual.recurso}
               alt={experienciaActual.titulo}
               fill
@@ -1053,98 +1111,146 @@ export default function HomePage() {
               className="object-cover transition-transform duration-1000"
             />
           )}
+          <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" />
         </div>
 
-        {/* SELECTOR SUPERIOR FLOTANTE CON SCROLL TÁCTIL SUAVE */}
-        <div className="relative z-20 pt-16 sm:pt-24 px-3 sm:px-12 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
-          <div className="flex items-center justify-between w-full sm:w-auto">
-            <span className="bg-white/85 backdrop-blur-xl border border-white/60 px-3 sm:px-4 py-1.5 rounded-full text-[11px] sm:text-xs font-semibold text-stone-900 shadow-lg flex items-center gap-1.5">
-              {experienciaEsVideo && <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />}
-              📍 {experienciaActual.tag}
-            </span>
-
-            {/* Botón de audio móvil si es video */}
+        {/* ETIQUETA SUPERIOR FLOTANTE DINÁMICA: CAMBIA SOLA CON CADA RECURSO */}
+        <div className="relative z-30 pt-16 sm:pt-24 px-4 sm:px-12 flex items-center justify-between pointer-events-none">
+          <div className="pointer-events-auto bg-black/50 backdrop-blur-2xl border border-white/20 px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-full text-white text-[11px] sm:text-xs font-light flex items-center gap-2 shadow-xl transition-all duration-500">
+            <span className="text-[#C5A059] font-mono font-bold">0{experienciaActivaIndex + 1}</span>
+            <span className="text-white/40">•</span>
+            <span className="font-medium tracking-wide">{experienciaActual.titulo}</span>
             {experienciaEsVideo && (
-              <button
-                onClick={() => setExperienciaSonido(!experienciaSonido)}
-                className="sm:hidden bg-black/45 text-white p-2 rounded-full backdrop-blur-xl border border-white/20"
-                aria-label={experienciaSonido ? "Silenciar video" : "Activar sonido"}
-              >
-                {experienciaSonido ? <Icons.VolumeUp /> : <Icons.VolumeMute />}
-              </button>
+              <span className="bg-red-500/85 text-white text-[8px] uppercase px-1.5 py-0.5 rounded font-bold flex items-center gap-0.5">
+                <Icons.Play /> Video
+              </span>
             )}
           </div>
 
-          {/* Barra deslizable con el dedo (overflow-x-auto táctil) */}
-          <div className="w-full sm:w-auto flex items-center gap-1.5 bg-black/45 backdrop-blur-xl p-1 sm:p-1.5 rounded-full border border-white/20 overflow-x-auto no-scrollbar scroll-smooth">
-            {EXPERIENCIAS_SAN_ANTERO.map((item, idx) => {
-              const activo = idx === experienciaActivaIndex;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setExperienciaActivaIndex(idx)}
-                  className={`px-3 py-1.5 rounded-full text-[9px] sm:text-[10px] uppercase font-semibold tracking-wider whitespace-nowrap transition-all duration-300 cursor-pointer shrink-0 ${
-                    activo
-                      ? 'bg-[#8c7355] text-white shadow-md scale-105'
-                      : 'text-white/70 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  {item.titulo}
-                </button>
-              );
-            })}
+          {/* Indicadores circulares sutiles de avance automático */}
+          <div className="pointer-events-auto hidden sm:flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/15">
+            {EXPERIENCIAS_SAN_ANTERO.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setExperienciaActivaIndex(idx)}
+                className={`transition-all duration-300 rounded-full cursor-pointer ${
+                  idx === experienciaActivaIndex
+                    ? 'w-6 h-1.5 bg-[#C5A059]'
+                    : 'w-1.5 h-1.5 bg-white/40 hover:bg-white'
+                }`}
+                aria-label={`Ver experiencia ${idx + 1}`}
+              />
+            ))}
           </div>
         </div>
 
-        {/* BOTÓN DE AUDIO DE ESCRITORIO */}
+        {/* CONTROLES LATERALES (FLECHAS DISCRETAS PARA AVANZAR MANUALMENTE) */}
+        <button
+          onClick={anteriorExperiencia}
+          className="absolute left-3 sm:left-10 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-16 sm:h-16 rounded-full bg-black/40 hover:bg-[#8c7355] text-white backdrop-blur-xl border border-white/25 flex items-center justify-center transition-all shadow-2xl active:scale-90 cursor-pointer"
+          aria-label="Experiencia anterior"
+        >
+          <Icons.ChevronLeft />
+        </button>
+
+        <button
+          onClick={siguienteExperiencia}
+          className="absolute right-3 sm:right-10 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-16 sm:h-16 rounded-full bg-black/40 hover:bg-[#8c7355] text-white backdrop-blur-xl border border-white/25 flex items-center justify-center transition-all shadow-2xl active:scale-90 cursor-pointer"
+          aria-label="Siguiente experiencia"
+        >
+          <Icons.ChevronRight />
+        </button>
+
+        {/* BOTÓN FLOTANTE DE AUDIO (SOLO SI EL RECURSO ES VIDEO) */}
         {experienciaEsVideo && (
           <button
             onClick={() => setExperienciaSonido(!experienciaSonido)}
-            className="hidden sm:flex absolute top-32 right-12 z-30 bg-black/45 hover:bg-black/70 text-white p-2.5 rounded-full backdrop-blur-xl border border-white/20 transition-all shadow-xl active:scale-90 cursor-pointer items-center gap-1.5"
+            className="absolute bottom-4 right-4 sm:right-12 z-30 bg-black/45 hover:bg-black/70 text-white p-2.5 rounded-full backdrop-blur-xl border border-white/20 transition-all shadow-xl active:scale-90 cursor-pointer flex items-center gap-1.5"
             aria-label={experienciaSonido ? "Silenciar video" : "Activar sonido"}
           >
             {experienciaSonido ? <Icons.VolumeUp /> : <Icons.VolumeMute />}
-            <span className="text-[9px] uppercase font-mono tracking-wider">
+            <span className="text-[9px] uppercase font-mono tracking-wider hidden sm:inline">
               {experienciaSonido ? "Audio ON" : "Audio OFF"}
             </span>
           </button>
         )}
 
-        {/* TARJETA INFERIOR SUSPENDIDA ADAPTABLE */}
-        <div className="relative z-20 w-full px-4 sm:px-12 pb-6 sm:pb-12">
-          <div className="max-w-6xl mx-auto bg-white/85 backdrop-blur-2xl border border-white/60 p-5 sm:p-8 md:p-10 rounded-2xl sm:rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.25)] flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6 text-left text-stone-900">
-            <div className="space-y-1">
-              <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.3em] text-[#8c7355] font-bold block">
-                {experienciaActual.tag} • San Antero
+        {/* PIE DEL CARRUSEL: INDICADOR DISCRETO */}
+        <div className="relative z-20 pb-4 sm:pb-6 text-center pointer-events-none">
+          <span className="bg-black/40 backdrop-blur-md border border-white/15 px-3.5 py-1 rounded-full text-[10px] sm:text-[11px] text-white/80 font-mono">
+            {experienciaActivaIndex + 1} de {EXPERIENCIAS_SAN_ANTERO.length} • {experienciaActual.tag}
+          </span>
+        </div>
+      </section>
+
+      {/* ========================================================
+          7. SECCIÓN EDITORIAL: INFORMACIÓN Y ACCIONES DEBAJO DEL VIDEO
+          ======================================================== */}
+      <section className="bg-white py-10 sm:py-16 px-4 sm:px-12 border-b border-[#E8DDD0]">
+        <div className="max-w-6xl mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-8 sm:gap-10 text-left">
+          
+          {/* Textos informativos de la experiencia */}
+          <div className="space-y-3 max-w-2xl">
+            <div className="flex items-center gap-2">
+              <span className="bg-[#8c7355] text-white text-[9px] sm:text-[10px] uppercase tracking-[0.2em] font-semibold px-2.5 py-0.5 rounded-full">
+                {experienciaActual.tag}
               </span>
-              <h2 className="text-xl sm:text-3xl md:text-4xl font-semibold uppercase tracking-wide text-stone-950">
-                {experienciaActual.titulo}
-              </h2>
-              <p className="text-xs sm:text-sm text-stone-700 font-normal max-w-xl leading-relaxed">
-                {experienciaActual.descripcion}
-              </p>
+              <span className="text-xs text-stone-500 font-light">
+                📍 San Antero & Alrededores
+              </span>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center gap-2.5 shrink-0 w-full sm:w-auto">
+            <h3 className="text-xl sm:text-3xl md:text-4xl font-semibold uppercase tracking-wide text-stone-900">
+              {experienciaActual.titulo}
+            </h3>
+
+            <p className="text-xs sm:text-sm text-stone-600 font-light leading-relaxed">
+              {experienciaActual.descripcion}
+            </p>
+
+            <div className="flex items-center gap-2 pt-1 text-xs text-stone-500">
+              <span className="text-[#8c7355] font-bold">✓</span>
+              <span>Recomendación exclusiva de Abadía Casa Hotel</span>
+            </div>
+          </div>
+
+          {/* Tarjeta de acción y cotización rápida */}
+          <div className="bg-[#FAF7F2] p-5 sm:p-8 rounded-2xl sm:rounded-3xl border border-[#E8DDD0] shadow-sm flex flex-col justify-between gap-4 shrink-0 lg:w-80">
+            <div>
+              <span className="text-[9px] sm:text-[10px] uppercase tracking-widest text-stone-500 font-bold block">
+                Planes & Destino
+              </span>
+              <div className="text-lg sm:text-xl font-semibold text-stone-900 mt-1">
+                {experienciaActual.titulo}
+              </div>
+              <span className="text-[10px] sm:text-[11px] text-stone-500 block mt-0.5">
+                Te asesoramos con transporte y horarios
+              </span>
+            </div>
+
+            <div className="space-y-2">
               <button
                 onClick={() => cotizarWhatsApp(`conocer más sobre ${experienciaActual.titulo} en San Antero`)}
-                className="w-full sm:w-auto bg-[#8c7355] hover:bg-[#735e45] text-white px-6 sm:px-7 py-3 sm:py-3.5 rounded-xl sm:rounded-full text-xs font-semibold uppercase tracking-[0.15em] shadow-lg transition-all active:scale-95 cursor-pointer text-center"
+                className="w-full bg-[#8c7355] hover:bg-[#735e45] text-white py-3 px-4 rounded-xl text-xs font-semibold uppercase tracking-[0.15em] shadow-md transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
               >
-                WhatsApp
+                <Icons.WhatsApp />
+                <span>Consultar por WhatsApp</span>
               </button>
 
               <Link
                 href="/que-hacer"
-                className="w-full sm:w-auto bg-white hover:bg-stone-100 text-stone-900 border border-stone-300 px-5 sm:px-6 py-3 sm:py-3.5 rounded-xl sm:rounded-full text-xs font-semibold uppercase tracking-[0.15em] transition-all active:scale-95 text-center"
+                className="w-full bg-white hover:bg-stone-100 text-stone-900 border border-[#E8DDD0] py-3 px-4 rounded-xl text-xs font-semibold uppercase tracking-[0.15em] transition-all active:scale-95 flex items-center justify-center gap-1.5 text-center"
               >
-                Guía Completa →
+                <span>Ver Guía Completa</span>
+                <Icons.ArrowUpRight />
               </Link>
             </div>
           </div>
+
         </div>
       </section>
 
-      {/* 7. FOOTER AZUL ABADÍA UNIFICADO */}
+      {/* 8. FOOTER AZUL ABADÍA UNIFICADO */}
       <GlobalFooter />
 
     </main>
