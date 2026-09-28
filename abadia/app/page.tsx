@@ -265,14 +265,7 @@ const EXPERIENCIAS_SAN_ANTERO: Experiencia[] = [
     tag: "Aventura Náutica",
     titulo: "Moto Acuática",
     descripcion: "Adrenalina y velocidad recorriendo los puntos clave de la bahía con instructores certificados de la zona.",
-    recurso: "/WhatsApp Video 2026-09-28 at 15.36.44.mp4"
-  },
-  {
-    id: "artesanias",
-    tag: "Cultura Zenú",
-    titulo: "Artesanía Mariana",
-    descripcion: "Creaciones locales hechas a mano, sombreros vueltiaos y recuerdos únicos que capturan el espíritu caribeño.",
-    recurso: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1920&q=85"
+    recurso: "/IMG_2277.mov"
   }
 ];
 
