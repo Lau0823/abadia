@@ -3,6 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { EB_Garamond } from 'next/font/google';
+
+const ebGaramond = EB_Garamond({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  style: ['normal', 'italic'],
+  display: 'swap',
+});
 
 const NUMERO_WHATSAPP = "573122373415";
 
@@ -70,7 +78,6 @@ const Icons = {
   )
 };
 
-// Función auxiliar para detectar videos .mov y otros formatos
 const esVideo = (url?: string) => {
   if (!url) return false;
   const limpio = url.split('?')[0].toLowerCase();
@@ -90,6 +97,7 @@ interface Habitacion {
   ocupacion: string;
   camas: string;
   descripcion: string;
+  servicios: string[];
   medios: string[];
 }
 
@@ -105,6 +113,7 @@ const HABITACIONES: Habitacion[] = [
     ocupacion: "2 a 3 Huéspedes",
     camas: "1 Cama Queen + Cama Adicional",
     descripcion: "Habitación privada equipada con aire acondicionado, televisor Smart TV, mininevera y Wi-Fi de alta velocidad para descansar a pasos del mar.",
+    servicios: ["Aire acondicionado", "Mininevera", "Smart TV", "Wi-Fi gratuito"],
     medios: [
       "/Habitaciones/habitacion1.jpeg",
       "/WhatsApp Image 2026-07-08 at 10.54.20 (1).jpeg",
@@ -122,6 +131,7 @@ const HABITACIONES: Habitacion[] = [
     ocupacion: "Hasta 3 Huéspedes",
     camas: "1 Cama Queen + 1 Sencilla",
     descripcion: "Rodeada de palmeras y vegetación caribeña. Totalmente climatizada, equipada con mininevera, Smart TV, Wi-Fi de alta velocidad y video en alta definición.",
+    servicios: ["Aire acondicionado", "Mininevera", "Smart TV", "Wi-Fi gratuito"],
     medios: [
       "/Habitaciones/habitacion2.mov",
       "/Habitaciones/habitacion2.PNG",
@@ -139,6 +149,7 @@ const HABITACIONES: Habitacion[] = [
     ocupacion: "2 a 3 Huéspedes",
     camas: "1 Cama Queen + Cama Auxiliar",
     descripcion: "Ambiente fresco y apacible para el descanso. Dotada con aire acondicionado, mininevera, Smart TV, baño privado y Wi-Fi.",
+    servicios: ["Aire acondicionado", "Mininevera", "Smart TV", "Wi-Fi gratuito"],
     medios: [
       "/Habitaciones/habitacion3.jpeg",
       "/121017.jpg",
@@ -156,6 +167,7 @@ const HABITACIONES: Habitacion[] = [
     ocupacion: "Hasta 4 Huéspedes",
     camas: "2 Camas Dobles",
     descripcion: "Amplitud y comodidad para compartir. Incluye aire acondicionado, mininevera, Smart TV, Wi-Fi de alta velocidad y salida rápida a la arena.",
+    servicios: ["Aire acondicionado", "Mininevera", "Smart TV", "Wi-Fi gratuito"],
     medios: [
       "/Habitaciones/habitacion4.jpeg",
       "/WhatsApp Image 2026-07-08 at 10.54.20 (1).jpeg",
@@ -173,6 +185,7 @@ const HABITACIONES: Habitacion[] = [
     ocupacion: "Hasta 4 - 5 Huéspedes",
     camas: "1 Cama Queen + 1 Cama Semidoble + 1 Cama Junior (Nido Deslizable)",
     descripcion: "Habitación espaciosa con excelente capacidad. Cuenta con 1 cama Queen, 1 cama semidoble y 1 cama junior deslizable desde abajo. Equipada con aire acondicionado, mininevera, Smart TV, Wi-Fi y video del espacio.",
+    servicios: ["Aire acondicionado", "Mininevera", "Smart TV", "Wi-Fi gratuito"],
     medios: [
       "/videosdebanner/copy_359F2AF5-3796-41C5-B3D0-B9AC83EF213B.mov",
       "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=1920&q=85",
@@ -190,6 +203,7 @@ const HABITACIONES: Habitacion[] = [
     ocupacion: "Hasta 4 - 5 Huéspedes",
     camas: "1 Cama Queen + 1 Cama Semidoble + 1 Cama Junior (Nido Deslizable)",
     descripcion: "Nuestra habitación más amplia con vista abierta. Dotada con 1 cama Queen, 1 cama semidoble y 1 cama junior deslizable inferior, además de aire acondicionado, mininevera, Smart TV y Wi-Fi.",
+    servicios: ["Aire acondicionado", "Mininevera", "Smart TV", "Wi-Fi gratuito"],
     medios: [
       "/Habitaciones/habitacion6.jpeg",
       "/piscina.png",
@@ -264,7 +278,7 @@ const EXPERIENCIAS_SAN_ANTERO: Experiencia[] = [
   }
 ];
 
-// --- 7 FOTOGRAFÍAS: LOS ATARDECERES EN SAN ANTERO PLAYA BLANCA ---
+// --- 7 FOTOGRAFÍAS: ATARDECERES ---
 interface AtardecerFoto {
   id: number;
   titulo: string;
@@ -317,7 +331,13 @@ const ATARDECERES_FOTOS: AtardecerFoto[] = [
   }
 ];
 
-// --- CABECERA INTEGRADA GLOBAL (SIN BOTÓN DE RESERVAR) ---
+// Carrusel duplicado para loop infinito
+const ATARDECERES_FOTOS_DUPLICADOS: AtardecerFoto[] = [
+  ...ATARDECERES_FOTOS,
+  ...ATARDECERES_FOTOS.map((f) => ({ ...f, id: f.id + 100 }))
+];
+
+// --- CABECERA GLOBAL ---
 function GlobalHeader() {
   const [menuAbierto, setMenuAbierto] = useState(false);
 
@@ -349,7 +369,7 @@ function GlobalHeader() {
         </div>
       </header>
 
-      {/* MENÚ LATERAL GLASS RESPONSIVE */}
+      {/* MENÚ LATERAL */}
       <div 
         className={`fixed inset-0 z-50 transition-opacity duration-500 ${
           menuAbierto ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
@@ -418,7 +438,7 @@ function GlobalHeader() {
   );
 }
 
-// --- FOOTER AZUL ABADÍA INTEGRADO ---
+// --- FOOTER AZUL ---
 function GlobalFooter() {
   return (
     <footer className="w-full bg-[#071326] text-white py-12 sm:py-16 px-6 text-center border-t border-blue-950/60">
@@ -489,7 +509,7 @@ function BienvenidaAbadia({ onFinish }: { onFinish: () => void }) {
 export default function HomePage() {
   const [splashActivo, setSplashActivo] = useState(true);
 
-  // Estados de control de video y audio
+  // Estados video y audio
   const [videoHeroActivo, setVideoHeroActivo] = useState(0);
   const [heroSonido, setHeroSonido] = useState(false);
   const [habitacionSonido, setHabitacionSonido] = useState(false);
@@ -505,7 +525,7 @@ export default function HomePage() {
   const [espacioActivoIndex, setEspacioActivoIndex] = useState(0);
   const [experienciaActivaIndex, setExperienciaActivaIndex] = useState(0);
 
-  // Carrusel de Atardeceres
+  // Carrusel Atardeceres
   const [atardecerActivoIndex, setAtardecerActivoIndex] = useState(0);
 
   const [isMounted, setIsMounted] = useState(false);
@@ -514,7 +534,7 @@ export default function HomePage() {
     setIsMounted(true);
   }, []);
 
-  // 1. Carrusel automático Hero (cada 9s)
+  // 1. Hero (cada 9s)
   useEffect(() => {
     if (!isMounted || splashActivo) return;
     const intervalHero = setInterval(() => {
@@ -523,7 +543,7 @@ export default function HomePage() {
     return () => clearInterval(intervalHero);
   }, [isMounted, splashActivo]);
 
-  // 2. Carrusel automático de fotos/videos de la habitación activa (cada 6s)
+  // 2. Fotos/videos de la habitación activa (cada 6s)
   useEffect(() => {
     if (!isMounted || splashActivo) return;
     const intervalHab = setInterval(() => {
@@ -532,7 +552,7 @@ export default function HomePage() {
     return () => clearInterval(intervalHab);
   }, [isMounted, splashActivo, habitacionActivaIndex]);
 
-  // 3. Carrusel automático de Otros Espacios (cada 6s)
+  // 3. Otros Espacios (cada 6s)
   useEffect(() => {
     if (!isMounted || splashActivo) return;
     const intervalEsp = setInterval(() => {
@@ -541,7 +561,7 @@ export default function HomePage() {
     return () => clearInterval(intervalEsp);
   }, [isMounted, splashActivo]);
 
-  // 4. Carrusel automático de las Experiencias en San Antero (cada 7s)
+  // 4. Experiencias San Antero (cada 7s)
   useEffect(() => {
     if (!isMounted || splashActivo) return;
     const intervalExp = setInterval(() => {
@@ -550,7 +570,7 @@ export default function HomePage() {
     return () => clearInterval(intervalExp);
   }, [isMounted, splashActivo]);
 
-  // 5. Carrusel automático de los 7 Atardeceres (cada 5s)
+  // 5. Atardeceres (cada 5s)
   useEffect(() => {
     if (!isMounted || splashActivo) return;
     const intervalAtardeceres = setInterval(() => {
@@ -577,6 +597,12 @@ export default function HomePage() {
     setFotoHabitacionIndex((prev) => (prev === 0 ? habitacionActual.medios.length - 1 : prev - 1));
   };
 
+  const cambiarHabitacion = (idx: number) => {
+    setHabitacionActivaIndex(idx);
+    setFotoHabitacionIndex(0);
+    setLlavesDesplegadas(false);
+  };
+
   const siguienteExperiencia = () => {
     setExperienciaActivaIndex((prev) => (prev + 1) % EXPERIENCIAS_SAN_ANTERO.length);
   };
@@ -597,12 +623,6 @@ export default function HomePage() {
     );
   };
 
-  const seleccionarHabitacionLlave = (index: number) => {
-    setHabitacionActivaIndex(index);
-    setFotoHabitacionIndex(0);
-    setLlavesDesplegadas(false);
-  };
-
   const cotizarWhatsApp = (asunto: string) => {
     const msj = encodeURIComponent(`Hola! Deseo cotizar reserva en Abadía Casa Hotel: ${asunto}`);
     window.open(`https://wa.me/${NUMERO_WHATSAPP}?text=${msj}`, '_blank');
@@ -611,7 +631,7 @@ export default function HomePage() {
   if (!isMounted) return <div className="min-h-screen bg-[#FAF7F2]" />;
 
   return (
-    <main className="w-full bg-[#FAF7F2] text-[#2a2421] antialiased selection:bg-[#8c7355]/20 font-light overflow-x-hidden">
+    <main className={`w-full bg-[#FAF7F2] text-[#2a2421] antialiased selection:bg-[#8c7355]/20 overflow-x-hidden ${ebGaramond.className}`}>
 
       {/* 0. BIENVENIDA */}
       {splashActivo && <BienvenidaAbadia onFinish={() => setSplashActivo(false)} />}
@@ -620,7 +640,7 @@ export default function HomePage() {
       <GlobalHeader />
 
       {/* ========================================================
-          1. BANNER PRINCIPAL (SOLO BOTÓN, SIN TEXTOS - RESPONSIVE 100dvh)
+          1. BANNER PRINCIPAL (SOLO BOTÓN - RESPONSIVE 100dvh)
           ======================================================== */}
       <section className="relative h-[100dvh] w-full overflow-hidden bg-black flex flex-col justify-end pb-12 sm:pb-20 items-center">
         {VIDEOS_HERO.map((video, idx) => {
@@ -652,7 +672,7 @@ export default function HomePage() {
           );
         })}
 
-        {/* SELECTOR FLOTANTE PARA CAMBIAR MANUALMENTE ENTRE LOS 2 VIDEOS */}
+        {/* SELECTOR FLOTANTE EN HERO */}
         <div className="absolute top-20 sm:top-28 z-30 flex items-center gap-2.5 bg-black/40 backdrop-blur-md px-3 sm:px-4 py-1.5 rounded-full border border-white/20">
           <span className="text-[9px] sm:text-[10px] uppercase font-mono tracking-widest text-white/70">
             Video
@@ -673,7 +693,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* BOTÓN FLOTANTE PARA ACTIVAR / SILENCIAR AUDIO DEL HERO */}
+        {/* BOTÓN FLOTANTE AUDIO HERO */}
         <button
           onClick={() => setHeroSonido(!heroSonido)}
           className="absolute bottom-6 right-4 sm:right-12 z-30 bg-black/45 hover:bg-black/70 text-white p-2.5 sm:p-3 rounded-full backdrop-blur-xl border border-white/20 transition-all shadow-xl active:scale-90 cursor-pointer flex items-center gap-2"
@@ -686,7 +706,7 @@ export default function HomePage() {
           </span>
         </button>
 
-        {/* SOLO BOTÓN DE RESERVA EN EL BANNER (SIN TÍTULO NI SUBTÍTULO) */}
+        {/* BOTÓN RESERVAR HERO */}
         <div className="relative z-20 flex flex-col items-center">
           <Link
             href="/reservas-y-pagos"
@@ -701,27 +721,29 @@ export default function HomePage() {
       {/* ========================================================
           TRANSICIÓN 1: TÍTULO EN DORADO
           ======================================================== */}
-      <section className="bg-[#FAF7F2] py-10 sm:py-16 px-4 sm:px-6 text-center border-b border-[#E8DDD0]">
+      <section className="bg-[#FAF7F2] py-10 sm:py-14 px-4 sm:px-6 text-center border-b border-[#E8DDD0]">
         <div className="max-w-2xl mx-auto space-y-2">
           <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.35em] text-[#8c7355] font-semibold block">
-            
+            — COLECCIÓN EXCLUSIVA
           </span>
           <h2 className="text-xl sm:text-3xl md:text-4xl font-semibold uppercase tracking-wide text-[#C5A059]">
             Nuestras Habitaciones
           </h2>
-          <p className="text-xs sm:text-sm text-stone-600 font-light leading-relaxed">
-            Tarifas por persona la noche. Selecciona la llave para explorar cada Habitación (incluyendo videos y fotos en pantalla completa).
+          <p className="text-sm sm:text-base text-stone-600 leading-relaxed">
+            Tarifas por persona la noche. Selecciona la llave del 1 al 6 para explorar cada habitación en pantalla completa.
           </p>
         </div>
       </section>
 
       {/* ========================================================
-          2. SECCIÓN: HABITACIÓN FULL SCREEN (CARRUSEL AUTOMÁTICO)
+          2. SECCIÓN: HABITACIÓN FULL SCREEN (COMO ESTABA ANTES)
+          CON SELECTOR 1 AL 6 DUPLICADO ARRIBA PARA CELULAR + GLASS ULTRA DIFUMINADO
           ======================================================== */}
       <section 
         id="seccion-habitaciones" 
-        className="relative h-[75dvh] sm:h-[100dvh] w-full overflow-hidden bg-black flex flex-col justify-between select-none"
+        className="relative h-[80dvh] sm:h-[100dvh] w-full overflow-hidden bg-black flex flex-col justify-between select-none"
       >
+        {/* RECURSO FULL SCREEN REAL: OCUPA TODO EL FONDO DE BORDE A BORDE */}
         <div className="absolute inset-0 z-0">
           {esRecursoVideo ? (
             <video
@@ -747,124 +769,103 @@ export default function HomePage() {
               fill
               priority
               unoptimized
-              className="object-cover transition-all duration-700 scale-100 hover:scale-105"
+              className="object-cover transition-all duration-700"
             />
           )}
-          <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" />
+
+          {/* Degradado superior e inferior suave */}
+          <div className="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-black/60 to-transparent pointer-events-none" />
+          <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
         </div>
 
-        {/* BARRA SUPERIOR FLOTANTE CON INDICADOR SI ES VIDEO */}
-        <div className="relative z-30 pt-16 sm:pt-24 px-4 sm:px-12 flex items-start justify-between pointer-events-none gap-2">
-          <div className="pointer-events-auto bg-black/40 backdrop-blur-2xl border border-white/20 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-white text-[11px] sm:text-xs font-light flex items-center gap-1.5 sm:gap-2 shadow-xl">
-            <span className="text-white font-mono font-semibold">0{habitacionActual.numero}</span>
-            <span className="text-white/40">•</span>
-            <span className="truncate max-w-[110px] sm:max-w-none">{habitacionActual.categoria}</span>
-            <span className="text-white/40 hidden sm:inline">•</span>
-            <span className="text-white/80 font-mono text-[10px] sm:text-[11px] flex items-center gap-1">
-              {esRecursoVideo && (
-                <span className="bg-red-500/80 text-white text-[8px] uppercase px-1.5 py-0.5 rounded font-bold flex items-center gap-0.5">
-                  <Icons.Play /> Video
-                </span>
-              )}
-              <span>{fotoHabitacionIndex + 1}/{habitacionActual.medios.length}</span>
-            </span>
-          </div>
-
-          <div className="pointer-events-auto relative flex flex-col items-end">
-            <button
-              onClick={() => setLlavesDesplegadas(!llavesDesplegadas)}
-              className={`relative flex items-center gap-1.5 sm:gap-2.5 px-3 sm:px-5 py-2 sm:py-2.5 rounded-full backdrop-blur-2xl border transition-all duration-300 active:scale-95 cursor-pointer shadow-2xl ${
-                llavesDesplegadas 
-                  ? 'bg-[#8c7355] text-white border-white/40 ring-4 ring-[#8c7355]/30' 
-                  : 'bg-black/55 hover:bg-black/75 text-white border-white/30 hover:border-white'
-              }`}
-              aria-label="Abrir selector de 6 habitaciones"
-            >
-              {!llavesDesplegadas && (
-                <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#8c7355]"></span>
-                </span>
-              )}
-
-              <span className="p-0.5 rounded-full text-white">
-                <Icons.Key className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
+        {/* =======================================================
+            BARRA SUPERIOR DUPLICADA:
+            SELECTOR DE HABITACIONES DEL 1 AL 6 VISIBLE EN CELULAR Y ESCRITORIO
+            CON GLASS BLANCO ULTRA DIFUMINADO Y TRANSPARENTE
+            ======================================================= */}
+        <div className="relative z-30 pt-16 sm:pt-24 px-3 sm:px-12 flex flex-col gap-3">
+          
+          <div className="flex items-center justify-between gap-2">
+            {/* Píldora de estado de habitación en glass ultra transparente */}
+            <div className="bg-white/15 backdrop-blur-3xl border border-white/30 px-3.5 sm:px-4 py-1.5 rounded-full text-white text-[11px] sm:text-xs font-light flex items-center gap-2 shadow-[0_8px_32px_rgba(0,0,0,0.15)]">
+              <span className="font-mono font-bold text-[#C5A059]">0{habitacionActual.numero}</span>
+              <span className="text-white/40">•</span>
+              <span className="truncate max-w-[130px] sm:max-w-none font-medium">{habitacionActual.categoria}</span>
+              <span className="text-white/40 hidden sm:inline">•</span>
+              <span className="text-white/80 font-mono text-[10px] hidden sm:inline">
+                {fotoHabitacionIndex + 1} / {habitacionActual.medios.length} {esRecursoVideo ? '(Video)' : 'fotos'}
               </span>
+            </div>
 
-              <div className="text-left hidden md:block">
-                <span className="text-[9px] uppercase tracking-[0.2em] text-white font-semibold block leading-none">
-                  Elige habitación
-                </span>
-                <span className="text-[11px] font-light text-white/90">
-                  Toca aquí (1 al 6)
-                </span>
-              </div>
+            {/* Selector desplegable de llaves clásico de Abadía */}
+            <div className="relative">
+              <button
+                onClick={() => setLlavesDesplegadas(!llavesDesplegadas)}
+                className="bg-white/15 hover:bg-white/25 text-white backdrop-blur-3xl border border-white/30 px-3.5 py-1.5 rounded-full text-xs font-mono flex items-center gap-2 cursor-pointer shadow-[0_8px_32px_rgba(0,0,0,0.15)] transition-all"
+                aria-label="Abrir llaves"
+              >
+                <Icons.Key className="w-3.5 h-3.5 text-[#C5A059]" />
+                <span className="hidden sm:inline">Llaves</span>
+                <span className="font-bold">0{habitacionActual.numero}</span>
+                <span className={`text-[8px] transition-transform ${llavesDesplegadas ? 'rotate-180' : ''}`}>▼</span>
+              </button>
 
-              <div className="flex items-center gap-1 bg-white/15 px-2 py-0.5 rounded-full border border-white/15">
-                <span className="text-[10px] sm:text-[11px] font-mono font-bold text-white">
-                  0{habitacionActual.numero}
-                </span>
-                <span className={`text-[8px] sm:text-[9px] text-white transition-transform duration-300 ${llavesDesplegadas ? 'rotate-180' : ''}`}>
-                  ▼
-                </span>
-              </div>
-            </button>
-
-            {llavesDesplegadas && (
-              <div className="absolute top-12 sm:top-14 right-0 w-64 sm:w-80 p-3 sm:p-4 bg-black/85 backdrop-blur-3xl border border-white/25 rounded-2xl sm:rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.85)] z-40 animate-in fade-in zoom-in-95 duration-200">
-                <div className="flex items-center justify-between pb-2 sm:pb-3 mb-2 sm:mb-3 border-b border-white/15">
-                  <div className="flex items-center gap-1.5">
-                    <Icons.Key className="w-3 h-3 text-white" />
-                    <span className="text-[9px] uppercase tracking-[0.2em] text-white font-semibold">
-                      Selecciona tu Habitación
-                    </span>
-                  </div>
-                  <span className="text-[9px] text-white/70 font-mono">6 llaves</span>
-                </div>
-
-                <div className="grid grid-cols-3 gap-2">
-                  {HABITACIONES.map((h, i) => {
-                    const esSeleccionada = habitacionActivaIndex === i;
-                    const tieneVideo = h.medios.some((m) => esVideo(m));
-
-                    return (
+              {llavesDesplegadas && (
+                <div className="absolute top-11 right-0 w-64 p-3 bg-black/85 backdrop-blur-3xl border border-white/25 rounded-2xl shadow-2xl z-40 animate-in fade-in zoom-in-95">
+                  <div className="grid grid-cols-3 gap-2">
+                    {HABITACIONES.map((h, i) => (
                       <button
                         key={h.id}
-                        onClick={() => seleccionarHabitacionLlave(i)}
-                        className={`group flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-300 cursor-pointer border relative ${
-                          esSeleccionada
-                            ? 'bg-[#8c7355] text-white border-white/50 shadow-lg scale-105 ring-2 ring-white/30'
-                            : 'bg-white/10 hover:bg-white/20 text-white border-white/10 hover:border-white/30'
+                        onClick={() => cambiarHabitacion(i)}
+                        className={`p-2 rounded-xl text-center border transition-all cursor-pointer ${
+                          habitacionActivaIndex === i
+                            ? 'bg-[#8c7355] text-white border-white/50'
+                            : 'bg-white/10 text-white/80 border-white/10 hover:bg-white/20'
                         }`}
                       >
-                        {tieneVideo && (
-                          <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_6px_#22d3ee]" title="Incluye Video" />
-                        )}
-
-                        <div className={`w-6 h-6 rounded-full flex items-center justify-center mb-1 transition-transform group-hover:rotate-12 ${
-                          esSeleccionada ? 'bg-white/25 text-white' : 'bg-black/30 text-white'
-                        }`}>
-                          <Icons.Key className="w-3 h-3" />
-                        </div>
-                        <span className="text-[11px] font-mono font-bold leading-tight text-white">
-                          0{h.numero}
-                        </span>
-                        <span className="text-[7.5px] uppercase tracking-wider text-white/90 truncate w-full text-center mt-0.5">
-                          {h.titulo}
-                        </span>
+                        <span className="block text-xs font-mono font-bold">0{h.numero}</span>
+                        <span className="block text-[8px] uppercase tracking-wider truncate">{h.titulo}</span>
                       </button>
-                    );
-                  })}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
+
+          {/* DUPLICADO ARRIBA: BARRA DE NÚMEROS DEL 1 AL 6 ESPECIAL PARA CELULARES
+              (CON GLASS BLANCO ULTRA DIFUMINADO Y TRANSPARENTE) */}
+          <div className="w-full flex items-center justify-between gap-1.5 sm:gap-2 bg-white/20 backdrop-blur-3xl p-1.5 rounded-full border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.18)] overflow-x-auto no-scrollbar">
+            <span className="text-[10px] uppercase font-mono tracking-widest text-[#C5A059] px-2.5 hidden md:inline font-bold">
+              Habitación:
+            </span>
+            <div className="flex items-center justify-between w-full gap-1.5">
+              {HABITACIONES.map((hab, idx) => {
+                const activa = idx === habitacionActivaIndex;
+                return (
+                  <button
+                    key={hab.id}
+                    onClick={() => cambiarHabitacion(idx)}
+                    className={`flex-1 py-1.5 sm:py-2 px-2 rounded-full text-center text-xs sm:text-sm font-mono font-bold tracking-wider transition-all duration-300 cursor-pointer ${
+                      activa
+                        ? 'bg-[#8c7355] text-white shadow-lg shadow-[#8c7355]/40 scale-105 ring-1 ring-white/50'
+                        : 'bg-white/15 hover:bg-white/30 text-white/90 border border-white/20'
+                    }`}
+                    aria-label={`Ver Habitación 0${hab.numero}`}
+                  >
+                    0{hab.numero}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
         </div>
 
-        {/* CONTROLES LATERALES DE FLECHA */}
+        {/* CONTROLES LATERALES FULL SCREEN (FLECHAS DISCRETAS CON GLASS ULTRA DIFUMINADO) */}
         <button
           onClick={anteriorFoto}
-          className="absolute left-3 sm:left-10 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-16 sm:h-16 rounded-full bg-black/40 hover:bg-[#8c7355] text-white backdrop-blur-xl border border-white/25 flex items-center justify-center transition-all shadow-2xl active:scale-90 cursor-pointer"
+          className="absolute left-3 sm:left-10 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-16 sm:h-16 rounded-full bg-white/20 hover:bg-[#8c7355] text-white backdrop-blur-3xl border border-white/30 flex items-center justify-center transition-all shadow-[0_8px_32px_rgba(0,0,0,0.2)] active:scale-90 cursor-pointer"
           aria-label="Foto anterior"
         >
           <Icons.ChevronLeft />
@@ -872,35 +873,36 @@ export default function HomePage() {
 
         <button
           onClick={siguienteFoto}
-          className="absolute right-3 sm:right-10 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-16 sm:h-16 rounded-full bg-black/40 hover:bg-[#8c7355] text-white backdrop-blur-xl border border-white/25 flex items-center justify-center transition-all shadow-2xl active:scale-90 cursor-pointer"
+          className="absolute right-3 sm:right-10 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-16 sm:h-16 rounded-full bg-white/20 hover:bg-[#8c7355] text-white backdrop-blur-3xl border border-white/30 flex items-center justify-center transition-all shadow-[0_8px_32px_rgba(0,0,0,0.2)] active:scale-90 cursor-pointer"
           aria-label="Siguiente foto"
         >
           <Icons.ChevronRight />
         </button>
 
-        {/* BOTÓN DE AUDIO SI EL MEDIO ACTUAL DE LA HABITACIÓN ES VIDEO */}
+        {/* BOTÓN FLOTANTE DE AUDIO EN VIDEO */}
         {esRecursoVideo && (
           <button
             onClick={() => setHabitacionSonido(!habitacionSonido)}
-            className="absolute bottom-4 right-4 sm:right-12 z-30 bg-black/45 hover:bg-black/70 text-white p-2 sm:p-2.5 rounded-full backdrop-blur-xl border border-white/20 transition-all shadow-xl active:scale-90 cursor-pointer flex items-center gap-1.5"
-            aria-label={habitacionSonido ? "Silenciar video de habitación" : "Activar sonido de habitación"}
+            className="absolute bottom-6 right-4 sm:right-12 z-30 bg-white/20 hover:bg-white/35 text-white px-3.5 py-1.5 rounded-full backdrop-blur-3xl border border-white/30 transition-all text-xs font-mono flex items-center gap-1.5 shadow-[0_8px_32px_rgba(0,0,0,0.2)] cursor-pointer"
+            aria-label={habitacionSonido ? "Silenciar video" : "Activar sonido"}
           >
             {habitacionSonido ? <Icons.VolumeUp /> : <Icons.VolumeMute />}
-            <span className="text-[9px] uppercase font-mono tracking-wider hidden sm:inline">
+            <span className="text-[10px] uppercase hidden sm:inline">
               {habitacionSonido ? "Audio ON" : "Audio OFF"}
             </span>
           </button>
         )}
 
+        {/* PIE DEL VISOR FULL SCREEN */}
         <div className="relative z-20 pb-4 sm:pb-6 text-center pointer-events-none">
-          <span className="bg-black/40 backdrop-blur-md border border-white/15 px-3 py-1 rounded-full text-[10px] sm:text-[11px] text-white/80 font-mono">
-            {fotoHabitacionIndex + 1} / {habitacionActual.medios.length} {esRecursoVideo ? '(Video)' : 'fotos'}
+          <span className="bg-white/20 backdrop-blur-3xl border border-white/30 px-3.5 py-1 rounded-full text-[10px] sm:text-[11px] text-white/90 font-mono shadow-[0_8px_32px_rgba(0,0,0,0.2)]">
+            {fotoHabitacionIndex + 1} / {habitacionActual.medios.length} fotografías • Habitación 0{habitacionActual.numero}
           </span>
         </div>
       </section>
 
       {/* ========================================================
-          3. INFORMACIÓN DE LA HABITACIÓN DEBAJO DEL FULL SCREEN
+          3. FICHA TÉCNICA Y DETALLES DEBAJO DEL FULL SCREEN (COMO ESTABA ANTES)
           ======================================================== */}
       <section className="bg-white py-10 sm:py-16 px-4 sm:px-12 border-b border-[#E8DDD0]">
         <div className="max-w-6xl mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-8 sm:gap-10 text-left">
@@ -923,51 +925,43 @@ export default function HomePage() {
               )}
             </div>
 
-            <h3 className="text-xl sm:text-3xl md:text-4xl font-semibold uppercase tracking-wide text-stone-900">
+            <h3 className="text-2xl sm:text-4xl font-semibold uppercase tracking-wide text-stone-900">
               {habitacionActual.titulo}
             </h3>
 
-            <p className="text-xs sm:text-sm text-stone-600 font-light leading-relaxed">
+            <p className="text-base sm:text-lg text-stone-700 leading-relaxed font-normal">
               {habitacionActual.descripcion}
             </p>
 
             <div className="pt-2 space-y-2.5">
-              <div className="flex flex-wrap items-center gap-2 text-xs text-stone-600 font-medium">
+              <div className="flex flex-wrap items-center gap-2 text-sm text-stone-700 font-medium">
                 <span>👥 {habitacionActual.ocupacion}</span>
                 <span>•</span>
-                <span className="font-semibold text-stone-800">🛏️ {habitacionActual.camas}</span>
+                <span className="font-semibold text-stone-900">🛏️ {habitacionActual.camas}</span>
               </div>
 
+              {/* COMODIDADES */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
-                <div className="bg-[#FAF7F2] p-2.5 rounded-xl border border-[#E8DDD0] text-xs text-stone-800 flex items-center gap-1.5">
-                  <span className="text-[#8c7355] font-bold">✓</span>
-                  <span>Aire acondicionado</span>
-                </div>
-                <div className="bg-[#FAF7F2] p-2.5 rounded-xl border border-[#E8DDD0] text-xs text-stone-800 flex items-center gap-1.5">
-                  <span className="text-[#8c7355] font-bold">✓</span>
-                  <span>Mininevera</span>
-                </div>
-                <div className="bg-[#FAF7F2] p-2.5 rounded-xl border border-[#E8DDD0] text-xs text-stone-800 flex items-center gap-1.5">
-                  <span className="text-[#8c7355] font-bold">✓</span>
-                  <span>Smart TV</span>
-                </div>
-                <div className="bg-[#FAF7F2] p-2.5 rounded-xl border border-[#E8DDD0] text-xs text-stone-800 flex items-center gap-1.5">
-                  <span className="text-[#8c7355] font-bold">✓</span>
-                  <span>Wi-Fi gratuito</span>
-                </div>
+                {habitacionActual.servicios.map((srv, i) => (
+                  <div key={i} className="bg-[#FAF7F2] p-2.5 rounded-xl border border-[#E8DDD0] text-sm text-stone-800 flex items-center gap-1.5">
+                    <span className="text-[#8c7355] font-bold">✓</span>
+                    <span>{srv}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
 
+          {/* Tarjeta de tarifa oficial y botón WhatsApp */}
           <div className="bg-[#FAF7F2] p-5 sm:p-8 rounded-2xl sm:rounded-3xl border border-[#E8DDD0] shadow-sm flex flex-col justify-between gap-5 shrink-0 lg:w-80">
             <div>
               <span className="text-[9px] sm:text-[10px] uppercase tracking-widest text-stone-500 font-bold block">
                 Tarifa Oficial por Persona
               </span>
               <div className="text-2xl sm:text-3xl font-semibold text-stone-900 mt-1">
-                {habitacionActual.precio} <span className="text-xs text-stone-500 font-normal">{habitacionActual.noches}</span>
+                {habitacionActual.precio} <span className="text-sm text-stone-500 font-normal">{habitacionActual.noches}</span>
               </div>
-              <span className="text-[10px] sm:text-[11px] text-stone-500 block mt-1">
+              <span className="text-xs text-stone-500 block mt-1">
                 Acomodación: {habitacionActual.ocupacion}
               </span>
             </div>
@@ -1021,19 +1015,19 @@ export default function HomePage() {
       <section className="bg-[#FAF7F2] py-10 sm:py-16 px-4 sm:px-6 text-center border-b border-[#E8DDD0]">
         <div className="max-w-2xl mx-auto space-y-2">
           <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.35em] text-[#8c7355] font-semibold block">
-            
+            — RINCONES ÍNTIMOS
           </span>
           <h2 className="text-xl sm:text-3xl md:text-4xl font-semibold uppercase tracking-wide text-[#C5A059]">
             Otros Espacios de la Casa
           </h2>
-          <p className="text-xs sm:text-sm text-stone-600 font-light leading-relaxed">
+          <p className="text-sm sm:text-base text-stone-600 leading-relaxed">
             Descubre las áreas comunes, piscina, patios y estacionamiento privado diseñados para tu comodidad absoluta.
           </p>
         </div>
       </section>
 
       {/* ========================================================
-          5. SECCIÓN: OTROS ESPACIOS (CARRUSEL AUTOMÁTICO)
+          5. SECCIÓN: OTROS ESPACIOS (PISCINA Y PARQUEADERO CON SOPORTE DE VIDEO)
           ======================================================== */}
       <section 
         id="seccion-otros-espacios" 
@@ -1113,7 +1107,7 @@ export default function HomePage() {
               <h3 className="text-xl sm:text-3xl md:text-4xl font-semibold uppercase tracking-wide text-stone-950">
                 {espacioActual.titulo}
               </h3>
-              <p className="text-xs sm:text-sm text-stone-700 font-normal max-w-xl leading-relaxed">
+              <p className="text-base sm:text-lg text-stone-700 leading-relaxed">
                 {espacioActual.descripcion}
               </p>
             </div>
@@ -1134,12 +1128,12 @@ export default function HomePage() {
       <section className="bg-[#FAF7F2] py-10 sm:py-16 px-4 sm:px-6 text-center border-b border-[#E8DDD0]">
         <div className="max-w-3xl mx-auto space-y-2">
           <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.35em] text-[#8c7355] font-semibold block">
-            
+            — EXPERIENCIAS & ALREDEDORES
           </span>
           <h2 className="text-xl sm:text-3xl md:text-4xl font-semibold uppercase tracking-wide text-[#C5A059]">
             ¿Qué hacer en San Antero y sus Alrededores?
           </h2>
-          <p className="text-xs sm:text-sm text-stone-600 font-light leading-relaxed">
+          <p className="text-sm sm:text-base text-stone-600 leading-relaxed">
             Gastronomía típica, diversión náutica, playas y cultura local. El carrusel avanza automáticamente o puedes navegarlo con las flechas.
           </p>
         </div>
@@ -1152,7 +1146,6 @@ export default function HomePage() {
         id="seccion-que-hacer" 
         className="relative h-[75dvh] sm:h-[90dvh] w-full overflow-hidden bg-black flex flex-col justify-between select-none"
       >
-        {/* RECURSO VISUAL LIMPIO DE BORDE A BORDE */}
         <div className="absolute inset-0 z-0">
           {experienciaEsVideo ? (
             <video
@@ -1183,7 +1176,7 @@ export default function HomePage() {
           <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" />
         </div>
 
-        {/* ETIQUETA SUPERIOR FLOTANTE DINÁMICA: CAMBIA SOLA CON CADA RECURSO */}
+        {/* ETIQUETA SUPERIOR FLOTANTE DINÁMICA */}
         <div className="relative z-30 pt-16 sm:pt-24 px-4 sm:px-12 flex items-center justify-between pointer-events-none">
           <div className="pointer-events-auto bg-black/50 backdrop-blur-2xl border border-white/20 px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-full text-white text-[11px] sm:text-xs font-light flex items-center gap-2 shadow-xl transition-all duration-500">
             <span className="text-[#C5A059] font-mono font-bold">0{experienciaActivaIndex + 1}</span>
@@ -1196,7 +1189,6 @@ export default function HomePage() {
             )}
           </div>
 
-          {/* Indicadores circulares sutiles de avance automático */}
           <div className="pointer-events-auto hidden sm:flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/15">
             {EXPERIENCIAS_SAN_ANTERO.map((_, idx) => (
               <button
@@ -1213,7 +1205,6 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* CONTROLES LATERALES (FLECHAS DISCRETAS PARA AVANZAR MANUALMENTE) */}
         <button
           onClick={anteriorExperiencia}
           className="absolute left-3 sm:left-10 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-16 sm:h-16 rounded-full bg-black/40 hover:bg-[#8c7355] text-white backdrop-blur-xl border border-white/25 flex items-center justify-center transition-all shadow-2xl active:scale-90 cursor-pointer"
@@ -1230,7 +1221,6 @@ export default function HomePage() {
           <Icons.ChevronRight />
         </button>
 
-        {/* BOTÓN FLOTANTE DE AUDIO (SOLO SI EL RECURSO ES VIDEO) */}
         {experienciaEsVideo && (
           <button
             onClick={() => setExperienciaSonido(!experienciaSonido)}
@@ -1244,7 +1234,6 @@ export default function HomePage() {
           </button>
         )}
 
-        {/* PIE DEL CARRUSEL: INDICADOR DISCRETO */}
         <div className="relative z-20 pb-4 sm:pb-6 text-center pointer-events-none">
           <span className="bg-black/40 backdrop-blur-md border border-white/15 px-3.5 py-1 rounded-full text-[10px] sm:text-[11px] text-white/80 font-mono">
             {experienciaActivaIndex + 1} de {EXPERIENCIAS_SAN_ANTERO.length} • {experienciaActual.tag}
@@ -1258,7 +1247,6 @@ export default function HomePage() {
       <section className="bg-white py-10 sm:py-16 px-4 sm:px-12 border-b border-[#E8DDD0]">
         <div className="max-w-6xl mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-8 sm:gap-10 text-left">
           
-          {/* Textos informativos de la experiencia */}
           <div className="space-y-3 max-w-2xl">
             <div className="flex items-center gap-2">
               <span className="bg-[#8c7355] text-white text-[9px] sm:text-[10px] uppercase tracking-[0.2em] font-semibold px-2.5 py-0.5 rounded-full">
@@ -1273,17 +1261,16 @@ export default function HomePage() {
               {experienciaActual.titulo}
             </h3>
 
-            <p className="text-xs sm:text-sm text-stone-600 font-light leading-relaxed">
+            <p className="text-base sm:text-lg text-stone-700 leading-relaxed">
               {experienciaActual.descripcion}
             </p>
 
-            <div className="flex items-center gap-2 pt-1 text-xs text-stone-500">
+            <div className="flex items-center gap-2 pt-1 text-sm text-stone-600">
               <span className="text-[#8c7355] font-bold">✓</span>
               <span>Recomendación exclusiva de Abadía Casa Hotel</span>
             </div>
           </div>
 
-          {/* Tarjeta de acción y cotización rápida */}
           <div className="bg-[#FAF7F2] p-5 sm:p-8 rounded-2xl sm:rounded-3xl border border-[#E8DDD0] shadow-sm flex flex-col justify-between gap-4 shrink-0 lg:w-80">
             <div>
               <span className="text-[9px] sm:text-[10px] uppercase tracking-widest text-stone-500 font-bold block">
@@ -1292,7 +1279,7 @@ export default function HomePage() {
               <div className="text-lg sm:text-xl font-semibold text-stone-900 mt-1">
                 {experienciaActual.titulo}
               </div>
-              <span className="text-[10px] sm:text-[11px] text-stone-500 block mt-0.5">
+              <span className="text-xs text-stone-500 block mt-0.5">
                 Te asesoramos con transporte y horarios
               </span>
             </div>
@@ -1321,7 +1308,7 @@ export default function HomePage() {
 
       {/* ========================================================
           8. SECCIÓN: LOS ATARDECERES EN SAN ANTERO PLAYA BLANCA
-          (CARRUSEL AUTOMÁTICO - SOLO TÍTULO)
+          (DOBLE CARRUSEL AUTOMÁTICO - SOLO TÍTULO)
           ======================================================== */}
       <section id="atardeceres-san-antero" className="bg-[#FAF7F2] py-10 sm:py-16 px-4 sm:px-6 text-center border-b border-[#E8DDD0]">
         <div className="max-w-3xl mx-auto">
@@ -1331,8 +1318,8 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* 1er CARRUSEL: VISOR PRINCIPAL FULL SCREEN */}
       <section className="relative h-[75dvh] sm:h-[90dvh] w-full overflow-hidden bg-black flex flex-col justify-between select-none">
-        {/* FOTOGRAFÍAS EN CARRUSEL AUTOMÁTICO CON FUNDIDO SUAVE */}
         {ATARDECERES_FOTOS.map((foto, idx) => {
           const activo = idx === atardecerActivoIndex;
           return (
@@ -1355,18 +1342,17 @@ export default function HomePage() {
           );
         })}
 
-        {/* ETIQUETA SUPERIOR FLOTANTE DEL ATARDECER */}
+        {/* ETIQUETA SUPERIOR FLOTANTE DEL ATARDECER CON GLASS ULTRA DIFUMINADO */}
         <div className="relative z-30 pt-16 sm:pt-24 px-4 sm:px-12 flex items-center justify-between pointer-events-none">
-          <div className="pointer-events-auto bg-black/50 backdrop-blur-2xl border border-white/20 px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-full text-white text-[11px] sm:text-xs font-light flex items-center gap-2 shadow-xl transition-all duration-500">
+          <div className="pointer-events-auto bg-white/20 backdrop-blur-3xl border border-white/30 px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-full text-white text-[11px] sm:text-xs font-medium flex items-center gap-2 shadow-[0_8px_32px_rgba(0,0,0,0.18)] transition-all duration-500">
             <span className="text-[#C5A059] font-mono font-bold">0{atardecerActivoIndex + 1}</span>
             <span className="text-white/40">•</span>
-            <span className="font-medium tracking-wide">{atardecerActual.titulo}</span>
+            <span className="tracking-wide text-white">{atardecerActual.titulo}</span>
             <span className="text-white/40 hidden sm:inline">•</span>
             <span className="text-white/80 font-mono text-[10px] hidden sm:inline">{atardecerActual.momento}</span>
           </div>
 
-          {/* INDICADORES CIRCULARES DE AVANCE DE LAS 7 FOTOS */}
-          <div className="pointer-events-auto hidden sm:flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/15">
+          <div className="pointer-events-auto hidden sm:flex items-center gap-1.5 bg-white/20 backdrop-blur-3xl px-3 py-1.5 rounded-full border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.18)]">
             {ATARDECERES_FOTOS.map((_, idx) => (
               <button
                 key={idx}
@@ -1374,7 +1360,7 @@ export default function HomePage() {
                 className={`transition-all duration-300 rounded-full cursor-pointer ${
                   idx === atardecerActivoIndex
                     ? 'w-6 h-1.5 bg-[#C5A059]'
-                    : 'w-1.5 h-1.5 bg-white/40 hover:bg-white'
+                    : 'w-1.5 h-1.5 bg-white/50 hover:bg-white'
                 }`}
                 aria-label={`Ver foto de atardecer ${idx + 1}`}
               />
@@ -1382,10 +1368,10 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* FLECHAS MANUALES LATERALES */}
+        {/* FLECHAS MANUALES CON GLASS ULTRA DIFUMINADO */}
         <button
           onClick={anteriorAtardecer}
-          className="absolute left-3 sm:left-10 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-16 sm:h-16 rounded-full bg-black/40 hover:bg-[#8c7355] text-white backdrop-blur-xl border border-white/25 flex items-center justify-center transition-all shadow-2xl active:scale-90 cursor-pointer"
+          className="absolute left-3 sm:left-10 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-16 sm:h-16 rounded-full bg-white/20 hover:bg-[#8c7355] text-white backdrop-blur-3xl border border-white/30 flex items-center justify-center transition-all shadow-[0_8px_32px_rgba(0,0,0,0.2)] active:scale-90 cursor-pointer"
           aria-label="Atardecer anterior"
         >
           <Icons.ChevronLeft />
@@ -1393,17 +1379,52 @@ export default function HomePage() {
 
         <button
           onClick={siguienteAtardecer}
-          className="absolute right-3 sm:right-10 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-16 sm:h-16 rounded-full bg-black/40 hover:bg-[#8c7355] text-white backdrop-blur-xl border border-white/25 flex items-center justify-center transition-all shadow-2xl active:scale-90 cursor-pointer"
+          className="absolute right-3 sm:right-10 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-16 sm:h-16 rounded-full bg-white/20 hover:bg-[#8c7355] text-white backdrop-blur-3xl border border-white/30 flex items-center justify-center transition-all shadow-[0_8px_32px_rgba(0,0,0,0.2)] active:scale-90 cursor-pointer"
           aria-label="Siguiente atardecer"
         >
           <Icons.ChevronRight />
         </button>
 
-        {/* PIE DEL CARRUSEL: NÚMERO DE FOTOGRAFÍA */}
+        {/* PIE DEL CARRUSEL CON GLASS ULTRA DIFUMINADO */}
         <div className="relative z-20 pb-4 sm:pb-6 text-center pointer-events-none">
-          <span className="bg-black/40 backdrop-blur-md border border-white/15 px-3.5 py-1 rounded-full text-[10px] sm:text-[11px] text-white/80 font-mono">
+          <span className="bg-white/20 backdrop-blur-3xl border border-white/30 px-3.5 py-1 rounded-full text-[10px] sm:text-[11px] text-white font-mono shadow-[0_8px_32px_rgba(0,0,0,0.18)]">
             {atardecerActivoIndex + 1} de {ATARDECERES_FOTOS.length} fotografías • Atardecer en San Antero
           </span>
+        </div>
+      </section>
+
+      {/* 2do CARRUSEL: TIRA INFINITA DUPLICADA EN MINIATURA */}
+      <section className="bg-[#FAF7F2] py-6 px-4 border-b border-[#E8DDD0] overflow-hidden">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center gap-3 overflow-x-auto no-scrollbar py-2">
+            {ATARDECERES_FOTOS_DUPLICADOS.map((item, i) => {
+              const originalIdx = i % ATARDECERES_FOTOS.length;
+              const activo = originalIdx === atardecerActivoIndex;
+              return (
+                <button
+                  key={`${item.id}-${i}`}
+                  onClick={() => setAtardecerActivoIndex(originalIdx)}
+                  className={`relative w-28 sm:w-36 h-20 sm:h-24 rounded-2xl overflow-hidden shrink-0 border-2 transition-all duration-300 cursor-pointer ${
+                    activo
+                      ? 'border-[#8c7355] scale-105 shadow-lg ring-2 ring-[#8c7355]/30'
+                      : 'border-transparent opacity-60 hover:opacity-100'
+                  }`}
+                >
+                  <Image
+                    src={item.src}
+                    alt={item.titulo}
+                    fill
+                    unoptimized
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  <span className="absolute bottom-1.5 left-2 text-[10px] text-white font-mono font-medium">
+                    0{(originalIdx + 1)}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </section>
 
