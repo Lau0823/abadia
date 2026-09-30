@@ -11,16 +11,12 @@ const VIDEOS_HERO = [
   {
     id: 1,
     src: "/BANNER QUE ES ABADIA.MOV",
-    poster: "/Habitaciones/habitacion1.jpeg",
-    subtitulo: "Playa Blanca • San Antero, Córdoba",
-    titulo: "Un Destino Encantador"
+    poster: "/Habitaciones/habitacion1.jpeg"
   },
   {
     id: 2,
     src: "/videosdebanner/copy_411D7CCA-6A4F-4751-9D4E-D68E00EF3485 (1).mov",
-    poster: "/121017.jpg",
-    subtitulo: "Desconexión & Calma Total",
-    titulo: "Refugio Frente al Mar Caribe"
+    poster: "/121017.jpg"
   }
 ];
 
@@ -74,7 +70,7 @@ const Icons = {
   )
 };
 
-// Función auxiliar robusta para detectar videos .mov y otros formatos (insensible a mayúsculas)
+// Función auxiliar para detectar videos .mov y otros formatos
 const esVideo = (url?: string) => {
   if (!url) return false;
   const limpio = url.split('?')[0].toLowerCase();
@@ -202,7 +198,7 @@ const HABITACIONES: Habitacion[] = [
   }
 ];
 
-// --- OTROS ESPACIOS DE LA CASA (CON PISCINA Y PARQUEADERO INTEGRADOS) ---
+// --- OTROS ESPACIOS DE LA CASA ---
 interface EspacioCasa {
   id: string;
   tag: string;
@@ -225,11 +221,10 @@ const OTROS_ESPACIOS: EspacioCasa[] = [
     titulo: "Entrada y Parqueadero Privado",
     descripcion: "Acceso vehicular cerrado, vigilado y cómodo dentro del predio para la completa seguridad de tu vehículo.",
     recurso: "/IMG_2396.MOV"
-  },
- 
+  }
 ];
 
-// --- EXPERIENCIAS EN SAN ANTERO (SOLO PLANES Y DESTINOS EXTERNOS) ---
+// --- EXPERIENCIAS EN SAN ANTERO ---
 interface Experiencia {
   id: string;
   tag: string;
@@ -251,7 +246,7 @@ const EXPERIENCIAS_SAN_ANTERO: Experiencia[] = [
     tag: "Mirador & Atardeceres",
     titulo: "Punta Bonita",
     descripcion: "Un rincón paradisíaco con vistas panorámicas privilegiadas sobre el mar y atardeceres dorados inolvidables.",
-    recurso: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=85"
+    recurso: "/atardecer.jpg"
   },
   {
     id: "playa",
@@ -269,21 +264,67 @@ const EXPERIENCIAS_SAN_ANTERO: Experiencia[] = [
   }
 ];
 
-// --- CABECERA INTEGRADA GLOBAL ---
+// --- 7 FOTOGRAFÍAS: LOS ATARDECERES EN SAN ANTERO PLAYA BLANCA ---
+interface AtardecerFoto {
+  id: number;
+  titulo: string;
+  momento: string;
+  src: string;
+}
+
+const ATARDECERES_FOTOS: AtardecerFoto[] = [
+  {
+    id: 1,
+    titulo: "Reflejo Dorado sobre Playa Blanca",
+    momento: "05:45 PM • Horizonte Caribe",
+    src: "/atardecer.jpg"
+  },
+  {
+    id: 2,
+    titulo: "La Calma de la Marea Baja",
+    momento: "05:55 PM • Frente al Hotel",
+    src: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=85"
+  },
+  {
+    id: 3,
+    titulo: "Cielo Naranja entre Palmeras",
+    momento: "06:05 PM • Sendero Costero",
+    src: "https://images.unsplash.com/photo-1518495973542-4542c06a5843?auto=format&fit=crop&w=1920&q=85"
+  },
+  {
+    id: 4,
+    titulo: "Crepúsculo en Punta Bonita",
+    momento: "06:12 PM • Golfo de Morrosquillo",
+    src: "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?auto=format&fit=crop&w=1920&q=85"
+  },
+  {
+    id: 5,
+    titulo: "Paz Silente frente a la Orilla",
+    momento: "06:20 PM • Muelle Artesanal",
+    src: "https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?auto=format&fit=crop&w=1920&q=85"
+  },
+  {
+    id: 6,
+    titulo: "Tonos Violeta y Brisa Marina",
+    momento: "06:28 PM • Playa Blanca",
+    src: "https://images.unsplash.com/photo-1509233725247-49e657c54213?auto=format&fit=crop&w=1920&q=85"
+  },
+  {
+    id: 7,
+    titulo: "La Noche se Encuentra con el Mar",
+    momento: "06:35 PM • Abadía Casa Hotel",
+    src: "https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?auto=format&fit=crop&w=1920&q=85"
+  }
+];
+
+// --- CABECERA INTEGRADA GLOBAL (SIN BOTÓN DE RESERVAR) ---
 function GlobalHeader() {
   const [menuAbierto, setMenuAbierto] = useState(false);
 
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-40 px-4 sm:px-12 py-4 sm:py-6 flex items-center justify-between pointer-events-none">
-        <div className="pointer-events-auto">
-          <Link
-            href="/reservas-y-pagos"
-            className="bg-[#8c7355] hover:bg-[#735e45] text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-full text-[11px] sm:text-xs font-semibold uppercase tracking-[0.15em] shadow-xl backdrop-blur-md transition-all active:scale-95"
-          >
-            Reservar
-          </Link>
-        </div>
+        <div className="w-10 sm:w-12 pointer-events-none" />
 
         <div className="pointer-events-auto flex items-center justify-center">
           <Link href="/" className="relative w-36 h-12 sm:w-56 sm:h-18 cursor-pointer drop-shadow-[0_4px_16px_rgba(0,0,0,0.65)] hover:scale-105 transition-transform duration-300 block">
@@ -353,6 +394,9 @@ function GlobalHeader() {
             </Link>
             <Link onClick={() => setMenuAbierto(false)} href="/que-hacer" className="text-base sm:text-lg font-medium uppercase tracking-wider text-white hover:text-[#C5A059] transition-colors">
               Qué hacer en San Antero
+            </Link>
+            <Link onClick={() => setMenuAbierto(false)} href="#atardeceres-san-antero" className="text-base sm:text-lg font-medium uppercase tracking-wider text-white hover:text-[#C5A059] transition-colors">
+              Atardeceres Playa Blanca
             </Link>
             <Link onClick={() => setMenuAbierto(false)} href="/testimonios" className="text-base sm:text-lg font-medium uppercase tracking-wider text-white hover:text-[#C5A059] transition-colors">
               Testimonios & Huéspedes
@@ -460,13 +504,17 @@ export default function HomePage() {
   // Otros espacios y Experiencias de destino
   const [espacioActivoIndex, setEspacioActivoIndex] = useState(0);
   const [experienciaActivaIndex, setExperienciaActivaIndex] = useState(0);
+
+  // Carrusel de Atardeceres
+  const [atardecerActivoIndex, setAtardecerActivoIndex] = useState(0);
+
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // 1. Transición automática de los 2 videos del Hero (cada 9 segundos)
+  // 1. Carrusel automático Hero (cada 9s)
   useEffect(() => {
     if (!isMounted || splashActivo) return;
     const intervalHero = setInterval(() => {
@@ -475,7 +523,25 @@ export default function HomePage() {
     return () => clearInterval(intervalHero);
   }, [isMounted, splashActivo]);
 
-  // 2. Carrusel automático de las Experiencias en San Antero (cada 7 segundos)
+  // 2. Carrusel automático de fotos/videos de la habitación activa (cada 6s)
+  useEffect(() => {
+    if (!isMounted || splashActivo) return;
+    const intervalHab = setInterval(() => {
+      setFotoHabitacionIndex((prev) => (prev + 1) % HABITACIONES[habitacionActivaIndex].medios.length);
+    }, 6000);
+    return () => clearInterval(intervalHab);
+  }, [isMounted, splashActivo, habitacionActivaIndex]);
+
+  // 3. Carrusel automático de Otros Espacios (cada 6s)
+  useEffect(() => {
+    if (!isMounted || splashActivo) return;
+    const intervalEsp = setInterval(() => {
+      setEspacioActivoIndex((prev) => (prev + 1) % OTROS_ESPACIOS.length);
+    }, 6000);
+    return () => clearInterval(intervalEsp);
+  }, [isMounted, splashActivo]);
+
+  // 4. Carrusel automático de las Experiencias en San Antero (cada 7s)
   useEffect(() => {
     if (!isMounted || splashActivo) return;
     const intervalExp = setInterval(() => {
@@ -484,13 +550,22 @@ export default function HomePage() {
     return () => clearInterval(intervalExp);
   }, [isMounted, splashActivo]);
 
+  // 5. Carrusel automático de los 7 Atardeceres (cada 5s)
+  useEffect(() => {
+    if (!isMounted || splashActivo) return;
+    const intervalAtardeceres = setInterval(() => {
+      setAtardecerActivoIndex((prev) => (prev + 1) % ATARDECERES_FOTOS.length);
+    }, 5000);
+    return () => clearInterval(intervalAtardeceres);
+  }, [isMounted, splashActivo]);
+
   const habitacionActual = HABITACIONES[habitacionActivaIndex];
   const espacioActual = OTROS_ESPACIOS[espacioActivoIndex];
   const experienciaActual = EXPERIENCIAS_SAN_ANTERO[experienciaActivaIndex];
+  const atardecerActual = ATARDECERES_FOTOS[atardecerActivoIndex];
 
   const medioActual = habitacionActual.medios[fotoHabitacionIndex];
   const esRecursoVideo = esVideo(medioActual);
-  const videoActualHero = VIDEOS_HERO[videoHeroActivo];
   const espacioEsVideo = esVideo(espacioActual.recurso);
   const experienciaEsVideo = esVideo(experienciaActual.recurso);
 
@@ -509,6 +584,16 @@ export default function HomePage() {
   const anteriorExperiencia = () => {
     setExperienciaActivaIndex((prev) =>
       prev === 0 ? EXPERIENCIAS_SAN_ANTERO.length - 1 : prev - 1
+    );
+  };
+
+  const siguienteAtardecer = () => {
+    setAtardecerActivoIndex((prev) => (prev + 1) % ATARDECERES_FOTOS.length);
+  };
+
+  const anteriorAtardecer = () => {
+    setAtardecerActivoIndex((prev) =>
+      prev === 0 ? ATARDECERES_FOTOS.length - 1 : prev - 1
     );
   };
 
@@ -531,13 +616,13 @@ export default function HomePage() {
       {/* 0. BIENVENIDA */}
       {splashActivo && <BienvenidaAbadia onFinish={() => setSplashActivo(false)} />}
 
-      {/* HEADER GLOBAL */}
+      {/* HEADER GLOBAL SIN BOTÓN DE RESERVAR */}
       <GlobalHeader />
 
       {/* ========================================================
-          1. BANNER PRINCIPAL (2 VIDEOS .MOV EN EL HERO - RESPONSIVE 100dvh)
+          1. BANNER PRINCIPAL (SOLO BOTÓN, SIN TEXTOS - RESPONSIVE 100dvh)
           ======================================================== */}
-      <section className="relative h-[100dvh] w-full overflow-hidden bg-black flex flex-col justify-end pb-8 sm:pb-16 items-center">
+      <section className="relative h-[100dvh] w-full overflow-hidden bg-black flex flex-col justify-end pb-12 sm:pb-20 items-center">
         {VIDEOS_HERO.map((video, idx) => {
           const activo = idx === videoHeroActivo;
           return (
@@ -562,7 +647,7 @@ export default function HomePage() {
                 <source src={video.src} type="video/quicktime" />
                 <source src={video.src} type="video/mp4" />
               </video>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/35 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-black/30 pointer-events-none" />
             </div>
           );
         })}
@@ -601,20 +686,11 @@ export default function HomePage() {
           </span>
         </button>
 
-        {/* CONTENIDO FLOTANTE DEL HERO */}
-        <div className="relative z-20 flex flex-col items-center gap-3 text-center px-4 max-w-xl">
-          <div className="space-y-1">
-            <span className="text-[9px] sm:text-xs uppercase tracking-[0.3em] text-[#C5A059] font-semibold drop-shadow">
-              {videoActualHero.subtitulo}
-            </span>
-            <h2 className="text-lg sm:text-3xl md:text-4xl font-semibold uppercase tracking-wide text-white drop-shadow-md leading-tight">
-              {videoActualHero.titulo}
-            </h2>
-          </div>
-
+        {/* SOLO BOTÓN DE RESERVA EN EL BANNER (SIN TÍTULO NI SUBTÍTULO) */}
+        <div className="relative z-20 flex flex-col items-center">
           <Link
             href="/reservas-y-pagos"
-            className="bg-[#8c7355] hover:bg-[#735e45] text-white px-7 sm:px-9 py-3 sm:py-4 rounded-full text-[11px] sm:text-xs font-semibold uppercase tracking-[0.2em] shadow-[0_15px_35px_rgba(0,0,0,0.5)] transition-all duration-300 active:scale-95 cursor-pointer flex items-center gap-2 mt-1"
+            className="bg-[#8c7355] hover:bg-[#735e45] text-white px-9 sm:px-12 py-3.5 sm:py-4 rounded-full text-xs font-semibold uppercase tracking-[0.25em] shadow-[0_15px_35px_rgba(0,0,0,0.55)] transition-all duration-300 active:scale-95 cursor-pointer flex items-center gap-2.5"
           >
             <span>Reservar Ahora</span>
             <Icons.ArrowUpRight />
@@ -640,7 +716,7 @@ export default function HomePage() {
       </section>
 
       {/* ========================================================
-          2. SECCIÓN: HABITACIÓN FULL SCREEN (FOTO O VIDEO 100% LIMPIO Y SIN BLOQUEOS)
+          2. SECCIÓN: HABITACIÓN FULL SCREEN (CARRUSEL AUTOMÁTICO)
           ======================================================== */}
       <section 
         id="seccion-habitaciones" 
@@ -945,7 +1021,7 @@ export default function HomePage() {
       <section className="bg-[#FAF7F2] py-10 sm:py-16 px-4 sm:px-6 text-center border-b border-[#E8DDD0]">
         <div className="max-w-2xl mx-auto space-y-2">
           <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.35em] text-[#8c7355] font-semibold block">
-            — RINCONES ÍNTIMOS
+            
           </span>
           <h2 className="text-xl sm:text-3xl md:text-4xl font-semibold uppercase tracking-wide text-[#C5A059]">
             Otros Espacios de la Casa
@@ -957,7 +1033,7 @@ export default function HomePage() {
       </section>
 
       {/* ========================================================
-          5. SECCIÓN: OTROS ESPACIOS (PISCINA Y PARQUEADERO AQUÍ CON SOPORTE DE VIDEO)
+          5. SECCIÓN: OTROS ESPACIOS (CARRUSEL AUTOMÁTICO)
           ======================================================== */}
       <section 
         id="seccion-otros-espacios" 
@@ -1058,7 +1134,7 @@ export default function HomePage() {
       <section className="bg-[#FAF7F2] py-10 sm:py-16 px-4 sm:px-6 text-center border-b border-[#E8DDD0]">
         <div className="max-w-3xl mx-auto space-y-2">
           <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.35em] text-[#8c7355] font-semibold block">
-            — EXPERIENCIAS & ALREDEDORES
+            
           </span>
           <h2 className="text-xl sm:text-3xl md:text-4xl font-semibold uppercase tracking-wide text-[#C5A059]">
             ¿Qué hacer en San Antero y sus Alrededores?
@@ -1243,7 +1319,95 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 8. FOOTER AZUL ABADÍA UNIFICADO */}
+      {/* ========================================================
+          8. SECCIÓN: LOS ATARDECERES EN SAN ANTERO PLAYA BLANCA
+          (CARRUSEL AUTOMÁTICO - SOLO TÍTULO)
+          ======================================================== */}
+      <section id="atardeceres-san-antero" className="bg-[#FAF7F2] py-10 sm:py-16 px-4 sm:px-6 text-center border-b border-[#E8DDD0]">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-xl sm:text-3xl md:text-4xl font-semibold uppercase tracking-wide text-[#C5A059]">
+            Los Atardeceres en San Antero • Playa Blanca
+          </h2>
+        </div>
+      </section>
+
+      <section className="relative h-[75dvh] sm:h-[90dvh] w-full overflow-hidden bg-black flex flex-col justify-between select-none">
+        {/* FOTOGRAFÍAS EN CARRUSEL AUTOMÁTICO CON FUNDIDO SUAVE */}
+        {ATARDECERES_FOTOS.map((foto, idx) => {
+          const activo = idx === atardecerActivoIndex;
+          return (
+            <div
+              key={foto.id}
+              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+                activo ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
+              }`}
+            >
+              <Image
+                src={foto.src}
+                alt={foto.titulo}
+                fill
+                priority={idx === 0}
+                unoptimized
+                className="object-cover scale-100 hover:scale-105 transition-transform duration-1000"
+              />
+              <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" />
+            </div>
+          );
+        })}
+
+        {/* ETIQUETA SUPERIOR FLOTANTE DEL ATARDECER */}
+        <div className="relative z-30 pt-16 sm:pt-24 px-4 sm:px-12 flex items-center justify-between pointer-events-none">
+          <div className="pointer-events-auto bg-black/50 backdrop-blur-2xl border border-white/20 px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-full text-white text-[11px] sm:text-xs font-light flex items-center gap-2 shadow-xl transition-all duration-500">
+            <span className="text-[#C5A059] font-mono font-bold">0{atardecerActivoIndex + 1}</span>
+            <span className="text-white/40">•</span>
+            <span className="font-medium tracking-wide">{atardecerActual.titulo}</span>
+            <span className="text-white/40 hidden sm:inline">•</span>
+            <span className="text-white/80 font-mono text-[10px] hidden sm:inline">{atardecerActual.momento}</span>
+          </div>
+
+          {/* INDICADORES CIRCULARES DE AVANCE DE LAS 7 FOTOS */}
+          <div className="pointer-events-auto hidden sm:flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/15">
+            {ATARDECERES_FOTOS.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setAtardecerActivoIndex(idx)}
+                className={`transition-all duration-300 rounded-full cursor-pointer ${
+                  idx === atardecerActivoIndex
+                    ? 'w-6 h-1.5 bg-[#C5A059]'
+                    : 'w-1.5 h-1.5 bg-white/40 hover:bg-white'
+                }`}
+                aria-label={`Ver foto de atardecer ${idx + 1}`}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* FLECHAS MANUALES LATERALES */}
+        <button
+          onClick={anteriorAtardecer}
+          className="absolute left-3 sm:left-10 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-16 sm:h-16 rounded-full bg-black/40 hover:bg-[#8c7355] text-white backdrop-blur-xl border border-white/25 flex items-center justify-center transition-all shadow-2xl active:scale-90 cursor-pointer"
+          aria-label="Atardecer anterior"
+        >
+          <Icons.ChevronLeft />
+        </button>
+
+        <button
+          onClick={siguienteAtardecer}
+          className="absolute right-3 sm:right-10 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-16 sm:h-16 rounded-full bg-black/40 hover:bg-[#8c7355] text-white backdrop-blur-xl border border-white/25 flex items-center justify-center transition-all shadow-2xl active:scale-90 cursor-pointer"
+          aria-label="Siguiente atardecer"
+        >
+          <Icons.ChevronRight />
+        </button>
+
+        {/* PIE DEL CARRUSEL: NÚMERO DE FOTOGRAFÍA */}
+        <div className="relative z-20 pb-4 sm:pb-6 text-center pointer-events-none">
+          <span className="bg-black/40 backdrop-blur-md border border-white/15 px-3.5 py-1 rounded-full text-[10px] sm:text-[11px] text-white/80 font-mono">
+            {atardecerActivoIndex + 1} de {ATARDECERES_FOTOS.length} fotografías • Atardecer en San Antero
+          </span>
+        </div>
+      </section>
+
+      {/* 9. FOOTER AZUL ABADÍA UNIFICADO */}
       <GlobalFooter />
 
     </main>
