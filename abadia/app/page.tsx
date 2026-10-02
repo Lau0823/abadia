@@ -184,7 +184,7 @@ const HABITACIONES: Habitacion[] = [
     numero: "2",
     categoria: "",
     titulo: "Habitación 2",
-    ubicacion: "Jardín Botánico Central",
+    ubicacion: "San antero ",
     precio: "$70.000",
     noches: "/ noche por persona",
     ocupacion: "Hasta 3 Huéspedes",

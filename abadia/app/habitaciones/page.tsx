@@ -1,10 +1,46 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { Montserrat, Alex_Brush, Outfit } from 'next/font/google';
+
+// 1. Títulos geométricos limpios
+const montserrat = Montserrat({
+  subsets: ['latin'],
+  weight: ['400', '600', '700', '800'],
+  display: 'swap',
+});
+
+// 2. Acento caligráfico / cursiva fluida
+const alexBrush = Alex_Brush({
+  subsets: ['latin'],
+  weight: ['400'],
+  display: 'swap',
+});
+
+// 3. Cuerpo de texto contemporáneo
+const outfit = Outfit({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600'],
+  display: 'swap',
+});
 
 const NUMERO_WHATSAPP = "573122373415";
+
+// --- 2 VIDEOS .MOV PARA EL BANNER DE HABITACIONES ---
+const VIDEOS_HERO_HABITACIONES = [
+  {
+    id: 1,
+    src: "/121015.mp4",
+    poster: ""
+  },
+  {
+    id: 2,
+    src: "/121016.mp4",
+    poster: ""
+  }
+];
 
 const Icons = {
   ArrowUpRight: () => (
@@ -26,7 +62,24 @@ const Icons = {
     <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
       <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.969.54 1.761.815 2.796.815 3.183 0 5.769-2.587 5.77-5.766.001-3.182-2.585-5.802-5.77-5.802zm9.969 5.828c0 5.518-4.481 9.999-10 9.999-1.745 0-3.385-.45-4.816-1.238l-7.184 1.889 1.921-7.018c-.859-1.488-1.353-3.218-1.353-5.064 0-5.518 4.482-10 10-10 5.519 0 10 4.482 10 10z" />
     </svg>
+  ),
+  VolumeUp: () => (
+    <svg className="w-4 h-4 stroke-current fill-none" viewBox="0 0 24 24" strokeWidth="1.8">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.83 0-1.51-.68-1.51-1.51V9.75c0-.83.68-1.5 1.51-1.5h2.24z" />
+    </svg>
+  ),
+  VolumeMute: () => (
+    <svg className="w-4 h-4 stroke-current fill-none" viewBox="0 0 24 24" strokeWidth="1.8">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 9.75L19.5 12m0 0l2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25m-10.5-3.75l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.83 0-1.51-.68-1.51-1.51V9.75c0-.83.68-1.5 1.51-1.5h2.24z" />
+    </svg>
   )
+};
+
+const esVideo = (url?: string) => {
+  if (!url) return false;
+  const limpio = url.split('?')[0].toLowerCase();
+  const extensiones = ['.mov', '.mp4', '.webm', '.ogg', '.m4v'];
+  return extensiones.some((ext) => limpio.endsWith(ext));
 };
 
 interface Habitacion {
@@ -44,51 +97,51 @@ interface Habitacion {
 
 const HABITACIONES: Habitacion[] = [
   {
-    id: "suite-imperial",
+    id: "Habitación 1",
     numero: "01",
-    categoria: "Suite Insignia",
-    titulo: "Suite Real con Hidromasaje",
-    ubicacion: "Frente al Mar • Terraza Superior",
+    categoria: "",
+    titulo: "Habitación 1 ",
+    ubicacion: "San antero, playa blanca",
     precio: "$450.000",
     noches: "/ noche",
     capacidad: "4 a 6 Personas",
     descripcion: "Nuestra suite insignia concebida para una experiencia íntima sin precedentes. Cuenta con tina de hidromasaje exterior privada al aire libre en su balcón panorámico, lencería de 400 hilos en algodón egipcio, ducha tipo lluvia en piedra natural y amenidades botánicas orgánicas.",
     imagenes: [
-      "/121017.jpg",
+      "/Habitaciones/habitacion1.jpeg",
       "/WhatsApp Image 2026-07-08 at 10.54.20 (1).jpeg",
-      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1920&q=85"
+      "/Habitaciones/habitacion101.png"
     ]
   },
   {
-    id: "cabana-palmeras",
+    id: "Habitación 2",
     numero: "02",
-    categoria: "Cabaña Nativa",
-    titulo: "Cabaña Vista Palmeras",
-    ubicacion: "Jardín Botánico Central",
+    categoria: "Cabaña ",
+    titulo: "",
+    ubicacion: "San antero playa blanca ",
     precio: "$320.000",
     noches: "/ noche",
     capacidad: "4 a 5 Personas",
     descripcion: "Arquitectura rústica moderna con terraza privada suspendida y rodeada de vegetación nativa del Caribe. Un refugio fresco pensado para respirar la brisa marina entre las palmeras.",
     imagenes: [
-      "/WhatsApp Image 2026-07-06 at 20.33.43 (1).jpeg",
-      "/WhatsApp Image 2026-07-08 at 10.54.20 (2).jpeg",
-      "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=1920&q=85"
+     
+      "/Habitaciones/habitacion2.PNG",
+      "/Habitaciones/habitacion2.2.PNG"
     ]
   },
   {
     id: "estancia-silencio",
     numero: "03",
-    categoria: "Estancia Silente",
+    categoria: "Habitacion3",
     titulo: "Estancia Silencio",
-    ubicacion: "Ala Silente • Planta Baja",
+    ubicacion: "",
     precio: "$280.000",
     noches: "/ noche",
     capacidad: "4 Personas",
     descripcion: "Diseño minimalista y fresco concebido para el descanso profundo, la desconexión total y la calma. Materiales nobles, temperatura fresca constante y acústica aislada.",
     imagenes: [
-      "/WhatsApp Image 2026-07-06 at 20.33.43.jpeg",
-      "/121017.jpg",
-      "https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=1920&q=85"
+      "/Habitaciones/habitacion301.png",
+      "/Habitaciones/habitacion3.jpeg",
+      "/Habitaciones/301.png"
     ]
   },
   {
@@ -102,9 +155,9 @@ const HABITACIONES: Habitacion[] = [
     capacidad: "5 a 6 Personas",
     descripcion: "Amplitud y confort integral para familias o grupos íntimos, con sala de descanso, dos ambientes independientes y acceso directo al sendero que lleva a la orilla del mar.",
     imagenes: [
-      "/WhatsApp Image 2026-07-06 at 20.33.44.jpeg",
-      "/WhatsApp Image 2026-07-08 at 10.54.20 (1).jpeg",
-      "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&w=1920&q=85"
+      "/Habitaciones/habitacion4.jpeg",
+      "/DSC05650.jpeg",
+      "/DSC05657.jpeg"
     ]
   },
   {
@@ -118,9 +171,10 @@ const HABITACIONES: Habitacion[] = [
     capacidad: "4 Personas",
     descripcion: "Ubicado a escasos metros de la marea, con hamaca privada, acabados en maderas nobles, ducha exterior a cielo abierto y sonido ininterrumpido de las olas.",
     imagenes: [
-      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=1920&q=85",
-      "/WhatsApp Image 2026-07-08 at 10.54.20 (2).jpeg",
-      "/121017.jpg"
+     
+      "/Habitaciones/habitacion5/DSC05772.jpeg",
+      "/Habitaciones/habitacion5/DSC05770.jpeg",
+      "/Habitaciones/habitacion5/DSC05779.jpeg"
     ]
   },
   {
@@ -134,14 +188,12 @@ const HABITACIONES: Habitacion[] = [
     capacidad: "4 a 6 Personas",
     descripcion: "Nuestra estancia más exclusiva con ventanales de piso a techo, jacuzzi privado, cava y atención personalizada permanente para una estadía inigualable.",
     imagenes: [
-      "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=1920&q=85",
-      "/piscina.png",
-      "/WhatsApp Image 2026-07-06 at 20.33.43 (1).jpeg"
+   "/Habitaciones/habitacion6.jpeg",
     ]
   }
 ];
 
-// --- COMPONENTE INDIVIDUAL DE HABITACIÓN: FULL SCREEN + BOTÓN WHATSAPP EN GLASS ---
+// --- COMPONENTE INDIVIDUAL DE HABITACIÓN: FULL SCREEN + BOTÓN WHATSAPP ---
 function HabitacionFullScreenItem({ hab }: { hab: Habitacion }) {
   const [fotoIndex, setFotoIndex] = useState(0);
 
@@ -160,7 +212,7 @@ function HabitacionFullScreenItem({ hab }: { hab: Habitacion }) {
 
   return (
     <article className="w-full border-b border-[#E8DDD0] bg-white last:border-b-0">
-      {/* 1. IMAGEN FULL SCREEN CON CARRUSEL DE FOTOS */}
+      {/* 1. RECURSO FULL SCREEN CON CARRUSEL DE FOTOS */}
       <div className="relative h-[80vh] sm:h-[88vh] md:h-[92vh] w-full overflow-hidden bg-black select-none group">
         <Image
           src={hab.imagenes[fotoIndex]}
@@ -172,20 +224,21 @@ function HabitacionFullScreenItem({ hab }: { hab: Habitacion }) {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/35 pointer-events-none" />
 
-        {/* ETIQUETA SUPERIOR GLASS */}
+        {/* ETIQUETA SUPERIOR GLASS ULTRA DIFUMINADA */}
         <div className="absolute top-6 left-6 right-6 z-20 flex items-center justify-between pointer-events-none">
-          <div className="pointer-events-auto bg-black/40 backdrop-blur-xl border border-white/20 px-4 py-1.5 rounded-full text-white text-xs font-light shadow-md">
-            Estancia {hab.numero} • {hab.categoria}
+          <div className="pointer-events-auto bg-white/20 backdrop-blur-3xl border border-white/30 px-4 py-1.5 rounded-full text-white text-xs font-light shadow-[0_8px_32px_rgba(0,0,0,0.18)]">
+            <span className={`${montserrat.className} font-bold text-[#C5A059] mr-1.5`}>0{hab.numero}</span>
+            <span className={`${montserrat.className} uppercase tracking-wider text-[10px]`}>{hab.categoria}</span>
           </div>
-          <div className="pointer-events-auto bg-black/40 backdrop-blur-xl border border-white/20 px-4 py-1.5 rounded-full text-white text-xs font-light shadow-md">
-            Foto {fotoIndex + 1} de {hab.imagenes.length}
+          <div className="pointer-events-auto bg-white/20 backdrop-blur-3xl border border-white/30 px-4 py-1.5 rounded-full text-white text-xs font-mono shadow-[0_8px_32px_rgba(0,0,0,0.18)]">
+            {fotoIndex + 1} de {hab.imagenes.length}
           </div>
         </div>
 
         {/* BOTONES CARRUSEL ‹ Y › */}
         <button
           onClick={anterior}
-          className="absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-black/40 hover:bg-[#8c7355] text-white backdrop-blur-xl border border-white/25 flex items-center justify-center transition-all shadow-2xl active:scale-90 cursor-pointer"
+          className="absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-white/20 hover:bg-[#071326] text-white backdrop-blur-3xl border border-white/30 flex items-center justify-center transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.2)] active:scale-90 cursor-pointer"
           aria-label={`Foto anterior de ${hab.titulo}`}
         >
           <Icons.ChevronLeft />
@@ -193,26 +246,28 @@ function HabitacionFullScreenItem({ hab }: { hab: Habitacion }) {
 
         <button
           onClick={siguiente}
-          className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-black/40 hover:bg-[#8c7355] text-white backdrop-blur-xl border border-white/25 flex items-center justify-center transition-all shadow-2xl active:scale-90 cursor-pointer"
+          className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-white/20 hover:bg-[#071326] text-white backdrop-blur-3xl border border-white/30 flex items-center justify-center transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.2)] active:scale-90 cursor-pointer"
           aria-label={`Siguiente foto de ${hab.titulo}`}
         >
           <Icons.ChevronRight />
         </button>
 
-        {/* TÍTULO Y COSTO SOBRE LA BASE DE LA FOTO EN BLANCO */}
+        {/* TÍTULO Y COSTO SOBRE LA BASE DE LA FOTO */}
         <div className="absolute bottom-6 left-6 right-6 z-20 pointer-events-none">
-          <div className="max-w-6xl mx-auto flex flex-col sm:flex-row sm:items-end justify-between gap-2 text-white text-left">
+          <div className="max-w-6xl mx-auto flex flex-col sm:flex-row sm:items-end justify-between gap-3 text-white text-left">
             <div>
-              <span className="text-[10px] uppercase tracking-[0.25em] text-white/80 block font-semibold">
+              <span className="text-[10px] uppercase tracking-[0.25em] text-white/80 block font-semibold mb-1">
                 📍 {hab.ubicacion}
               </span>
-              <h3 className="text-2xl sm:text-4xl font-semibold uppercase tracking-wide text-white drop-shadow-md">
+              <h3 className={`${montserrat.className} text-2xl sm:text-4xl font-extrabold uppercase tracking-tight text-white drop-shadow-md`}>
                 {hab.titulo}
               </h3>
             </div>
             <div className="text-left sm:text-right">
-              <span className="text-xs uppercase tracking-widest text-white/70 block">Costo Oficial</span>
-              <span className="text-2xl sm:text-3xl font-medium text-white">
+              <span className={`${montserrat.className} text-[10px] uppercase tracking-widest text-[#C5A059] font-bold block`}>
+                Costo Oficial
+              </span>
+              <span className={`${montserrat.className} text-2xl sm:text-3xl font-bold text-white`}>
                 {hab.precio} <span className="text-xs text-white/70 font-normal">{hab.noches}</span>
               </span>
             </div>
@@ -220,42 +275,42 @@ function HabitacionFullScreenItem({ hab }: { hab: Habitacion }) {
         </div>
       </div>
 
-      {/* 2. DESCRIPCIÓN ABAJO DEL FULL SCREEN */}
+      {/* 2. DESCRIPCIÓN Y FICHA TÉCNICA ABAJO DEL FULL SCREEN */}
       <div className="bg-[#FAF7F2] py-10 px-6 sm:px-12">
         <div className="max-w-6xl mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-8 text-left">
           
           <div className="space-y-4 max-w-2xl">
             <div className="flex items-center gap-3">
-              <span className="bg-[#8c7355] text-white text-[10px] uppercase tracking-[0.2em] font-semibold px-3 py-1 rounded-full">
+              <span className={`${montserrat.className} bg-[#8c7355] text-white text-[10px] uppercase tracking-[0.2em] font-bold px-3 py-1 rounded-full`}>
                 Estancia {hab.numero}
               </span>
-              <span className="text-xs font-semibold text-[#8c7355]">
+              <span className={`${montserrat.className} text-xs font-semibold uppercase text-[#C5A059]`}>
                 👥 Capacidad: {hab.capacidad}
               </span>
             </div>
 
-            <p className="text-xs sm:text-sm text-stone-600 font-light leading-relaxed">
+            <p className="text-sm sm:text-base text-stone-700 font-normal leading-relaxed">
               {hab.descripcion}
             </p>
 
             <div className="pt-2">
-              <span className="text-[10px] uppercase tracking-[0.25em] text-stone-500 font-bold block mb-2">
+              <span className={`${montserrat.className} text-[10px] uppercase tracking-[0.25em] text-stone-500 font-bold block mb-2`}>
                 Servicios Incluidos en la Habitación:
               </span>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                <div className="bg-white p-3 rounded-2xl border border-[#E8DDD0] text-xs text-stone-800 flex items-center gap-2 shadow-sm">
+                <div className="bg-white p-3 rounded-2xl border border-[#E8DDD0] text-xs text-stone-800 flex items-center gap-2 shadow-2xs">
                   <span className="text-[#8c7355] font-bold">✓</span>
                   <span>Baño privado</span>
                 </div>
-                <div className="bg-white p-3 rounded-2xl border border-[#E8DDD0] text-xs text-stone-800 flex items-center gap-2 shadow-sm">
+                <div className="bg-white p-3 rounded-2xl border border-[#E8DDD0] text-xs text-stone-800 flex items-center gap-2 shadow-2xs">
                   <span className="text-[#8c7355] font-bold">✓</span>
                   <span>Nevera minibar</span>
                 </div>
-                <div className="bg-white p-3 rounded-2xl border border-[#E8DDD0] text-xs text-stone-800 flex items-center gap-2 shadow-sm">
+                <div className="bg-white p-3 rounded-2xl border border-[#E8DDD0] text-xs text-stone-800 flex items-center gap-2 shadow-2xs">
                   <span className="text-[#8c7355] font-bold">✓</span>
                   <span>Aire acondicionado</span>
                 </div>
-                <div className="bg-white p-3 rounded-2xl border border-[#E8DDD0] text-xs text-stone-800 flex items-center gap-2 shadow-sm">
+                <div className="bg-white p-3 rounded-2xl border border-[#E8DDD0] text-xs text-stone-800 flex items-center gap-2 shadow-2xs">
                   <span className="text-[#8c7355] font-bold">✓</span>
                   <span>Televisor Smart TV</span>
                 </div>
@@ -263,36 +318,32 @@ function HabitacionFullScreenItem({ hab }: { hab: Habitacion }) {
             </div>
           </div>
 
-          {/* Tarjeta de acciones: BOTÓN WHATSAPP EN GLASS */}
+          {/* Tarjeta de acciones */}
           <div className="bg-white p-6 sm:p-8 rounded-3xl border border-[#E8DDD0] shadow-md flex flex-col justify-between gap-5 shrink-0 lg:w-80">
             <div>
-              <span className="text-[10px] uppercase tracking-[0.25em] text-stone-400 font-bold block">
+              <span className={`${montserrat.className} text-[10px] uppercase tracking-[0.25em] text-stone-400 font-bold block`}>
                 Tarifa Total por Noche
               </span>
-              <div className="text-3xl font-semibold text-[#8c7355] mt-1">
+              <div className={`${montserrat.className} text-3xl font-bold text-[#C5A059] mt-1`}>
                 {hab.precio} <span className="text-xs text-stone-400 font-normal">{hab.noches}</span>
               </div>
-              <span className="text-[11px] text-stone-500 block mt-1">
+              <span className="text-xs text-stone-500 block mt-1">
                 Acomodación para {hab.capacidad}
               </span>
             </div>
 
             <div className="space-y-2.5">
-              {/* BOTÓN WHATSAPP EN GLASSMORPHISM ELEGANTE */}
               <button
                 onClick={cotizarWhatsApp}
-                className="w-full bg-white/70 hover:bg-white text-stone-800 border border-stone-300/80 backdrop-blur-xl py-3.5 px-4 rounded-2xl text-xs font-semibold uppercase tracking-[0.15em] shadow-[0_4px_16px_rgba(0,0,0,0.06)] hover:shadow-[0_6px_20px_rgba(140,115,85,0.15)] transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+                className={`${montserrat.className} w-full bg-[#8c7355] hover:bg-[#071326] text-white py-3.5 px-4 rounded-2xl text-xs font-bold uppercase tracking-[0.15em] shadow-md transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 cursor-pointer`}
               >
-                <span className="text-[#8c7355]">
-                  <Icons.WhatsApp />
-                </span>
+                <Icons.WhatsApp />
                 <span>Reservar por WhatsApp</span>
               </button>
 
-              {/* Botón Dashboard */}
               <Link
                 href={`/reservas-y-pagos?id=${hab.id}`}
-                className="w-full bg-[#8c7355] hover:bg-[#735e45] text-white py-3.5 px-4 rounded-2xl text-xs font-semibold uppercase tracking-[0.15em] shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5 text-center"
+                className={`${montserrat.className} w-full bg-white hover:bg-stone-100 text-stone-900 border border-[#E8DDD0] py-3.5 px-4 rounded-2xl text-xs font-semibold uppercase tracking-[0.15em] transition-all duration-300 active:scale-95 flex items-center justify-center gap-1.5 text-center`}
               >
                 <span>Dashboard de Reservas</span>
                 <Icons.ArrowUpRight />
@@ -308,11 +359,21 @@ function HabitacionFullScreenItem({ hab }: { hab: Habitacion }) {
 
 export default function PaginaHabitaciones() {
   const [menuAbierto, setMenuAbierto] = useState(false);
+  const [videoHeroActivo, setVideoHeroActivo] = useState(0);
+  const [heroSonido, setHeroSonido] = useState(false);
+
+  // Cambio automático entre los 2 videos cada 9s
+  useEffect(() => {
+    const intervalHero = setInterval(() => {
+      setVideoHeroActivo((prev) => (prev + 1) % VIDEOS_HERO_HABITACIONES.length);
+    }, 9000);
+    return () => clearInterval(intervalHero);
+  }, []);
 
   return (
-    <main className="w-full bg-[#FAF7F2] text-[#2a2421] antialiased min-h-screen font-light">
+    <main className={`w-full bg-[#FAF7F2] text-[#2a2421] antialiased min-h-screen ${outfit.className}`}>
       
-      {/* HEADER: SIN BOTÓN IZQUIERDO, LOGO CENTRADO Y MENÚ DERECHO */}
+      {/* HEADER GLOBAL */}
       <header className="fixed top-0 left-0 right-0 z-40 px-6 sm:px-12 py-6 flex items-center justify-between pointer-events-none">
         <div className="w-12 h-12" />
 
@@ -331,7 +392,7 @@ export default function PaginaHabitaciones() {
         <div className="pointer-events-auto">
           <button 
             onClick={() => setMenuAbierto(true)}
-            className="w-12 h-12 rounded-full bg-black/35 hover:bg-black/55 text-white border border-white/20 flex items-center justify-center shadow-xl active:scale-90 transition-all cursor-pointer backdrop-blur-xl"
+            className="w-12 h-12 rounded-full bg-black/35 hover:bg-[#071326] text-white border border-white/20 flex items-center justify-center shadow-xl active:scale-90 transition-all duration-300 cursor-pointer backdrop-blur-xl"
             aria-label="Abrir Menú"
           >
             <span className="text-xl">☰</span>
@@ -347,12 +408,12 @@ export default function PaginaHabitaciones() {
       >
         <div onClick={() => setMenuAbierto(false)} className="absolute inset-0 bg-black/50 backdrop-blur-md" />
 
-        <div className={`absolute top-0 right-0 bottom-0 w-full sm:w-[420px] bg-[#14100e]/85 backdrop-blur-3xl p-10 sm:p-12 flex flex-col justify-between border-l border-white/15 shadow-2xl transition-transform duration-500 ease-out ${
+        <div className={`absolute top-0 right-0 bottom-0 w-full sm:w-[420px] bg-[#071326]/95 backdrop-blur-3xl p-10 sm:p-12 flex flex-col justify-between border-l border-white/15 shadow-2xl transition-transform duration-500 ease-out ${
           menuAbierto ? 'translate-x-0' : 'translate-x-full'
         }`}>
           <div className="flex items-center justify-between border-b border-white/10 pb-6">
-            <span className="text-[10px] uppercase tracking-[0.3em] text-[#C5A059] font-semibold">
-              Menú Abadía
+            <span className={`${montserrat.className} text-[10px] uppercase tracking-[0.3em] text-[#C5A059] font-bold`}>
+              Abadía Casa Hotel
             </span>
             <button
               onClick={() => setMenuAbierto(false)}
@@ -363,11 +424,11 @@ export default function PaginaHabitaciones() {
           </div>
 
           <nav className="flex flex-col gap-6 text-left my-auto">
-            <Link onClick={() => setMenuAbierto(false)} href="/" className="text-lg sm:text-2xl font-medium uppercase tracking-wider text-white hover:text-[#C5A059] transition-colors">Inicio</Link>
-            <Link onClick={() => setMenuAbierto(false)} href="/habitaciones" className="text-lg sm:text-2xl font-medium uppercase tracking-wider text-white hover:text-[#C5A059] transition-colors">Nuestras Habitaciones</Link>
-            <Link onClick={() => setMenuAbierto(false)} href="/otros-espacios" className="text-lg sm:text-2xl font-medium uppercase tracking-wider text-white hover:text-[#C5A059] transition-colors">Otros Espacios de la Casa</Link>
-            <Link onClick={() => setMenuAbierto(false)} href="/que-hacer" className="text-lg sm:text-2xl font-medium uppercase tracking-wider text-white hover:text-[#C5A059] transition-colors">Qué hacer en San Antero</Link>
-            <Link onClick={() => setMenuAbierto(false)} href="/reservas-y-pagos" className="text-lg sm:text-2xl font-medium uppercase tracking-wider text-white hover:text-[#C5A059] transition-colors">Dashboard de Reservas & Pagos</Link>
+            <Link onClick={() => setMenuAbierto(false)} href="/" className={`${montserrat.className} text-lg sm:text-2xl font-medium uppercase tracking-wider text-white hover:text-[#C5A059] transition-colors`}>Inicio</Link>
+            <Link onClick={() => setMenuAbierto(false)} href="/habitaciones" className={`${montserrat.className} text-lg sm:text-2xl font-medium uppercase tracking-wider text-white hover:text-[#C5A059] transition-colors`}>Nuestras Habitaciones</Link>
+            <Link onClick={() => setMenuAbierto(false)} href="/otros-espacios" className={`${montserrat.className} text-lg sm:text-2xl font-medium uppercase tracking-wider text-white hover:text-[#C5A059] transition-colors`}>Otros Espacios de la Casa</Link>
+            <Link onClick={() => setMenuAbierto(false)} href="/que-hacer" className={`${montserrat.className} text-lg sm:text-2xl font-medium uppercase tracking-wider text-white hover:text-[#C5A059] transition-colors`}>Qué hacer en San Antero</Link>
+            <Link onClick={() => setMenuAbierto(false)} href="/reservas-y-pagos" className={`${montserrat.className} text-lg sm:text-2xl font-medium uppercase tracking-wider text-white hover:text-[#C5A059] transition-colors`}>Dashboard de Reservas & Pagos</Link>
           </nav>
 
           <div className="pt-6 border-t border-white/10 flex items-center justify-between text-[10px] uppercase tracking-[0.25em] text-white/70">
@@ -377,47 +438,123 @@ export default function PaginaHabitaciones() {
         </div>
       </div>
 
-      {/* BANNER EDITORIAL FULL SCREEN DE ENTRADA (TÍTULO EN BLANCO) */}
-      <section className="relative h-[65vh] sm:h-[75vh] w-full overflow-hidden bg-black flex flex-col justify-end pb-12 px-6 text-white text-center">
-        <Image
-          src="/121017.jpg"
-          alt="Colección de Habitaciones Hotel Abadía"
-          fill
-          priority
-          unoptimized
-          className="object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/40 pointer-events-none" />
+      {/* ========================================================
+          BANNER PRINCIPAL: 2 VIDEOS .MOV CON CONTROLES (HERO)
+          ======================================================== */}
+      <section className="relative h-[85vh] sm:h-[92vh] w-full overflow-hidden bg-black flex flex-col justify-end pb-12 sm:pb-16 items-center">
+        {VIDEOS_HERO_HABITACIONES.map((video, idx) => {
+          const activo = idx === videoHeroActivo;
+          return (
+            <div
+              key={video.id}
+              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+                activo ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
+              }`}
+            >
+              <video
+                poster={video.poster}
+                autoPlay
+                muted={!heroSonido}
+                loop
+                playsInline
+                preload="auto"
+                onLoadedData={(e) => {
+                  e.currentTarget.play().catch(() => {});
+                }}
+                className="w-full h-full object-cover scale-105"
+              >
+                <source src={video.src} type="video/quicktime" />
+                <source src={video.src} type="video/mp4" />
+              </video>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/40 pointer-events-none" />
+            </div>
+          );
+        })}
 
-        <div className="relative z-20 max-w-3xl mx-auto space-y-2">
-          <span className="text-[10px] uppercase tracking-[0.35em] text-white/80 font-semibold block">
-            Colección de Estancias
+        {/* SELECTOR FLOTANTE PARA CAMBIAR ENTRE LOS 2 VIDEOS */}
+        <div className="absolute top-24 sm:top-28 z-30 flex items-center gap-2.5 bg-black/40 backdrop-blur-md px-3 sm:px-4 py-1.5 rounded-full border border-white/20">
+          <span className="text-[9px] sm:text-[10px] uppercase font-mono tracking-widest text-white/70">
+            Video
           </span>
-          <h1 className="text-3xl sm:text-5xl font-semibold uppercase tracking-wide text-white">
-            Nuestras Habitaciones
-          </h1>
-          <p className="text-xs sm:text-sm text-stone-200 font-light">
+          <div className="flex items-center gap-1.5">
+            {VIDEOS_HERO_HABITACIONES.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setVideoHeroActivo(i)}
+                className={`transition-all duration-300 rounded-full cursor-pointer ${
+                  i === videoHeroActivo
+                    ? 'w-6 sm:w-7 h-2 bg-[#C5A059]'
+                    : 'w-2 h-2 bg-white/40 hover:bg-white'
+                }`}
+                aria-label={`Ver video ${i + 1}`}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* BOTÓN FLOTANTE AUDIO HERO */}
+        <button
+          onClick={() => setHeroSonido(!heroSonido)}
+          className="absolute bottom-6 right-6 sm:right-12 z-30 bg-black/45 hover:bg-[#071326] text-white p-2.5 sm:p-3 rounded-full backdrop-blur-xl border border-white/20 transition-all duration-300 shadow-xl active:scale-90 cursor-pointer flex items-center gap-2"
+          aria-label={heroSonido ? "Silenciar video" : "Activar sonido"}
+          title={heroSonido ? "Silenciar video" : "Activar sonido"}
+        >
+          {heroSonido ? <Icons.VolumeUp /> : <Icons.VolumeMute />}
+          <span className="text-[9px] uppercase font-mono tracking-widest hidden sm:inline">
+            {heroSonido ? "Sonido ON" : "Sonido OFF"}
+          </span>
+        </button>
+
+        {/* TÍTULO EDITORIAL EN HERO */}
+        <div className="relative z-20 max-w-3xl mx-auto space-y-2 text-center px-4">
+          <span className={`${montserrat.className} text-[9px] sm:text-[10px] uppercase tracking-[0.35em] text-white/80 font-bold block`}>
+            
+          </span>
+          <div className="relative inline-block">
+            <h1 className={`${montserrat.className} text-3xl sm:text-5xl md:text-6xl font-extrabold uppercase tracking-tight text-white drop-shadow-lg`}>
+              NUESTRAS
+            </h1>
+            <span className={`${alexBrush.className} block text-5xl sm:text-7xl text-[#7C9D96] -mt-3 sm:-mt-6 tracking-wide drop-shadow-md`}>
+              Habitaciones?
+            </span>
+          </div>
+          <p className="text-xs sm:text-sm text-stone-200 font-light max-w-lg mx-auto pt-1">
             Explora las 6 estancias boutique en pantalla completa con sus especificaciones de confort y capacidad.
           </p>
+
+          <div className="pt-2">
+            <Link
+              href="#catalogo-estancias"
+              className={`${montserrat.className} inline-flex items-center gap-2 bg-[#8c7355] hover:bg-[#071326] text-white px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-[0.2em] shadow-[0_15px_35px_rgba(0,0,0,0.55)] transition-all duration-300 active:scale-95`}
+            >
+              <span>Ver Catálogo</span>
+              <Icons.ArrowUpRight />
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* TRANSICIÓN EDITORIAL: TÍTULO EN DORADO */}
-      <section className="bg-[#FAF7F2] py-12 px-6 text-center border-b border-[#E8DDD0]">
-        <div className="max-w-2xl mx-auto space-y-2">
-          <span className="text-[10px] uppercase tracking-[0.35em] text-[#8c7355] font-semibold block">
-            — EXPERIENCIA VISUAL
+      {/* TRANSICIÓN EDITORIAL: TÍTULO EN DORADO CON DETALLE SCRIPT */}
+      <section id="catalogo-estancias" className="bg-[#FAF7F2] py-12 sm:py-16 px-6 text-center border-b border-[#E8DDD0]">
+        <div className="max-w-2xl mx-auto space-y-1">
+          <span className={`${montserrat.className} text-[9px] sm:text-[10px] uppercase tracking-[0.35em] text-[#8c7355] font-bold block`}>
+            
           </span>
-          <h2 className="text-2xl sm:text-3xl font-semibold uppercase tracking-wide text-[#C5A059]">
-            Catálogo Completo de las 6 Estancias
-          </h2>
-          <p className="text-xs sm:text-sm text-stone-600 font-light leading-relaxed">
+          <div className="relative inline-block">
+            <h2 className={`${montserrat.className} text-2xl sm:text-4xl font-extrabold uppercase tracking-tight text-[#2a2421]`}>
+              CATÁLOGO DE LAS
+            </h2>
+            <span className={`${alexBrush.className} block text-4xl sm:text-6xl text-[#7C9D96] -mt-3 sm:-mt-5 tracking-wide`}>
+              6 Estancias?
+            </span>
+          </div>
+          <p className="text-xs sm:text-sm text-stone-600 font-light leading-relaxed pt-2">
             Desliza las fotografías de cada estancia usando los controles de carrusel y consulta abajo sus servicios incluidos.
           </p>
         </div>
       </section>
 
-      {/* LAS 6 HABITACIONES FULL SCREEN DE AHÍ PARA ABAJO */}
+      {/* LAS 6 HABITACIONES FULL SCREEN */}
       <div className="w-full">
         {HABITACIONES.map((hab) => (
           <HabitacionFullScreenItem key={hab.id} hab={hab} />
@@ -434,7 +571,7 @@ export default function PaginaHabitaciones() {
             Playa Blanca, San Antero & Coveñas — Colombia <br /> Un espacio para la desconexión total y la calma.
           </p>
           <div className="w-12 h-[1px] bg-white/20 my-2" />
-          <p className="text-[10px] uppercase tracking-[0.3em] text-white/50 font-semibold">
+          <p className="text-[10px] uppercase tracking-[0.3em] text-white/50 font-semibold font-mono">
             © 2026 Hotel Abadía. Todos los derechos reservados.
           </p>
         </div>
