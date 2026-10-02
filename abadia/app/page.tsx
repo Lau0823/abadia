@@ -164,14 +164,14 @@ const HABITACIONES: Habitacion[] = [
   {
     id: "habitacion-1",
     numero: "1",
-    categoria: "Habitación Confort",
+    categoria: "",
     titulo: "Habitación 1",
     ubicacion: "Playa Blanca • San Antero",
     precio: "$70.000",
     noches: "/ noche por persona",
     ocupacion: "2 a 3 Huéspedes",
-    camas: "1 Cama Queen + Cama Adicional",
-    descripcion: "Habitación privada equipada con aire acondicionado, televisor Smart TV, mininevera y Wi-Fi de alta velocidad para descansar a pasos del mar.",
+    camas: "1 Cama doble + Camarote cama semidoble ",
+    descripcion: "Habitación privada  equipada con aire acondicionado, televisor Smart TV, mininevera y Wi-Fi de alta velocidad para descansar a pasos del mar.",
     servicios: ["Aire acondicionado", "Mininevera", "Smart TV", "Wi-Fi gratuito"],
     medios: [
       "/Habitaciones/habitacion1.jpeg",
@@ -182,14 +182,14 @@ const HABITACIONES: Habitacion[] = [
   {
     id: "habitacion-2",
     numero: "2",
-    categoria: "Estancia Confort",
+    categoria: "",
     titulo: "Habitación 2",
     ubicacion: "Jardín Botánico Central",
     precio: "$70.000",
     noches: "/ noche por persona",
     ocupacion: "Hasta 3 Huéspedes",
-    camas: "1 Cama Queen + 1 Sencilla",
-    descripcion: "Rodeada de palmeras y vegetación caribeña. Totalmente climatizada, equipada con mininevera, Smart TV, Wi-Fi de alta velocidad y video en alta definición.",
+    camas: "1 Cama doble + Camarote cama semidoble",
+    descripcion: "Habitación privada  equipada con aire acondicionado, televisor Smart TV, mininevera y Wi-Fi de alta velocidad para descansar a pasos del mar.",
     servicios: ["Aire acondicionado", "Mininevera", "Smart TV", "Wi-Fi gratuito"],
     medios: [
       "/Habitaciones/habitacion2.mov",
@@ -200,12 +200,12 @@ const HABITACIONES: Habitacion[] = [
   {
     id: "habitacion-3",
     numero: "3",
-    categoria: "Habitación Confort",
+    categoria: "",
     titulo: "Habitación 3",
     ubicacion: "Planta Baja • Ala Silente",
     precio: "$70.000",
     noches: "/ noche por persona",
-    ocupacion: "2 a 3 Huéspedes",
+    ocupacion: "2 a 5 Huéspedes",
     camas: "1 Cama sencilla",
     descripcion: "Ambiente fresco y apacible para el descanso. Dotada con aire acondicionado, mininevera, Smart TV, baño privado y Wi-Fi.",
     servicios: ["Aire acondicionado", "Mininevera", "Smart TV", "Wi-Fi gratuito"],
@@ -218,7 +218,7 @@ const HABITACIONES: Habitacion[] = [
   {
     id: "habitacion-4",
     numero: "4",
-    categoria: "Habitación Familiar",
+    categoria: "",
     titulo: "Habitación 4",
     ubicacion: "Acceso Directo a la Orilla",
     precio: "$70.000",
@@ -236,7 +236,7 @@ const HABITACIONES: Habitacion[] = [
   {
     id: "habitacion-5",
     numero: "5",
-    categoria: "Suite Familiar Superior",
+    categoria: "",
     titulo: "Habitación 5",
     ubicacion: "Primera Línea • Terraza Privada",
     precio: "$80.000",
@@ -255,9 +255,9 @@ const HABITACIONES: Habitacion[] = [
   {
     id: "habitacion-6",
     numero: "6",
-    categoria: "Master Suite Superior",
+    categoria: "",
     titulo: "Habitación 6",
-    ubicacion: "Nivel Superior • Vista Panorámica",
+    ubicacion: "",
     precio: "$80.000",
     noches: "/ noche por persona",
     ocupacion: "Hasta 4 - 5 Huéspedes",
@@ -281,14 +281,14 @@ interface EspacioCasa {
 const OTROS_ESPACIOS: EspacioCasa[] = [
   {
     id: "Piscina",
-    tag: "01 • Recreación & Relax",
+    tag: " • Recreación & Relax",
     titulo: "Piscina Abadía",
     descripcion: "Piscina grande adultos + kiosko asoleadoras, duchas y piscina infantil.",
     recurso: "/IMG_2254.mov"
   },
   {
     id: "Parqueadero",
-    tag: "02 • Acceso & Seguridad",
+    tag: " • Acceso & Seguridad",
     titulo: "Entrada y Parqueadero Privado",
     descripcion: "Acceso vehicular cerrado, vigilado y cómodo dentro del predio para la completa seguridad de tu vehículo.",
     recurso: "/IMG_2396.MOV"
@@ -345,31 +345,31 @@ const ATARDECERES_FOTOS: AtardecerFoto[] = [
   {
     id: 1,
     titulo: "Reflejo Dorado sobre Playa Blanca",
-    momento: "05:45 PM • Horizonte Caribe",
+    momento: "",
     src: "/atardeceres/abe23f00-6c34-41ab-920c-449ea7f703b0.JPG"
   },
   {
     id: 2,
     titulo: "La Calma de la Marea Baja",
-    momento: "05:55 PM • Frente al Hotel",
+    momento: " ",
     src: "/atardeceres/abe23f00-6c34-41ab-920c-449ea7f703b0.JPG"
   },
   {
     id: 3,
     titulo: "Cielo Naranja entre Palmeras",
-    momento: "06:05 PM • Sendero Costero",
+    momento: " ",
     src: "/atardeceres/DSC00012.JPG"
   },
   {
     id: 4,
     titulo: "Crepúsculo en Punta Bonita",
-    momento: "06:12 PM • Golfo de Morrosquillo",
+    momento: " ",
     src: "/sunshine.JPG"
   },
   {
     id: 5,
     titulo: "Amanecer en San Antero",
-    momento: "06:12 PM • Golfo de Morrosquillo",
+    momento: " ",
     src: "/amanecersan atnero.JPG"
   },
 ];
@@ -528,7 +528,7 @@ function BienvenidaAbadia({ onFinish }: { onFinish: () => void }) {
             Bienvenido
           </h1>
           <p className={`${alexBrush.className} text-2xl sm:text-3xl text-white/90`}>
-            al corazón de la calma
+            Una experiencia inolvidable 
           </p>
         </div>
 
@@ -758,7 +758,7 @@ export default function HomePage() {
       <section className="bg-[#FAF7F2] py-10 sm:py-14 px-4 sm:px-6 text-center border-b border-[#E8DDD0]">
         <div className="max-w-2xl mx-auto space-y-1">
           <span className={`${montserrat.className} text-[9px] sm:text-[10px] uppercase tracking-[0.35em] text-[#8c7355] font-bold block`}>
-            — COLECCIÓN EXCLUSIVA
+            
           </span>
           <div className="relative inline-block">
             <h2 className={`${montserrat.className} text-2xl sm:text-4xl font-extrabold uppercase tracking-tight text-[#2a2421]`}>
@@ -996,7 +996,7 @@ export default function HomePage() {
           <div className="bg-[#FAF7F2] p-5 sm:p-8 rounded-2xl sm:rounded-3xl border border-[#E8DDD0] shadow-sm flex flex-col justify-between gap-5 shrink-0 lg:w-80">
             <div>
               <span className={`${montserrat.className} text-[9px] sm:text-[10px] uppercase tracking-widest text-stone-500 font-bold block`}>
-                Tarifa Oficial por Persona
+                
               </span>
               <div className={`${montserrat.className} text-2xl sm:text-3xl font-bold text-[#C5A059] mt-1`}>
                 {habitacionActual.precio} <span className="text-sm text-stone-500 font-normal">{habitacionActual.noches}</span>
@@ -1118,7 +1118,7 @@ export default function HomePage() {
       <section className="bg-[#FAF7F2] py-10 sm:py-16 px-4 sm:px-6 text-center border-b border-[#E8DDD0]">
         <div className="max-w-2xl mx-auto space-y-1">
           <span className={`${montserrat.className} text-[9px] sm:text-[10px] uppercase tracking-[0.35em] text-[#8c7355] font-bold block`}>
-            — RINCONES ÍNTIMOS
+            
           </span>
           <div className="relative inline-block">
             <h2 className={`${montserrat.className} text-2xl sm:text-4xl font-extrabold uppercase tracking-tight text-[#2a2421]`}>
@@ -1207,7 +1207,7 @@ export default function HomePage() {
           <div className="max-w-6xl mx-auto bg-white/85 backdrop-blur-2xl border border-white/60 p-5 sm:p-8 md:p-10 rounded-2xl sm:rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.25)] flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6 text-left text-stone-900">
             <div className="space-y-1">
               <span className={`${montserrat.className} text-[9px] sm:text-[10px] uppercase tracking-[0.25em] text-[#8c7355] font-bold block`}>
-                Comodidades del Hotel
+                
               </span>
               <h3 className={`${montserrat.className} text-xl sm:text-3xl md:text-4xl font-bold uppercase tracking-tight text-[#C5A059]`}>
                 {espacioActual.titulo}
@@ -1233,7 +1233,7 @@ export default function HomePage() {
       <section className="bg-[#FAF7F2] py-10 sm:py-16 px-4 sm:px-6 text-center border-b border-[#E8DDD0]">
         <div className="max-w-3xl mx-auto space-y-1">
           <span className={`${montserrat.className} text-[9px] sm:text-[10px] uppercase tracking-[0.35em] text-[#8c7355] font-bold block`}>
-            — EXPERIENCIAS & ALREDEDORES
+            
           </span>
           <div className="relative inline-block">
             <h2 className={`${montserrat.className} text-2xl sm:text-4xl font-extrabold uppercase tracking-tight text-[#2a2421]`}>
@@ -1388,7 +1388,7 @@ export default function HomePage() {
           <div className="bg-[#FAF7F2] p-5 sm:p-8 rounded-2xl sm:rounded-3xl border border-[#E8DDD0] shadow-sm flex flex-col justify-between gap-4 shrink-0 lg:w-80">
             <div>
               <span className={`${montserrat.className} text-[9px] sm:text-[10px] uppercase tracking-widest text-stone-500 font-bold block`}>
-                Planes & Destino
+                
               </span>
               <div className={`${montserrat.className} text-lg sm:text-xl font-bold text-[#C5A059] mt-1`}>
                 {experienciaActual.titulo}
@@ -1426,7 +1426,7 @@ export default function HomePage() {
       <section id="atardeceres-san-antero" className="bg-[#FAF7F2] py-10 sm:py-16 px-4 sm:px-6 text-center border-b border-[#E8DDD0]">
         <div className="max-w-3xl mx-auto space-y-1">
           <span className={`${montserrat.className} text-[9px] sm:text-[10px] uppercase tracking-[0.35em] text-[#8c7355] font-bold block`}>
-            — LA HORA DORADA
+            
           </span>
           <div className="relative inline-block">
             <h2 className={`${montserrat.className} text-2xl sm:text-4xl font-extrabold uppercase tracking-tight text-[#2a2421]`}>
