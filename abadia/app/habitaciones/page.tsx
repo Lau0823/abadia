@@ -28,7 +28,7 @@ const outfit = Outfit({
 
 const NUMERO_WHATSAPP = "573122373415";
 
-// --- 2 VIDEOS .MOV PARA EL BANNER DE HABITACIONES ---
+// --- 2 VIDEOS .MOV PARA EL BANNER DE HABITACIONES (HERO) ---
 const VIDEOS_HERO_HABITACIONES = [
   {
     id: 1,
@@ -38,6 +38,20 @@ const VIDEOS_HERO_HABITACIONES = [
   {
     id: 2,
     src: "/121016.mp4",
+    poster: ""
+  }
+];
+
+// --- 2 VIDEOS PARA EL BANNER FULL SCREEN A MITAD DE PÁGINA (100% LIMPIO) ---
+const VIDEOS_MITAD_HABITACIONES = [
+  {
+    id: 1,
+    src: "/Habitaciones/habitacion2.mov",
+    poster: ""
+  },
+  {
+    id: 2,
+    src: "/videosdebanner/copy_359F2AF5-3796-41C5-B3D0-B9AC83EF213B.mov",
     poster: ""
   }
 ];
@@ -100,11 +114,11 @@ const HABITACIONES: Habitacion[] = [
     id: "Habitación 1",
     numero: "01",
     categoria: "",
-    titulo: "Habitación 1 ",
+    titulo: "Habitación 1",
     ubicacion: "San antero, playa blanca",
-    precio: "$450.000",
+    precio: "$70.000",
     noches: "/ noche",
-    capacidad: "4 a 6 Personas",
+    capacidad: "4 Personas",
     descripcion: "Nuestra suite insignia concebida para una experiencia íntima sin precedentes. Cuenta con tina de hidromasaje exterior privada al aire libre en su balcón panorámico, lencería de 400 hilos en algodón egipcio, ducha tipo lluvia en piedra natural y amenidades botánicas orgánicas.",
     imagenes: [
       "/Habitaciones/habitacion1.jpeg",
@@ -115,15 +129,14 @@ const HABITACIONES: Habitacion[] = [
   {
     id: "Habitación 2",
     numero: "02",
-    categoria: "Cabaña ",
-    titulo: "",
-    ubicacion: "San antero playa blanca ",
-    precio: "$320.000",
+    categoria: "Cabaña",
+    titulo: "Habitación 2",
+    ubicacion: "San antero playa blanca",
+    precio: "$70.000",
     noches: "/ noche",
-    capacidad: "4 a 5 Personas",
+    capacidad: "4 Personas",
     descripcion: "Arquitectura rústica moderna con terraza privada suspendida y rodeada de vegetación nativa del Caribe. Un refugio fresco pensado para respirar la brisa marina entre las palmeras.",
     imagenes: [
-     
       "/Habitaciones/habitacion2.PNG",
       "/Habitaciones/habitacion2.2.PNG"
     ]
@@ -134,9 +147,9 @@ const HABITACIONES: Habitacion[] = [
     categoria: "Habitacion3",
     titulo: "Estancia Silencio",
     ubicacion: "",
-    precio: "$280.000",
+    precio: "$70.000",
     noches: "/ noche",
-    capacidad: "4 Personas",
+    capacidad: "2 Personas",
     descripcion: "Diseño minimalista y fresco concebido para el descanso profundo, la desconexión total y la calma. Materiales nobles, temperatura fresca constante y acústica aislada.",
     imagenes: [
       "/Habitaciones/habitacion301.png",
@@ -148,9 +161,9 @@ const HABITACIONES: Habitacion[] = [
     id: "cabana-familiar",
     numero: "04",
     categoria: "Cabaña Familiar",
-    titulo: "Cabaña Familiar Playa Blanca",
+    titulo: "Habitación 4",
     ubicacion: "Paso Directo a la Arena",
-    precio: "$390.000",
+    precio: "80.000",
     noches: "/ noche",
     capacidad: "5 a 6 Personas",
     descripcion: "Amplitud y confort integral para familias o grupos íntimos, con sala de descanso, dos ambientes independientes y acceso directo al sendero que lleva a la orilla del mar.",
@@ -164,14 +177,13 @@ const HABITACIONES: Habitacion[] = [
     id: "bungalow-marino",
     numero: "05",
     categoria: "Bungalow",
-    titulo: "Bungalow Atardecer Caribe",
+    titulo: "Habitacion 5",
     ubicacion: "Primera Línea de Playa",
-    precio: "$360.000",
+    precio: "80.000",
     noches: "/ noche",
-    capacidad: "4 Personas",
+    capacidad: "4 a 6 Personas",
     descripcion: "Ubicado a escasos metros de la marea, con hamaca privada, acabados en maderas nobles, ducha exterior a cielo abierto y sonido ininterrumpido de las olas.",
     imagenes: [
-     
       "/Habitaciones/habitacion5/DSC05772.jpeg",
       "/Habitaciones/habitacion5/DSC05770.jpeg",
       "/Habitaciones/habitacion5/DSC05779.jpeg"
@@ -181,19 +193,19 @@ const HABITACIONES: Habitacion[] = [
     id: "master-abadia",
     numero: "06",
     categoria: "Penthouse",
-    titulo: "Master Suite Abadía",
+    titulo: "Habitación 6",
     ubicacion: "Nivel Superior • Vista Panorámica",
-    precio: "$520.000",
+    precio: "$80.000",
     noches: "/ noche",
     capacidad: "4 a 6 Personas",
     descripcion: "Nuestra estancia más exclusiva con ventanales de piso a techo, jacuzzi privado, cava y atención personalizada permanente para una estadía inigualable.",
     imagenes: [
-   "/Habitaciones/habitacion6.jpeg",
+      "/Habitaciones/habitacion6.jpeg",
     ]
   }
 ];
 
-// --- COMPONENTE INDIVIDUAL DE HABITACIÓN: FULL SCREEN + BOTÓN WHATSAPP ---
+// --- COMPONENTE INDIVIDUAL DE HABITACIÓN CON BOTÓN COTIZAR Y BOTÓN RESERVAR ---
 function HabitacionFullScreenItem({ hab }: { hab: Habitacion }) {
   const [fotoIndex, setFotoIndex] = useState(0);
 
@@ -205,8 +217,19 @@ function HabitacionFullScreenItem({ hab }: { hab: Habitacion }) {
     setFotoIndex((prev) => (prev + 1) % hab.imagenes.length);
   };
 
+  // Botón 1: Cotizar de acuerdo a la habitación específica
   const cotizarWhatsApp = () => {
-    const msj = encodeURIComponent(`Hola! Deseo cotizar reserva en Hotel Abadía para la habitación: ${hab.titulo} (${hab.precio})`);
+    const msj = encodeURIComponent(
+      `Hola! Deseo cotizar disponibilidad para la ${hab.titulo || 'Estancia ' + hab.numero} (${hab.precio} ${hab.noches}) para capacidad de ${hab.capacidad}.`
+    );
+    window.open(`https://wa.me/${NUMERO_WHATSAPP}?text=${msj}`, '_blank');
+  };
+
+  // Botón 2: Reservar de acuerdo a la habitación específica
+  const reservarWhatsApp = () => {
+    const msj = encodeURIComponent(
+      `Hola! Deseo formalizar una reserva inmediata para la ${hab.titulo || 'Estancia ' + hab.numero} (${hab.precio} ${hab.noches}) en Abadía Casa Hotel.`
+    );
     window.open(`https://wa.me/${NUMERO_WHATSAPP}?text=${msj}`, '_blank');
   };
 
@@ -216,7 +239,7 @@ function HabitacionFullScreenItem({ hab }: { hab: Habitacion }) {
       <div className="relative h-[80vh] sm:h-[88vh] md:h-[92vh] w-full overflow-hidden bg-black select-none group">
         <Image
           src={hab.imagenes[fotoIndex]}
-          alt={`${hab.titulo} foto ${fotoIndex + 1}`}
+          alt={`${hab.titulo || 'Habitación ' + hab.numero} foto ${fotoIndex + 1}`}
           fill
           unoptimized
           priority
@@ -228,7 +251,9 @@ function HabitacionFullScreenItem({ hab }: { hab: Habitacion }) {
         <div className="absolute top-6 left-6 right-6 z-20 flex items-center justify-between pointer-events-none">
           <div className="pointer-events-auto bg-white/20 backdrop-blur-3xl border border-white/30 px-4 py-1.5 rounded-full text-white text-xs font-light shadow-[0_8px_32px_rgba(0,0,0,0.18)]">
             <span className={`${montserrat.className} font-bold text-[#C5A059] mr-1.5`}>0{hab.numero}</span>
-            <span className={`${montserrat.className} uppercase tracking-wider text-[10px]`}>{hab.categoria}</span>
+            {hab.categoria && (
+              <span className={`${montserrat.className} uppercase tracking-wider text-[10px]`}>{hab.categoria}</span>
+            )}
           </div>
           <div className="pointer-events-auto bg-white/20 backdrop-blur-3xl border border-white/30 px-4 py-1.5 rounded-full text-white text-xs font-mono shadow-[0_8px_32px_rgba(0,0,0,0.18)]">
             {fotoIndex + 1} de {hab.imagenes.length}
@@ -256,11 +281,13 @@ function HabitacionFullScreenItem({ hab }: { hab: Habitacion }) {
         <div className="absolute bottom-6 left-6 right-6 z-20 pointer-events-none">
           <div className="max-w-6xl mx-auto flex flex-col sm:flex-row sm:items-end justify-between gap-3 text-white text-left">
             <div>
-              <span className="text-[10px] uppercase tracking-[0.25em] text-white/80 block font-semibold mb-1">
-                📍 {hab.ubicacion}
-              </span>
+              {hab.ubicacion && (
+                <span className="text-[10px] uppercase tracking-[0.25em] text-white/80 block font-semibold mb-1">
+                  📍 {hab.ubicacion}
+                </span>
+              )}
               <h3 className={`${montserrat.className} text-2xl sm:text-4xl font-extrabold uppercase tracking-tight text-white drop-shadow-md`}>
-                {hab.titulo}
+                {hab.titulo || `Habitación ${hab.numero}`}
               </h3>
             </div>
             <div className="text-left sm:text-right">
@@ -318,7 +345,7 @@ function HabitacionFullScreenItem({ hab }: { hab: Habitacion }) {
             </div>
           </div>
 
-          {/* Tarjeta de acciones */}
+          {/* Tarjeta de acciones con BOTÓN COTIZAR y BOTÓN RESERVAR */}
           <div className="bg-white p-6 sm:p-8 rounded-3xl border border-[#E8DDD0] shadow-md flex flex-col justify-between gap-5 shrink-0 lg:w-80">
             <div>
               <span className={`${montserrat.className} text-[10px] uppercase tracking-[0.25em] text-stone-400 font-bold block`}>
@@ -333,21 +360,25 @@ function HabitacionFullScreenItem({ hab }: { hab: Habitacion }) {
             </div>
 
             <div className="space-y-2.5">
+              {/* BOTÓN 1: COTIZAR */}
               <button
                 onClick={cotizarWhatsApp}
+                className={`${montserrat.className} w-full bg-white hover:bg-stone-100 text-stone-900 border border-[#E8DDD0] py-3.5 px-4 rounded-2xl text-xs font-semibold uppercase tracking-[0.15em] transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 cursor-pointer shadow-xs`}
+              >
+                <span className="text-[#8c7355]">
+                  <Icons.WhatsApp />
+                </span>
+                <span>Cotizar Habitación</span>
+              </button>
+
+              {/* BOTÓN 2: RESERVAR */}
+              <button
+                onClick={reservarWhatsApp}
                 className={`${montserrat.className} w-full bg-[#8c7355] hover:bg-[#071326] text-white py-3.5 px-4 rounded-2xl text-xs font-bold uppercase tracking-[0.15em] shadow-md transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 cursor-pointer`}
               >
                 <Icons.WhatsApp />
-                <span>Reservar por WhatsApp</span>
+                <span>Reservar Habitación</span>
               </button>
-
-              <Link
-                href={`/reservas-y-pagos?id=${hab.id}`}
-                className={`${montserrat.className} w-full bg-white hover:bg-stone-100 text-stone-900 border border-[#E8DDD0] py-3.5 px-4 rounded-2xl text-xs font-semibold uppercase tracking-[0.15em] transition-all duration-300 active:scale-95 flex items-center justify-center gap-1.5 text-center`}
-              >
-                <span>Dashboard de Reservas</span>
-                <Icons.ArrowUpRight />
-              </Link>
             </div>
           </div>
 
@@ -357,18 +388,95 @@ function HabitacionFullScreenItem({ hab }: { hab: Habitacion }) {
   );
 }
 
+// --- BANNER FULL SCREEN A MITAD DE PÁGINA (SOLO 2 VIDEOS, 100% LIMPIO) ---
+function BannerMitadPageVideos() {
+  const [videoActivo, setVideoActivo] = useState(0);
+  const [sonido, setSonido] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setVideoActivo((prev) => (prev + 1) % VIDEOS_MITAD_HABITACIONES.length);
+    }, 8500);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <section className="relative h-[75vh] sm:h-[90vh] w-full overflow-hidden bg-black select-none">
+      {VIDEOS_MITAD_HABITACIONES.map((video, idx) => {
+        const activo = idx === videoActivo;
+        return (
+          <div
+            key={video.id}
+            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+              activo ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
+            }`}
+          >
+            <video
+              poster={video.poster}
+              autoPlay
+              muted={!sonido}
+              loop
+              playsInline
+              preload="auto"
+              onLoadedData={(e) => {
+                e.currentTarget.play().catch(() => {});
+              }}
+              className="w-full h-full object-cover scale-105"
+            >
+              <source src={video.src} type="video/quicktime" />
+              <source src={video.src} type="video/mp4" />
+            </video>
+          </div>
+        );
+      })}
+
+      {/* SELECTOR SUTIL DE LOS 2 VIDEOS */}
+      <div className="absolute bottom-6 left-6 z-30 flex items-center gap-2 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20">
+        {VIDEOS_MITAD_HABITACIONES.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setVideoActivo(i)}
+            className={`transition-all duration-300 rounded-full cursor-pointer ${
+              i === videoActivo
+                ? 'w-6 h-2 bg-[#C5A059]'
+                : 'w-2 h-2 bg-white/40 hover:bg-white'
+            }`}
+            aria-label={`Ver video ${i + 1}`}
+          />
+        ))}
+      </div>
+
+      {/* BOTÓN FLOTANTE DISCRETO PARA AUDIO */}
+      <button
+        onClick={() => setSonido(!sonido)}
+        className="absolute bottom-6 right-6 z-30 bg-black/45 hover:bg-[#071326] text-white p-2.5 rounded-full backdrop-blur-xl border border-white/20 transition-all duration-300 shadow-xl active:scale-90 cursor-pointer flex items-center gap-1.5"
+        aria-label={sonido ? "Silenciar video" : "Activar sonido"}
+      >
+        {sonido ? <Icons.VolumeUp /> : <Icons.VolumeMute />}
+        <span className="text-[9px] uppercase font-mono tracking-wider hidden sm:inline">
+          {sonido ? "Audio ON" : "Audio OFF"}
+        </span>
+      </button>
+    </section>
+  );
+}
+
 export default function PaginaHabitaciones() {
   const [menuAbierto, setMenuAbierto] = useState(false);
   const [videoHeroActivo, setVideoHeroActivo] = useState(0);
   const [heroSonido, setHeroSonido] = useState(false);
 
-  // Cambio automático entre los 2 videos cada 9s
+  // Cambio automático entre los 2 videos de Hero cada 9s
   useEffect(() => {
     const intervalHero = setInterval(() => {
       setVideoHeroActivo((prev) => (prev + 1) % VIDEOS_HERO_HABITACIONES.length);
     }, 9000);
     return () => clearInterval(intervalHero);
   }, []);
+
+  // Separamos las habitaciones: 3 primeras, banner limpio a mitad, y 3 restantes
+  const primerGrupoHabitaciones = HABITACIONES.slice(0, 3);
+  const segundoGrupoHabitaciones = HABITACIONES.slice(3);
 
   return (
     <main className={`w-full bg-[#FAF7F2] text-[#2a2421] antialiased min-h-screen ${outfit.className}`}>
@@ -508,7 +616,7 @@ export default function PaginaHabitaciones() {
         {/* TÍTULO EDITORIAL EN HERO */}
         <div className="relative z-20 max-w-3xl mx-auto space-y-2 text-center px-4">
           <span className={`${montserrat.className} text-[9px] sm:text-[10px] uppercase tracking-[0.35em] text-white/80 font-bold block`}>
-            
+            Colección de Estancias
           </span>
           <div className="relative inline-block">
             <h1 className={`${montserrat.className} text-3xl sm:text-5xl md:text-6xl font-extrabold uppercase tracking-tight text-white drop-shadow-lg`}>
@@ -538,7 +646,7 @@ export default function PaginaHabitaciones() {
       <section id="catalogo-estancias" className="bg-[#FAF7F2] py-12 sm:py-16 px-6 text-center border-b border-[#E8DDD0]">
         <div className="max-w-2xl mx-auto space-y-1">
           <span className={`${montserrat.className} text-[9px] sm:text-[10px] uppercase tracking-[0.35em] text-[#8c7355] font-bold block`}>
-            
+            — EXPERIENCIA VISUAL
           </span>
           <div className="relative inline-block">
             <h2 className={`${montserrat.className} text-2xl sm:text-4xl font-extrabold uppercase tracking-tight text-[#2a2421]`}>
@@ -554,9 +662,22 @@ export default function PaginaHabitaciones() {
         </div>
       </section>
 
-      {/* LAS 6 HABITACIONES FULL SCREEN */}
+      {/* 1. PRIMERAS 3 HABITACIONES */}
       <div className="w-full">
-        {HABITACIONES.map((hab) => (
+        {primerGrupoHabitaciones.map((hab) => (
+          <HabitacionFullScreenItem key={hab.id} hab={hab} />
+        ))}
+      </div>
+
+      {/* ========================================================
+          BANNER A MITAD DE PÁGINA: FULL SCREEN CON 2 VIDEOS 100% LIMPIO
+          (SIN LETRAS, SIN TÍTULOS NI TEXTOS)
+          ======================================================== */}
+      <BannerMitadPageVideos />
+
+      {/* 2. SIGUIENTES 3 HABITACIONES */}
+      <div className="w-full">
+        {segundoGrupoHabitaciones.map((hab) => (
           <HabitacionFullScreenItem key={hab.id} hab={hab} />
         ))}
       </div>
