@@ -89,11 +89,55 @@ const Icons = {
   )
 };
 
-const esVideo = (url?: string) => {
-  if (!url) return false;
-  const limpio = url.split('?')[0].toLowerCase();
-  const extensiones = ['.mov', '.mp4', '.webm', '.ogg', '.m4v'];
-  return extensiones.some((ext) => limpio.endsWith(ext));
+// --- DATA PARA EL MODAL DE SERVICIOS ---
+interface DetalleServicio {
+  nombre: string;
+  icono: string;
+  resumen: string;
+  detalles: string[];
+}
+
+const INFO_SERVICIOS: Record<string, DetalleServicio> = {
+  "Baño privado": {
+    nombre: "Baño privado",
+    icono: "🚿",
+    resumen: "Espacio íntimo e higiénico con acabados frescos, ducha de agua constante y elementos de aseo esenciales.",
+    detalles: [
+      "Ducha independiente con excelente presión.",
+      "Sanitario y lavamanos con toallas limpias.",
+      "Espejo de vanidad e iluminación cálida."
+    ]
+  },
+  "Nevera minibar": {
+    nombre: "Nevera minibar",
+    icono: "🧊",
+    resumen: "Refrigerador compacto privado dentro de tu habitación para mantener bebidas frías, agua y refrigerios a tu alcance.",
+    detalles: [
+      "Compartimiento de enfriamiento rápido integrado.",
+      "Capacidad adecuada para agua, gaseosas, vinos y snacks.",
+      "Ubicación silenciosa para no interrumpir tus horas de descanso."
+    ]
+  },
+  "Aire acondicionado": {
+    nombre: "Aire acondicionado",
+    icono: "❄️",
+    resumen: "Climatización silenciosa individual tipo inverter para mantener una temperatura fresca y confortable frente a la calidez caribeña.",
+    detalles: [
+      "Control remoto individual con ajuste digital de temperatura.",
+      "Tecnología inverter de ultra bajo nivel sonoro.",
+      "Filtros higienizados periódicamente."
+    ]
+  },
+  "Televisor Smart TV": {
+    nombre: "Televisor Smart TV",
+    icono: "📺",
+    resumen: "Pantalla plana de alta definición con conectividad inteligente para disfrutar de tus plataformas de entretenimiento favoritas.",
+    detalles: [
+      "Acceso directo a Netflix, YouTube y aplicaciones de streaming.",
+      "Control ergonómico y puertos de conexión multimedia.",
+      "Excelente ángulo de visión orientado hacia las camas principales."
+    ]
+  }
 };
 
 interface Habitacion {
@@ -205,9 +249,36 @@ const HABITACIONES: Habitacion[] = [
   }
 ];
 
-// --- COMPONENTE INDIVIDUAL DE HABITACIÓN CON BOTÓN COTIZAR Y BOTÓN RESERVAR ---
-function HabitacionFullScreenItem({ hab }: { hab: Habitacion }) {
+const parsearPrecio = (precioStr: string): number => {
+  const soloNumeros = precioStr.replace(/[^0-9]/g, '');
+  const valor = parseInt(soloNumeros, 10);
+  return isNaN(valor) ? 70000 : valor;
+};
+
+const obtenerCapacidadMaxima = (capacidadStr: string): number => {
+  const matches = capacidadStr.match(/\d+/g);
+  if (!matches) return 4;
+  return Math.max(...matches.map(Number));
+};
+
+// --- COMPONENTE INDIVIDUAL DE HABITACIÓN CON FORMULARIO Y MODAL DE SERVICIOS ---
+function HabitacionFullScreenItem({ 
+  hab, 
+  onAbrirServicio 
+}: { 
+  hab: Habitacion; 
+  onAbrirServicio: (nombre: string) => void; 
+}) {
   const [fotoIndex, setFotoIndex] = useState(0);
+
+  const maxPersonas = obtenerCapacidadMaxima(hab.capacidad);
+  const [personas, setPersonas] = useState(2);
+  const [noches, setNoches] = useState(1);
+  const [fechaLlegada, setFechaLlegada] = useState('');
+
+  const tarifaBase = parsearPrecio(hab.precio);
+  const precioTotal = tarifaBase * personas * noches;
+  const precioTotalFormateado = `$${precioTotal.toLocaleString('es-CO')}`;
 
   const anterior = () => {
     setFotoIndex((prev) => (prev === 0 ? hab.imagenes.length - 1 : prev - 1));
@@ -217,18 +288,26 @@ function HabitacionFullScreenItem({ hab }: { hab: Habitacion }) {
     setFotoIndex((prev) => (prev + 1) % hab.imagenes.length);
   };
 
-  // Botón 1: Cotizar de acuerdo a la habitación específica
   const cotizarWhatsApp = () => {
+    const fechaTexto = fechaLlegada ? ` para la fecha ${fechaLlegada}` : '';
     const msj = encodeURIComponent(
-      `Hola! Deseo cotizar disponibilidad para la ${hab.titulo || 'Estancia ' + hab.numero} (${hab.precio} ${hab.noches}) para capacidad de ${hab.capacidad}.`
+      `Hola! Deseo cotizar la ${hab.titulo || 'Estancia ' + hab.numero} en Abadía Casa Hotel.\n` +
+      `• Tarifa: ${hab.precio} por persona/noche\n` +
+      `• Huéspedes: ${personas} personas\n` +
+      `• Estancia: ${noches} ${noches === 1 ? 'noche' : 'noches'}${fechaTexto}\n` +
+      `• Total estimado: ${precioTotalFormateado} COP.`
     );
     window.open(`https://wa.me/${NUMERO_WHATSAPP}?text=${msj}`, '_blank');
   };
 
-  // Botón 2: Reservar de acuerdo a la habitación específica
   const reservarWhatsApp = () => {
+    const fechaTexto = fechaLlegada ? ` con llegada el ${fechaLlegada}` : '';
     const msj = encodeURIComponent(
-      `Hola! Deseo formalizar una reserva inmediata para la ${hab.titulo || 'Estancia ' + hab.numero} (${hab.precio} ${hab.noches}) en Abadía Casa Hotel.`
+      `Hola! Deseo realizar la RESERVA INMEDIATA de la ${hab.titulo || 'Estancia ' + hab.numero} en Abadía Casa Hotel.\n` +
+      `• Huéspedes: ${personas} personas\n` +
+      `• Noches: ${noches} ${noches === 1 ? 'noche' : 'noches'}${fechaTexto}\n` +
+      `• Total a pagar: ${precioTotalFormateado} COP.\n` +
+      `Por favor indíquenme los medios de pago para asegurar la reserva.`
     );
     window.open(`https://wa.me/${NUMERO_WHATSAPP}?text=${msj}`, '_blank');
   };
@@ -292,19 +371,19 @@ function HabitacionFullScreenItem({ hab }: { hab: Habitacion }) {
             </div>
             <div className="text-left sm:text-right">
               <span className={`${montserrat.className} text-[10px] uppercase tracking-widest text-[#C5A059] font-bold block`}>
-                Costo Oficial
+                Tarifa Base
               </span>
               <span className={`${montserrat.className} text-2xl sm:text-3xl font-bold text-white`}>
-                {hab.precio} <span className="text-xs text-white/70 font-normal">{hab.noches}</span>
+                {hab.precio} <span className="text-xs text-white/70 font-normal">por persona / noche</span>
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 2. DESCRIPCIÓN Y FICHA TÉCNICA ABAJO DEL FULL SCREEN */}
+      {/* 2. DESCRIPCIÓN Y FICHA TÉCNICA */}
       <div className="bg-[#FAF7F2] py-10 px-6 sm:px-12">
-        <div className="max-w-6xl mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-8 text-left">
+        <div className="max-w-6xl mx-auto flex flex-col lg:flex-row lg:items-start justify-between gap-8 text-left">
           
           <div className="space-y-4 max-w-2xl">
             <div className="flex items-center gap-3">
@@ -316,54 +395,144 @@ function HabitacionFullScreenItem({ hab }: { hab: Habitacion }) {
               </span>
             </div>
 
-            <p className="text-sm sm:text-base text-stone-700 font-normal leading-relaxed">
+            <p className="text-sm sm:text-base text-[#5a483a] font-normal leading-relaxed">
               {hab.descripcion}
             </p>
 
+            {/* BOTONES DE SERVICIOS INTERACTIVOS CON HOVER */}
             <div className="pt-2">
-              <span className={`${montserrat.className} text-[10px] uppercase tracking-[0.25em] text-stone-500 font-bold block mb-2`}>
-                Servicios Incluidos en la Habitación:
+              <span className={`${montserrat.className} text-[10px] uppercase tracking-[0.25em] text-[#7d6553] font-bold block mb-2`}>
+                Servicios Incluidos (Toca para ver detalles):
               </span>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                <div className="bg-white p-3 rounded-2xl border border-[#E8DDD0] text-xs text-stone-800 flex items-center gap-2 shadow-2xs">
-                  <span className="text-[#8c7355] font-bold">✓</span>
-                  <span>Baño privado</span>
-                </div>
-                <div className="bg-white p-3 rounded-2xl border border-[#E8DDD0] text-xs text-stone-800 flex items-center gap-2 shadow-2xs">
-                  <span className="text-[#8c7355] font-bold">✓</span>
-                  <span>Nevera minibar</span>
-                </div>
-                <div className="bg-white p-3 rounded-2xl border border-[#E8DDD0] text-xs text-stone-800 flex items-center gap-2 shadow-2xs">
-                  <span className="text-[#8c7355] font-bold">✓</span>
-                  <span>Aire acondicionado</span>
-                </div>
-                <div className="bg-white p-3 rounded-2xl border border-[#E8DDD0] text-xs text-stone-800 flex items-center gap-2 shadow-2xs">
-                  <span className="text-[#8c7355] font-bold">✓</span>
-                  <span>Televisor Smart TV</span>
-                </div>
+                {["Baño privado", "Nevera minibar", "Aire acondicionado", "Televisor Smart TV"].map((srv, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => onAbrirServicio(srv)}
+                    className="group bg-white hover:bg-[#071326] p-3 rounded-2xl border border-[#071326]/20 hover:border-[#071326] text-xs font-medium text-[#3e3229] hover:text-white flex items-center justify-between shadow-2xs hover:shadow-lg transition-all duration-300 hover:-translate-y-1 hover:scale-102 active:scale-95 cursor-pointer text-left"
+                  >
+                    <span className="flex items-center gap-1.5 truncate">
+                      <span className="text-[#8c7355] group-hover:text-[#C5A059] font-bold transition-colors">✓</span>
+                      <span className="truncate">{srv}</span>
+                    </span>
+                    <span className="text-[10px] text-stone-400 group-hover:text-white/80 transition-colors">↗</span>
+                  </button>
+                ))}
               </div>
             </div>
           </div>
 
-          {/* Tarjeta de acciones con BOTÓN COTIZAR y BOTÓN RESERVAR */}
-          <div className="bg-white p-6 sm:p-8 rounded-3xl border border-[#E8DDD0] shadow-md flex flex-col justify-between gap-5 shrink-0 lg:w-80">
-            <div>
-              <span className={`${montserrat.className} text-[10px] uppercase tracking-[0.25em] text-stone-400 font-bold block`}>
-                Tarifa Total por Noche
+          {/* FORMULARIO DE RESERVA: BORDES EN AZUL ABADÍA Y LETRAS CAFESITAS */}
+          <div className="bg-white p-6 sm:p-7 rounded-3xl border-2 border-[#071326]/25 shadow-md flex flex-col gap-5 shrink-0 w-full lg:w-88">
+            <div className="border-b border-[#071326]/20 pb-3">
+              <span className={`${montserrat.className} text-[10px] uppercase tracking-[0.25em] text-[#7d6553] font-bold block`}>
+                Calcula tu Estancia
               </span>
-              <div className={`${montserrat.className} text-3xl font-bold text-[#C5A059] mt-1`}>
-                {hab.precio} <span className="text-xs text-stone-400 font-normal">{hab.noches}</span>
+              <div className="flex items-baseline justify-between mt-1">
+                <span className="text-xs text-[#5a483a]">Tarifa por persona:</span>
+                <span className={`${montserrat.className} text-base font-bold text-[#8c7355]`}>
+                  {hab.precio}
+                </span>
               </div>
-              <span className="text-xs text-stone-500 block mt-1">
-                Acomodación para {hab.capacidad}
-              </span>
             </div>
 
-            <div className="space-y-2.5">
-              {/* BOTÓN 1: COTIZAR */}
+            {/* CONTROLES DEL FORMULARIO CON LÍNEAS AZUL ABADÍA */}
+            <div className="space-y-3.5">
+              {/* Selector de personas */}
+              <div className="flex items-center justify-between bg-[#FAF7F2] p-2.5 rounded-2xl border border-[#071326]/30">
+                <div>
+                  <span className="text-xs font-semibold text-[#3e3229] block">Huéspedes</span>
+                  <span className="text-[10px] text-[#7d6553] font-light">Máx. {maxPersonas} personas</span>
+                </div>
+                <div className="flex items-center gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setPersonas((p) => Math.max(1, p - 1))}
+                    disabled={personas <= 1}
+                    className="w-7 h-7 rounded-full bg-white hover:bg-stone-200 disabled:opacity-40 text-[#3e3229] font-bold text-sm flex items-center justify-center border border-[#071326]/30 transition-all cursor-pointer"
+                  >
+                    −
+                  </button>
+                  <span className={`${montserrat.className} w-5 text-center font-bold text-[#3e3229] text-sm`}>
+                    {personas}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setPersonas((p) => Math.min(maxPersonas, p + 1))}
+                    disabled={personas >= maxPersonas}
+                    className="w-7 h-7 rounded-full bg-white hover:bg-stone-200 disabled:opacity-40 text-[#3e3229] font-bold text-sm flex items-center justify-center border border-[#071326]/30 transition-all cursor-pointer"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+
+              {/* Selector de noches */}
+              <div className="flex items-center justify-between bg-[#FAF7F2] p-2.5 rounded-2xl border border-[#071326]/30">
+                <div>
+                  <span className="text-xs font-semibold text-[#3e3229] block">Noches</span>
+                  <span className="text-[10px] text-[#7d6553] font-light">Tiempo de estadía</span>
+                </div>
+                <div className="flex items-center gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setNoches((n) => Math.max(1, n - 1))}
+                    disabled={noches <= 1}
+                    className="w-7 h-7 rounded-full bg-white hover:bg-stone-200 disabled:opacity-40 text-[#3e3229] font-bold text-sm flex items-center justify-center border border-[#071326]/30 transition-all cursor-pointer"
+                  >
+                    −
+                  </button>
+                  <span className={`${montserrat.className} w-5 text-center font-bold text-[#3e3229] text-sm`}>
+                    {noches}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setNoches((n) => Math.min(30, n + 1))}
+                    className="w-7 h-7 rounded-full bg-white hover:bg-stone-200 text-[#3e3229] font-bold text-sm flex items-center justify-center border border-[#071326]/30 transition-all cursor-pointer"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+
+              {/* Selector de fecha */}
+              <div className="bg-[#FAF7F2] p-2.5 rounded-2xl border border-[#071326]/30">
+                <label htmlFor={`fecha-${hab.id}`} className="text-[10px] uppercase font-bold text-[#7d6553] block mb-1">
+                  Fecha estimada de llegada (opcional)
+                </label>
+                <input
+                  id={`fecha-${hab.id}`}
+                  type="date"
+                  value={fechaLlegada}
+                  onChange={(e) => setFechaLlegada(e.target.value)}
+                  className="w-full bg-white border border-[#071326]/30 rounded-xl px-3 py-1.5 text-xs text-[#3e3229] outline-none focus:border-[#071326] transition-colors"
+                />
+              </div>
+            </div>
+
+            {/* PRECIO TOTAL */}
+            <div className="bg-[#FAF7F2] p-3.5 rounded-2xl border border-[#071326]/20">
+              <div className="flex items-center justify-between text-[11px] text-[#5a483a] mb-1">
+                <span>{personas} {personas === 1 ? 'persona' : 'personas'} × {noches} {noches === 1 ? 'noche' : 'noches'}</span>
+                <span>{hab.precio} c/u</span>
+              </div>
+              <div className="flex items-baseline justify-between border-t border-[#071326]/15 pt-2">
+                <span className={`${montserrat.className} text-xs uppercase tracking-wider font-bold text-[#3e3229]`}>
+                  Precio Total:
+                </span>
+                <span className={`${montserrat.className} text-2xl font-extrabold text-[#C5A059]`}>
+                  {precioTotalFormateado} <span className="text-[11px] text-[#7d6553] font-normal">COP</span>
+                </span>
+              </div>
+            </div>
+
+            {/* BOTONES DE ACCIÓN */}
+            <div className="space-y-2">
               <button
+                type="button"
                 onClick={cotizarWhatsApp}
-                className={`${montserrat.className} w-full bg-white hover:bg-stone-100 text-stone-900 border border-[#E8DDD0] py-3.5 px-4 rounded-2xl text-xs font-semibold uppercase tracking-[0.15em] transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 cursor-pointer shadow-xs`}
+                className={`${montserrat.className} w-full bg-white hover:bg-stone-100 text-[#3e3229] border border-[#071326]/30 py-3 px-4 rounded-xl text-xs font-semibold uppercase tracking-[0.15em] transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 cursor-pointer shadow-2xs`}
               >
                 <span className="text-[#8c7355]">
                   <Icons.WhatsApp />
@@ -371,10 +540,10 @@ function HabitacionFullScreenItem({ hab }: { hab: Habitacion }) {
                 <span>Cotizar Habitación</span>
               </button>
 
-              {/* BOTÓN 2: RESERVAR */}
               <button
+                type="button"
                 onClick={reservarWhatsApp}
-                className={`${montserrat.className} w-full bg-[#8c7355] hover:bg-[#071326] text-white py-3.5 px-4 rounded-2xl text-xs font-bold uppercase tracking-[0.15em] shadow-md transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 cursor-pointer`}
+                className={`${montserrat.className} w-full bg-[#8c7355] hover:bg-[#071326] text-white py-3 px-4 rounded-xl text-xs font-bold uppercase tracking-[0.15em] shadow-md transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 cursor-pointer`}
               >
                 <Icons.WhatsApp />
                 <span>Reservar Habitación</span>
@@ -466,6 +635,9 @@ export default function PaginaHabitaciones() {
   const [videoHeroActivo, setVideoHeroActivo] = useState(0);
   const [heroSonido, setHeroSonido] = useState(false);
 
+  // Estado para la ventana emergente modal de servicios
+  const [servicioModal, setServicioModal] = useState<DetalleServicio | null>(null);
+
   // Cambio automático entre los 2 videos de Hero cada 9s
   useEffect(() => {
     const intervalHero = setInterval(() => {
@@ -474,7 +646,13 @@ export default function PaginaHabitaciones() {
     return () => clearInterval(intervalHero);
   }, []);
 
-  // Separamos las habitaciones: 3 primeras, banner limpio a mitad, y 3 restantes
+  const abrirModal = (nombreServicio: string) => {
+    const data = INFO_SERVICIOS[nombreServicio];
+    if (data) {
+      setServicioModal(data);
+    }
+  };
+
   const primerGrupoHabitaciones = HABITACIONES.slice(0, 3);
   const segundoGrupoHabitaciones = HABITACIONES.slice(3);
 
@@ -665,7 +843,7 @@ export default function PaginaHabitaciones() {
       {/* 1. PRIMERAS 3 HABITACIONES */}
       <div className="w-full">
         {primerGrupoHabitaciones.map((hab) => (
-          <HabitacionFullScreenItem key={hab.id} hab={hab} />
+          <HabitacionFullScreenItem key={hab.id} hab={hab} onAbrirServicio={abrirModal} />
         ))}
       </div>
 
@@ -678,9 +856,72 @@ export default function PaginaHabitaciones() {
       {/* 2. SIGUIENTES 3 HABITACIONES */}
       <div className="w-full">
         {segundoGrupoHabitaciones.map((hab) => (
-          <HabitacionFullScreenItem key={hab.id} hab={hab} />
+          <HabitacionFullScreenItem key={hab.id} hab={hab} onAbrirServicio={abrirModal} />
         ))}
       </div>
+
+      {/* VENTANA EMERGENTE (MODAL) DE SERVICIOS */}
+      {servicioModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-300">
+          <div 
+            onClick={() => setServicioModal(null)} 
+            className="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity"
+          />
+
+          <div className="relative w-full max-w-md bg-white/95 backdrop-blur-2xl border-2 border-[#071326]/30 rounded-3xl p-6 sm:p-8 shadow-[0_25px_60px_rgba(0,0,0,0.35)] space-y-5 text-stone-900 z-10 animate-in zoom-in-95 duration-300">
+            <div className="flex items-center justify-between border-b border-[#071326]/15 pb-3">
+              <div className="flex items-center gap-2.5">
+                <span className="text-2xl p-2 rounded-2xl bg-[#FAF7F2] border border-[#071326]/20">
+                  {servicioModal.icono}
+                </span>
+                <div>
+                  <span className={`${montserrat.className} text-[10px] uppercase tracking-widest text-[#8c7355] font-bold block`}>
+                    Servicio de la Estancia
+                  </span>
+                  <h4 className={`${montserrat.className} text-xl sm:text-2xl font-bold text-[#071326]`}>
+                    {servicioModal.nombre}
+                  </h4>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setServicioModal(null)}
+                className="w-8 h-8 rounded-full bg-stone-100 hover:bg-[#071326] text-stone-700 hover:text-white flex items-center justify-center text-sm transition-all cursor-pointer"
+                aria-label="Cerrar modal"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-sm sm:text-base text-[#5a483a] leading-relaxed font-normal">
+              {servicioModal.resumen}
+            </p>
+
+            <div className="space-y-2 bg-[#FAF7F2] p-4 rounded-2xl border border-[#071326]/20">
+              <span className={`${montserrat.className} text-[10px] uppercase tracking-wider text-[#7d6553] font-bold block`}>
+                Especificaciones:
+              </span>
+              <ul className="space-y-1.5 text-xs sm:text-sm text-[#5a483a]">
+                {servicioModal.detalles.map((det, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <span className="text-[#8c7355] font-bold mt-0.5">✓</span>
+                    <span>{det}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setServicioModal(null)}
+              className={`${montserrat.className} w-full bg-[#8c7355] hover:bg-[#071326] text-white py-3 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer shadow-md active:scale-95`}
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* FOOTER AZUL ABADÍA */}
       <footer className="w-full bg-[#071326] text-white py-16 px-6 text-center border-t border-blue-950/60">
