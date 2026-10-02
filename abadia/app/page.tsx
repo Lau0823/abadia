@@ -34,7 +34,6 @@ const VIDEO_MID = {
   poster: "/121017.jpg"
 };
 
-// --- ICONOS VECTORIALES DE ALTA PRECISIÓN ---
 const Icons = {
   Key: ({ className = "w-4 h-4" }: { className?: string }) => (
     <svg className={`${className} stroke-current fill-none`} viewBox="0 0 24 24" strokeWidth="1.6">
@@ -117,7 +116,7 @@ const HABITACIONES: Habitacion[] = [
     medios: [
       "/Habitaciones/habitacion1.jpeg",
       "/WhatsApp Image 2026-07-08 at 10.54.20 (1).jpeg",
-      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1920&q=85"
+      "/Habitaciones/habitacion101.png"
     ]
   },
   {
@@ -147,13 +146,16 @@ const HABITACIONES: Habitacion[] = [
     precio: "$70.000",
     noches: "/ noche por persona",
     ocupacion: "2 a 3 Huéspedes",
-    camas: "1 Cama Queen + Cama Auxiliar",
+    camas: "1 Cama sencilla",
     descripcion: "Ambiente fresco y apacible para el descanso. Dotada con aire acondicionado, mininevera, Smart TV, baño privado y Wi-Fi.",
     servicios: ["Aire acondicionado", "Mininevera", "Smart TV", "Wi-Fi gratuito"],
     medios: [
+
+
+        "/Habitaciones/habitacion301.png",
       "/Habitaciones/habitacion3.jpeg",
-      "/121017.jpg",
-      "https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=1920&q=85"
+      
+      "/Habitaciones/301.png"
     ]
   },
   {
@@ -170,8 +172,8 @@ const HABITACIONES: Habitacion[] = [
     servicios: ["Aire acondicionado", "Mininevera", "Smart TV", "Wi-Fi gratuito"],
     medios: [
       "/Habitaciones/habitacion4.jpeg",
-      "/WhatsApp Image 2026-07-08 at 10.54.20 (1).jpeg",
-      "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&w=1920&q=85"
+       "/DSC05650.jpeg",
+        "/DSC05657.jpeg",
     ]
   },
   {
@@ -188,8 +190,10 @@ const HABITACIONES: Habitacion[] = [
     servicios: ["Aire acondicionado", "Mininevera", "Smart TV", "Wi-Fi gratuito"],
     medios: [
       "/videosdebanner/copy_359F2AF5-3796-41C5-B3D0-B9AC83EF213B.mov",
-      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=1920&q=85",
-      "/WhatsApp Image 2026-07-08 at 10.54.20 (2).jpeg"
+      "/Habitaciones/habitacion5/DSC05772.jpeg",
+
+       "/Habitaciones/habitacion5/DSC05770.jpeg",
+      "/Habitaciones/habitacion5/DSC05779.jpeg"
     ]
   },
   {
@@ -206,8 +210,8 @@ const HABITACIONES: Habitacion[] = [
     servicios: ["Aire acondicionado", "Mininevera", "Smart TV", "Wi-Fi gratuito"],
     medios: [
       "/Habitaciones/habitacion6.jpeg",
-      "/piscina.png",
-      "/WhatsApp Image 2026-07-06 at 20.33.43 (1).jpeg"
+      
+     
     ]
   }
 ];
@@ -226,7 +230,7 @@ const OTROS_ESPACIOS: EspacioCasa[] = [
     id: "Piscina",
     tag: "01 • Recreación & Relax",
     titulo: "Piscina Abadía",
-    descripcion: "Área de agua cristalina rodeada de palmeras tropicales y asoleadoras privadas para relajarte a cualquier hora.",
+    descripcion: "piscina grande adultos + kiosko aseloadoras, duchas y picina infantil.",
     recurso: "/IMG_2254.mov"
   },
   {
@@ -291,44 +295,33 @@ const ATARDECERES_FOTOS: AtardecerFoto[] = [
     id: 1,
     titulo: "Reflejo Dorado sobre Playa Blanca",
     momento: "05:45 PM • Horizonte Caribe",
-    src: "/atardecer.jpg"
+    src: "/atardeceres/abe23f00-6c34-41ab-920c-449ea7f703b0.JPG"
   },
   {
     id: 2,
     titulo: "La Calma de la Marea Baja",
     momento: "05:55 PM • Frente al Hotel",
-    src: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=85"
+    src: "/atardeceres/abe23f00-6c34-41ab-920c-449ea7f703b0.JPG"
   },
   {
     id: 3,
     titulo: "Cielo Naranja entre Palmeras",
     momento: "06:05 PM • Sendero Costero",
-    src: "https://images.unsplash.com/photo-1518495973542-4542c06a5843?auto=format&fit=crop&w=1920&q=85"
+    src: "/atardeceres/DSC00012.JPG"
   },
   {
     id: 4,
     titulo: "Crepúsculo en Punta Bonita",
     momento: "06:12 PM • Golfo de Morrosquillo",
-    src: "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?auto=format&fit=crop&w=1920&q=85"
+    src:"/sunshine.JPG"
   },
-  {
+ 
+    {
     id: 5,
-    titulo: "Paz Silente frente a la Orilla",
-    momento: "06:20 PM • Muelle Artesanal",
-    src: "https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?auto=format&fit=crop&w=1920&q=85"
+    titulo: "Crepúsculo en Punta Bonita",
+    momento: "06:12 PM • Golfo de Morrosquillo",
+    src:"/amanecersan atnero.JPG"
   },
-  {
-    id: 6,
-    titulo: "Tonos Violeta y Brisa Marina",
-    momento: "06:28 PM • Playa Blanca",
-    src: "https://images.unsplash.com/photo-1509233725247-49e657c54213?auto=format&fit=crop&w=1920&q=85"
-  },
-  {
-    id: 7,
-    titulo: "La Noche se Encuentra con el Mar",
-    momento: "06:35 PM • Abadía Casa Hotel",
-    src: "https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?auto=format&fit=crop&w=1920&q=85"
-  }
 ];
 
 // Carrusel duplicado para loop infinito
@@ -403,9 +396,7 @@ function GlobalHeader() {
             <Link onClick={() => setMenuAbierto(false)} href="/gastronomia" className="text-base sm:text-lg font-medium uppercase tracking-wider text-white hover:text-[#C5A059] transition-colors">
               Gastronomía de Autor
             </Link>
-            <Link onClick={() => setMenuAbierto(false)} href="/matrimonios" className="text-base sm:text-lg font-medium uppercase tracking-wider text-white hover:text-[#C5A059] transition-colors">
-              Matrimonios & Eventos
-            </Link>
+           
             <Link onClick={() => setMenuAbierto(false)} href="/transporte" className="text-base sm:text-lg font-medium uppercase tracking-wider text-white hover:text-[#C5A059] transition-colors">
               Cómo Llegar & Transporte
             </Link>
@@ -724,7 +715,7 @@ export default function HomePage() {
       <section className="bg-[#FAF7F2] py-10 sm:py-14 px-4 sm:px-6 text-center border-b border-[#E8DDD0]">
         <div className="max-w-2xl mx-auto space-y-2">
           <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.35em] text-[#8c7355] font-semibold block">
-            — COLECCIÓN EXCLUSIVA
+            
           </span>
           <h2 className="text-xl sm:text-3xl md:text-4xl font-semibold uppercase tracking-wide text-[#C5A059]">
             Nuestras Habitaciones
