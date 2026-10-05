@@ -711,10 +711,10 @@ export default function PaginaHabitaciones() {
 
           <nav className="flex flex-col gap-6 text-left my-auto">
             <Link onClick={() => setMenuAbierto(false)} href="/" className={`${montserrat.className} text-lg sm:text-2xl font-medium uppercase tracking-wider text-white hover:text-[#C5A059] transition-colors`}>Inicio</Link>
-            <Link onClick={() => setMenuAbierto(false)} href="/habitaciones" className={`${montserrat.className} text-lg sm:text-2xl font-medium uppercase tracking-wider text-white hover:text-[#C5A059] transition-colors`}>Nuestras Habitaciones</Link>
+            <Link onClick={() => setMenuAbierto(false)} href="/habitaciones" className={`${montserrat.className} text-lg sm:text-2xl font-medium uppercase tracking-wider text-white hover:text-[#C5A059] transition-colors`}> Habitaciones</Link>
             <Link onClick={() => setMenuAbierto(false)} href="/otros-espacios" className={`${montserrat.className} text-lg sm:text-2xl font-medium uppercase tracking-wider text-white hover:text-[#C5A059] transition-colors`}>Otros Espacios de la Casa</Link>
             <Link onClick={() => setMenuAbierto(false)} href="/que-hacer" className={`${montserrat.className} text-lg sm:text-2xl font-medium uppercase tracking-wider text-white hover:text-[#C5A059] transition-colors`}>Qué hacer en San Antero</Link>
-            <Link onClick={() => setMenuAbierto(false)} href="/reservas-y-pagos" className={`${montserrat.className} text-lg sm:text-2xl font-medium uppercase tracking-wider text-white hover:text-[#C5A059] transition-colors`}>Dashboard de Reservas & Pagos</Link>
+            <Link onClick={() => setMenuAbierto(false)} href="/reservas-y-pagos" className={`${montserrat.className} text-lg sm:text-2xl font-medium uppercase tracking-wider text-white hover:text-[#C5A059] transition-colors`}>Reservas & Pagos</Link>
           </nav>
 
           <div className="pt-6 border-t border-white/10 flex items-center justify-between text-[10px] uppercase tracking-[0.25em] text-white/70">
@@ -824,7 +824,7 @@ export default function PaginaHabitaciones() {
       <section id="catalogo-estancias" className="bg-[#FAF7F2] py-12 sm:py-16 px-6 text-center border-b border-[#E8DDD0]">
         <div className="max-w-2xl mx-auto space-y-1">
           <span className={`${montserrat.className} text-[9px] sm:text-[10px] uppercase tracking-[0.35em] text-[#8c7355] font-bold block`}>
-            — EXPERIENCIA VISUAL
+            
           </span>
           <div className="relative inline-block">
             <h2 className={`${montserrat.className} text-2xl sm:text-4xl font-extrabold uppercase tracking-tight text-[#2a2421]`}>
