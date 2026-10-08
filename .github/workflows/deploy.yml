@@ -35,6 +35,23 @@ jobs:
           echo "Detected VPS host fingerprint: $actual_fingerprint"
           test "$actual_fingerprint" = "SHA256:KkiAxqPAAfkZWrdg+Z8JkCvj5W9+waXhIARGHWDw0es"
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build Application Locally (GitHub Actions)
+        run: |
+          cd abadia-back
+          npm ci
+          npm run build
+          cd ../abadia-front
+          npm ci
+          npm run build
+          cd ..
+          # Comprimir todo excepto node_modules y .git para subirlo súper rápido
+          tar --exclude='*/node_modules' --exclude='.git' -czf release.tar.gz abadia-front abadia-back deploy
+
       - name: Copy application source
         uses: appleboy/scp-action@v1
         with:
@@ -42,7 +59,7 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
           fingerprint: SHA256:5uXAbSheTHhyDmpbHQXoDtcdXOtIWe82ys+42Y+s7M4
-          source: 'abadia-front,abadia-back'
+          source: 'release.tar.gz'
           target: '/var/www'
           overwrite: true
 
@@ -58,37 +75,40 @@ jobs:
           strip_components: 1
           overwrite: true
 
-      - name: Build and reload Abadía
+      - name: Extract, Install Prod dependencies, and Reload Abadía
         uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
           fingerprint: SHA256:5uXAbSheTHhyDmpbHQXoDtcdXOtIWe82ys+42Y+s7M4
-          command_timeout: 30m
+          command_timeout: 10m
           script: |
             set -eu
+            cd /var/www
+            tar -xzf release.tar.gz
+            rm release.tar.gz
+            
             cd /var/www/abadia-back
-            npm install --no-audit --no-fund --prefer-offline
-            npm run build
+            npm install --no-audit --no-fund --omit=dev --prefer-offline
+            
             cd /var/www/abadia-front
-            npm install --no-audit --no-fund --prefer-offline
-            npm run build
+            npm install --no-audit --no-fund --omit=dev --prefer-offline
+            
             pm2 startOrReload /var/www/abadia-back/ecosystem.config.cjs
             pm2 save
+            
             for url in http://127.0.0.1:3102/health http://127.0.0.1:3100/; do
               for attempt in $(seq 1 30); do
                 if curl --fail --silent --show-error "$url" >/dev/null; then
                   break
                 fi
-
                 if [ "$attempt" -eq 30 ]; then
                   echo "Service did not become ready: $url"
                   pm2 logs abadia-back --lines 100 --nostream || true
                   pm2 logs abadia-front --lines 100 --nostream || true
                   exit 1
                 fi
-
                 sleep 1
               done
             done
