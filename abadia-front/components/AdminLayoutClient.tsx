@@ -22,7 +22,8 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   Bars3Icon,
-  XMarkIcon
+  XMarkIcon,
+  PhotoIcon
 } from "@heroicons/react/24/outline";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/Tooltip";
 import { useAuthStore } from "../store/authStore";
@@ -37,6 +38,7 @@ const navigation = [
   { name: "Tareas", href: "/admin/tareas", icon: ClipboardDocumentCheckIcon, roles: ["superadmin", "admin", "supervisor", "empleado", "employee"] },
   { name: "Empleados", href: "/admin/empleados", icon: BriefcaseIcon, roles: ["superadmin", "admin"] },
   { name: "Finanzas", href: "/admin/finanzas", icon: ChartBarIcon, roles: ["superadmin", "admin"] },
+  { name: "Multimedia", href: "/admin/multimedia", icon: PhotoIcon, roles: ["superadmin", "admin"] },
   { name: "Configuración", href: "/admin/settings", icon: Cog6ToothIcon, roles: ["superadmin", "admin"] },
 ];
 

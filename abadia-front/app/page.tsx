@@ -46,23 +46,7 @@ interface TerminoPolitica {
 
 
 
-const PLANES: PlanHotel[] = [
-  { id: "romantica", titulo: "Noche Romántica", subtitulo: "BASIC", descripcion: "Cena de tres tiempos a la luz de las velas servida en nuestra cava privada, una botella de champaña premium de bienvenida y acceso exclusivo al spa.", precio: "$250.000 COP / pareja", imagen: "https://i.pinimg.com/736x/6e/e5/6d/6ee56dc274682fb52d8986c70c816349.jpg", etiqueta: "EXPERIENCIA EXCLUSIVA" },
-  { id: "madre", titulo: "Mes de la Madre", subtitulo: "CLASIC", descripcion: "Un homenaje al amor incondicional. Incluye masaje terapéutico corporal de 90 minutos con aceites esenciales florales en nuestro spa y brunch dominical.", precio: "$190.000 COP / persona", imagen: "https://i.pinimg.com/736x/53/0e/d7/530ed71269d7970063d8d12596cbd559.jpg", etiqueta: "TEMPORADA ESPECIAL" },
-  { id: "escapada", titulo: "Escapada de Finde", subtitulo: "PREMIUM", descripcion: "Desconéctate de la rutina urbana desde el viernes por la tarde. Disfruta de desayunos buffet artesanales a la carta y caminatas guiadas privadas.", precio: "$320.000 COP / estancia", imagen: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=1200&q=80", etiqueta: "DESCONEXIÓN TOTAL" }
-];
 
-const CASA: EspacioCasa[] = [
-  { id: "casa-1", titulo: "El Lobby Principal", imagen: "https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=800&q=80" },
-  { id: "casa-4", titulo: "La Piscina de Calma", imagen: "https://i.pinimg.com/736x/5a/27/d9/5a27d98eb8014c3754af2a16af649e6a.jpg" },
-  { id: "casa-6", titulo: "Zona de parqueo", imagen: "https://i.pinimg.com/736x/00/e2/d8/00e2d88dc3d58b815f6678eccc353832.jpg" },
-];
-
-const ENTRETENIMIENTO_LOCAL: ActividadLocal[] = [
-  { id: "act-1", lugar: "Coveñas", titulo: "Playas de la Coquerita", imagen: "https://i.pinimg.com/736x/7e/49/82/7e4982b5eceb9ddd9cbb78b3be98bcf5.jpg", precioDesde: "$45.000 COP" },
-  { id: "act-2", lugar: "San Antero", titulo: "Bahía de Cispatá y Manglares", imagen: "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?auto=format&fit=crop&w=600&q=80", precioDesde: "$60.000 COP" },
-  { id: "act-3", lugar: "San Antero", titulo: "Mirador de la Guitarra", imagen: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=600&q=80", precioDesde: "Entrada Libre" }
-];
 
 const METODOS_PAGO: MetodoPago[] = [
   { id: "pago-1", tipo: "Transferencia Directa", detalle: "Bancolombia, Nequi o Daviplata sin costos adicionales.", icono: "📱" },
@@ -118,6 +102,60 @@ export default function HomePage() {
     { id: "casa-3", titulo: getSetting('home_casa_3_title', 'Zona de parqueo'), imagen: getSetting('home_casa_3_img', 'https://i.pinimg.com/736x/00/e2/d8/00e2d88dc3d58b815f6678eccc353832.jpg') },
   ];
 
+  const PLANES_DINAMICOS: PlanHotel[] = [
+    { 
+      id: "romantica", 
+      titulo: getSetting('plan_1_title', 'Noche Romántica'), 
+      subtitulo: getSetting('plan_1_subtitle', 'BASIC'), 
+      descripcion: getSetting('plan_1_desc', 'Cena de tres tiempos a la luz de las velas servida en nuestra cava privada, una botella de champaña premium de bienvenida y acceso exclusivo al spa.'), 
+      precio: getSetting('plan_1_price', '$250.000 COP / pareja'), 
+      imagen: getSetting('plan_1_img', 'https://i.pinimg.com/736x/6e/e5/6d/6ee56dc274682fb52d8986c70c816349.jpg'), 
+      etiqueta: getSetting('plan_1_tag', 'EXPERIENCIA EXCLUSIVA') 
+    },
+    { 
+      id: "madre", 
+      titulo: getSetting('plan_2_title', 'Mes de la Madre'), 
+      subtitulo: getSetting('plan_2_subtitle', 'CLASIC'), 
+      descripcion: getSetting('plan_2_desc', 'Un homenaje al amor incondicional. Incluye masaje terapéutico corporal de 90 minutos con aceites esenciales florales en nuestro spa y brunch dominical.'), 
+      precio: getSetting('plan_2_price', '$190.000 COP / persona'), 
+      imagen: getSetting('plan_2_img', 'https://i.pinimg.com/736x/53/0e/d7/530ed71269d7970063d8d12596cbd559.jpg'), 
+      etiqueta: getSetting('plan_2_tag', 'TEMPORADA ESPECIAL') 
+    },
+    { 
+      id: "escapada", 
+      titulo: getSetting('plan_3_title', 'Escapada de Finde'), 
+      subtitulo: getSetting('plan_3_subtitle', 'PREMIUM'), 
+      descripcion: getSetting('plan_3_desc', 'Desconéctate de la rutina urbana desde el viernes por la tarde. Disfruta de desayunos buffet artesanales a la carta y caminatas guiadas privadas.'), 
+      precio: getSetting('plan_3_price', '$320.000 COP / estancia'), 
+      imagen: getSetting('plan_3_img', 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=1200&q=80'), 
+      etiqueta: getSetting('plan_3_tag', 'DESCONEXIÓN TOTAL') 
+    }
+  ];
+
+  const ENTRETENIMIENTO_LOCAL_DINAMICO: ActividadLocal[] = [
+    { 
+      id: "act-1", 
+      lugar: getSetting('turismo_1_lugar', 'Coveñas'), 
+      titulo: getSetting('turismo_1_title', 'Playas de la Coquerita'), 
+      imagen: getSetting('turismo_1_img', 'https://i.pinimg.com/736x/7e/49/82/7e4982b5eceb9ddd9cbb78b3be98bcf5.jpg'), 
+      precioDesde: getSetting('turismo_1_price', '$45.000 COP') 
+    },
+    { 
+      id: "act-2", 
+      lugar: getSetting('turismo_2_lugar', 'San Antero'), 
+      titulo: getSetting('turismo_2_title', 'Bahía de Cispatá y Manglares'), 
+      imagen: getSetting('turismo_2_img', 'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?auto=format&fit=crop&w=600&q=80'), 
+      precioDesde: getSetting('turismo_2_price', '$60.000 COP') 
+    },
+    { 
+      id: "act-3", 
+      lugar: getSetting('turismo_3_lugar', 'San Antero'), 
+      titulo: getSetting('turismo_3_title', 'Mirador de la Guitarra'), 
+      imagen: getSetting('turismo_3_img', 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=600&q=80'), 
+      precioDesde: getSetting('turismo_3_price', 'Entrada Libre') 
+    }
+  ];
+
   const activarVolteoCard = (id: string) => {
     setHabitacionConPrecio(habitacionConPrecio === id ? null : id);
   };
@@ -129,7 +167,7 @@ export default function HomePage() {
     }
   };
 
-  const planSeleccionado = PLANES.find(p => p.id === planActivo) || PLANES[0];
+  const planSeleccionado = PLANES_DINAMICOS.find(p => p.id === planActivo) || PLANES_DINAMICOS[0];
 
   // Cortafuegos de hidratación seguro
   if (!isMounted) {
@@ -391,7 +429,7 @@ export default function HomePage() {
           </div>
 
           <div className="flex flex-wrap justify-center gap-2 mb-12 max-w-md mx-auto">
-            {PLANES.map((plan) => (
+            {PLANES_DINAMICOS.map((plan) => (
               <button 
                 key={plan.id}
                 onClick={() => setPlanActivo(plan.id)}
@@ -446,7 +484,7 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-            {ENTRETENIMIENTO_LOCAL.map((item) => (
+            {ENTRETENIMIENTO_LOCAL_DINAMICO.map((item) => (
               <div key={item.id} className="relative aspect-[4/5] overflow-hidden rounded-[2.5rem] shadow-sm border border-[#f4f1ea]/50 transition-all duration-500 hover:scale-[1.01] hover:shadow-md">
                 <Image src={item.imagen} alt={item.titulo} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent z-10" />

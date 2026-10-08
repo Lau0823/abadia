@@ -33,7 +33,7 @@ interface Setting {
   isNew?: boolean;
 }
 
-const PREDEFINED_KEYS: Record<string, { label: string; category: 'contact' | 'social' | 'general' | 'integrations' | 'multimedia' | 'home' | 'guide'; description: string; placeholder: string; type?: string; accept?: string }> = {
+const PREDEFINED_KEYS: Record<string, { label: string; category: 'contact' | 'social' | 'general' | 'integrations'; description: string; placeholder: string; type?: string; accept?: string }> = {
   telefono: { label: "Teléfono Principal", category: "contact", description: "Número de teléfono para contacto directo y reservas.", placeholder: "+57 300 000 0000", type: "tel" },
   whatsapp: { label: "Número de WhatsApp", category: "contact", description: "WhatsApp oficial donde se enviarán consultas de huéspedes.", placeholder: "+57 300 000 0000", type: "tel" },
   email_contacto: { label: "Correo Electrónico de Notificaciones", category: "contact", description: "Email donde llegarán las confirmaciones y notificaciones del sistema.", placeholder: "contacto@hotelabadia.com", type: "email" },
@@ -52,32 +52,6 @@ const PREDEFINED_KEYS: Record<string, { label: string; category: 'contact' | 'so
 
   google_calendar_id: { label: "ID de Google Calendar", category: "integrations", description: "ID del calendario vinculado para sincronización de reservas.", placeholder: "primary o id@group.calendar.google.com", type: "text" },
 
-  logo_principal: { label: "Logo Principal", category: "multimedia", description: "Logo principal utilizado en barra de navegación y pie de página.", placeholder: "URL o archivo", type: "file", accept: "image/*" },
-  logo_secundario: { label: "Logo Secundario", category: "multimedia", description: "Logo utilizado en panel de administración.", placeholder: "URL o archivo", type: "file", accept: "image/*" },
-  hero_video: { label: "Video Principal (Inicio)", category: "multimedia", description: "Video de fondo en la página de inicio.", placeholder: "URL o archivo", type: "file", accept: "video/*" },
-  login_bg: { label: "Fondo de Pantalla de Login", category: "multimedia", description: "Imagen mostrada al iniciar sesión.", placeholder: "URL o archivo", type: "file", accept: "image/*" },
-  about_img_1: { label: "Imagen Acerca de (1)", category: "multimedia", description: "Primera imagen para la sección de historia.", placeholder: "URL o archivo", type: "file", accept: "image/*" },
-  about_img_2: { label: "Imagen Acerca de (2)", category: "multimedia", description: "Segunda imagen para la sección de historia.", placeholder: "URL o archivo", type: "file", accept: "image/*" },
-
-  // Textos y Contenidos del Home
-  home_rooms_subtitle: { label: "Subtítulo Habitaciones", category: "home", description: "Texto sobre el título de habitaciones", placeholder: "— HABITACIONES", type: "text" },
-  home_casa_1_title: { label: "Espacio Casa 1 (Título)", category: "home", description: "Título del primer espacio", placeholder: "El Lobby Principal", type: "text" },
-  home_casa_1_img: { label: "Espacio Casa 1 (Imagen)", category: "home", description: "Imagen del primer espacio", placeholder: "URL o archivo", type: "file", accept: "image/*" },
-  home_casa_2_title: { label: "Espacio Casa 2 (Título)", category: "home", description: "Título del segundo espacio", placeholder: "La Piscina de Calma", type: "text" },
-  home_casa_2_img: { label: "Espacio Casa 2 (Imagen)", category: "home", description: "Imagen del segundo espacio", placeholder: "URL o archivo", type: "file", accept: "image/*" },
-  home_casa_3_title: { label: "Espacio Casa 3 (Título)", category: "home", description: "Título del tercer espacio", placeholder: "Zona de parqueo", type: "text" },
-  home_casa_3_img: { label: "Espacio Casa 3 (Imagen)", category: "home", description: "Imagen del tercer espacio", placeholder: "URL o archivo", type: "file", accept: "image/*" },
-
-  // Conoce Abadía (Guía)
-  guide_sec_1_title: { label: "Sección 1 (Título)", category: "guide", description: "Título de la primera sección de la guía", placeholder: "Nuestra Historia", type: "text" },
-  guide_sec_1_desc: { label: "Sección 1 (Descripción)", category: "guide", description: "Descripción de la primera sección", placeholder: "Lo que comenzó como una casa...", type: "textarea" },
-  guide_sec_1_img: { label: "Sección 1 (Imagen)", category: "guide", description: "Imagen de la primera sección", placeholder: "URL o archivo", type: "file", accept: "image/*" },
-  guide_sec_2_title: { label: "Sección 2 (Título)", category: "guide", description: "Título de la segunda sección", placeholder: "Gastronomía", type: "text" },
-  guide_sec_2_desc: { label: "Sección 2 (Descripción)", category: "guide", description: "Descripción de la segunda sección", placeholder: "Nuestra cocina es una...", type: "textarea" },
-  guide_sec_2_img: { label: "Sección 2 (Imagen)", category: "guide", description: "Imagen de la segunda sección", placeholder: "URL o archivo", type: "file", accept: "image/*" },
-  guide_sec_3_title: { label: "Sección 3 (Título)", category: "guide", description: "Título de la tercera sección", placeholder: "Bienestar", type: "text" },
-  guide_sec_3_desc: { label: "Sección 3 (Descripción)", category: "guide", description: "Descripción de la tercera sección", placeholder: "Sumérjase en un estado...", type: "textarea" },
-  guide_sec_3_img: { label: "Sección 3 (Imagen)", category: "guide", description: "Imagen de la tercera sección", placeholder: "URL o archivo", type: "file", accept: "image/*" },
 };
 
 export default function SettingsPage() {
@@ -86,7 +60,7 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
-  const [activeTab, setActiveTab] = useState<'account' | 'contact' | 'social' | 'general' | 'integrations' | 'multimedia' | 'home' | 'guide' | 'advanced'>('account');
+  const [activeTab, setActiveTab] = useState<'account' | 'contact' | 'social' | 'general' | 'integrations' | 'advanced'>('account');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [newKeyModal, setNewKeyModal] = useState(false);
   const [customKeyInput, setCustomKeyInput] = useState({ key: "", value: "", description: "" });
@@ -291,24 +265,12 @@ export default function SettingsPage() {
       const formData = new FormData();
       formData.append('file', file);
       
-      const token = useAuthStore.getState().token;
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002";
-      
-      const res = await fetch(`${apiUrl}/settings/upload-image/${key}`, {
+      const res = await fetchApi(`/settings/upload-image/${key}`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
         body: formData
       });
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Error al subir archivo");
-      }
-      
-      const data = await res.json();
-      updateSettingValue(key, data.value);
+      updateSettingValue(key, res.value);
       setSuccessMsg("Archivo multimedia subido con éxito");
       setTimeout(() => setSuccessMsg(""), 4000);
     } catch (error: any) {
@@ -349,119 +311,38 @@ export default function SettingsPage() {
             )}
 
             <button 
-              onClick={handleSaveAll}
-              disabled={saving || loading}
-              className="flex items-center gap-2 bg-gradient-to-r from-[var(--mv-blue)] to-[#0b3c66] hover:from-[#0b3c66] hover:to-[#082a48] text-white px-6 py-2.5 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all shadow-md shadow-blue-900/10 hover:shadow-lg hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+              onClick={handleSaveAll} 
+              disabled={saving}
+              className="bg-slate-900 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-slate-800 disabled:opacity-50 transition-all shadow-sm flex items-center gap-2"
             >
               {saving ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <>
+                  <div className="animate-spin w-4 h-4 border-2 border-white/30 border-t-white rounded-full"></div>
+                  Guardando...
+                </>
               ) : (
-                <CheckIcon className="w-4 h-4 stroke-[2.5]" />
+                'Guardar Todo'
               )}
-              Guardar Cambios
             </button>
           </div>
         )}
       </div>
 
-      {/* Tabs Navigation */}
-      <div className="flex bg-slate-100/80 p-1.5 rounded-2xl border border-slate-200/70 overflow-x-auto mv-scrollbar gap-1">
-        <button
-          onClick={() => setActiveTab('account')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
-            activeTab === 'account' 
-              ? 'bg-white text-[var(--mv-blue)] shadow-xs' 
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
-          }`}
-        >
-          <UserIcon className="w-4 h-4 stroke-[2.5]" />
-          Mi Cuenta y Seguridad
-        </button>
-
-        <button
-          onClick={() => setActiveTab('contact')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
-            activeTab === 'contact' 
-              ? 'bg-white text-[var(--mv-blue)] shadow-xs' 
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
-          }`}
-        >
-          <PhoneIcon className="w-4 h-4 stroke-[2.5]" />
-          Contacto y Ubicación
-        </button>
-
-        <button
-          onClick={() => setActiveTab('social')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
-            activeTab === 'social' 
-              ? 'bg-white text-[var(--mv-blue)] shadow-xs' 
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
-          }`}
-        >
-          <ShareIcon className="w-4 h-4 stroke-[2.5]" />
-          Redes Sociales
-        </button>
-
-        <button
-          onClick={() => setActiveTab('general')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
-            activeTab === 'general' 
-              ? 'bg-white text-[var(--mv-blue)] shadow-xs' 
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
-          }`}
-        >
-          <BuildingOfficeIcon className="w-4 h-4 stroke-[2.5]" />
-          Información del Hotel
-        </button>
-
-        <button
-          onClick={() => setActiveTab('integrations')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
-            activeTab === 'integrations' 
-              ? 'bg-white text-[var(--mv-blue)] shadow-xs' 
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
-          }`}
-        >
-          <GlobeAltIcon className="w-4 h-4 stroke-[2.5]" />
-          Integraciones
-        </button>
-
-        <button
-          onClick={() => setActiveTab('multimedia')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
-            activeTab === 'multimedia' 
-              ? 'bg-white text-[var(--mv-blue)] shadow-xs' 
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
-          }`}
-        >
-          <PhotoIcon className="w-4 h-4 stroke-[2.5]" />
-          Multimedia Global
-        </button>
-
-        <button
-          onClick={() => setActiveTab('home')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
-            activeTab === 'home' 
-              ? 'bg-white text-[var(--mv-blue)] shadow-xs' 
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
-          }`}
-        >
-          <DocumentTextIcon className="w-4 h-4 stroke-[2.5]" />
-          Inicio (Página)
-        </button>
-
-        <button
-          onClick={() => setActiveTab('guide')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
-            activeTab === 'guide' 
-              ? 'bg-white text-[var(--mv-blue)] shadow-xs' 
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
-          }`}
-        >
-          <GlobeAltIcon className="w-4 h-4 stroke-[2.5]" />
-          Conoce Abadía
-        </button>
-
+      {/* Tabs Layout */}
+      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+        {['account', 'contact', 'social', 'general', 'integrations'].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab as any)}
+            className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all shrink-0 ${
+              activeTab === tab 
+                ? 'bg-[var(--mv-ink)] text-white shadow-md' 
+                : 'bg-white text-slate-500 hover:text-slate-900 border border-slate-200/70 hover:border-slate-300'
+            }`}
+          >
+            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+          </button>
+        ))}
         <button
           onClick={() => setActiveTab('advanced')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 ml-auto ${
@@ -838,195 +719,7 @@ export default function SettingsPage() {
               </div>
             )}
 
-            {/* Category: Multimedia */}
-            {activeTab === 'multimedia' && (
-              <div className="space-y-5 animate-in fade-in duration-200">
-                <div className="border-b border-slate-100 pb-3">
-                  <h3 className="text-base font-extrabold text-slate-900">Archivos Multimedia</h3>
-                  <p className="text-xs text-slate-500 font-medium">Sube logos, videos de fondo y las imágenes principales para personalizar el sitio web.</p>
-                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {Object.keys(PREDEFINED_KEYS)
-                    .filter(k => PREDEFINED_KEYS[k].category === 'multimedia')
-                    .map(key => {
-                      const meta = PREDEFINED_KEYS[key];
-                      const setting = settings.find(s => s.key === key);
-                      const value = setting?.value || "";
-
-                      return (
-                        <div key={key} className="space-y-1.5 bg-slate-50/70 p-4 rounded-2xl border border-slate-200/60 hover:border-slate-300 transition-colors">
-                          <label className="block text-xs font-bold text-slate-800">
-                            {meta.label}
-                          </label>
-                          <p className="text-[11px] text-slate-400 leading-tight mb-2">{meta.description}</p>
-                          
-                          {value && (
-                            <div className="mb-3 relative rounded-xl overflow-hidden border border-slate-200 bg-slate-100 h-24 flex items-center justify-center">
-                              {meta.accept?.includes('video') ? (
-                                <video src={value} className="h-full w-full object-cover" muted loop autoPlay />
-                              ) : (
-                                <img src={value} alt={meta.label} className="h-full w-full object-contain p-2" />
-                              )}
-                            </div>
-                          )}
-
-                          <div className="flex flex-col gap-2">
-                            <input
-                              type="file"
-                              accept={meta.accept}
-                              onChange={(e) => {
-                                if (e.target.files && e.target.files[0]) {
-                                  handleFileUpload(key, e.target.files[0]);
-                                }
-                              }}
-                              className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all cursor-pointer"
-                            />
-                            <div className="text-[10px] text-slate-400 font-medium">O ingrese la URL directamente:</div>
-                            <input
-                              type="text"
-                              value={value}
-                              onChange={(e) => updateSettingValue(key, e.target.value)}
-                              placeholder={meta.placeholder}
-                              className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-medium focus:ring-2 focus:ring-[var(--mv-blue)]/30 focus:border-[var(--mv-blue)] outline-none transition-all"
-                            />
-                          </div>
-                        </div>
-                      );
-                    })}
-                </div>
-              </div>
-            )}
-
-            {/* Category: Home */}
-            {activeTab === 'home' && (
-              <div className="space-y-5 animate-in fade-in duration-200">
-                <div className="border-b border-slate-100 pb-3">
-                  <h3 className="text-base font-extrabold text-slate-900">Página de Inicio</h3>
-                  <p className="text-xs text-slate-500 font-medium">Personaliza los textos e imágenes de la página principal (Home).</p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {Object.keys(PREDEFINED_KEYS)
-                    .filter(k => PREDEFINED_KEYS[k].category === 'home')
-                    .map(key => {
-                      const meta = PREDEFINED_KEYS[key];
-                      const setting = settings.find(s => s.key === key);
-                      const value = setting?.value || "";
-
-                      return (
-                        <div key={key} className="space-y-1.5 bg-slate-50/70 p-4 rounded-2xl border border-slate-200/60 hover:border-slate-300 transition-colors">
-                          <label className="block text-xs font-bold text-slate-800">
-                            {meta.label}
-                          </label>
-                          <p className="text-[11px] text-slate-400 leading-tight mb-2">{meta.description}</p>
-                          
-                          {meta.type === 'file' ? (
-                            <>
-                              {value && (
-                                <div className="mb-3 relative rounded-xl overflow-hidden border border-slate-200 bg-slate-100 h-24 flex items-center justify-center">
-                                  <img src={value} alt={meta.label} className="h-full w-full object-cover" />
-                                </div>
-                              )}
-                              <input
-                                type="file"
-                                accept={meta.accept}
-                                onChange={(e) => {
-                                  if (e.target.files && e.target.files[0]) {
-                                    handleFileUpload(key, e.target.files[0]);
-                                  }
-                                }}
-                                className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all cursor-pointer"
-                              />
-                            </>
-                          ) : meta.type === 'textarea' ? (
-                            <textarea
-                              value={value}
-                              onChange={(e) => updateSettingValue(key, e.target.value)}
-                              placeholder={meta.placeholder}
-                              rows={3}
-                              className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-medium focus:ring-2 focus:ring-[var(--mv-blue)]/30 focus:border-[var(--mv-blue)] outline-none transition-all resize-none"
-                            />
-                          ) : (
-                            <input
-                              type="text"
-                              value={value}
-                              onChange={(e) => updateSettingValue(key, e.target.value)}
-                              placeholder={meta.placeholder}
-                              className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-medium focus:ring-2 focus:ring-[var(--mv-blue)]/30 focus:border-[var(--mv-blue)] outline-none transition-all"
-                            />
-                          )}
-                        </div>
-                      );
-                    })}
-                </div>
-              </div>
-            )}
-
-            {/* Category: Guide (Conoce Abadía) */}
-            {activeTab === 'guide' && (
-              <div className="space-y-5 animate-in fade-in duration-200">
-                <div className="border-b border-slate-100 pb-3">
-                  <h3 className="text-base font-extrabold text-slate-900">Guía: Conoce Abadía</h3>
-                  <p className="text-xs text-slate-500 font-medium">Personaliza las secciones de información y turismo.</p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {Object.keys(PREDEFINED_KEYS)
-                    .filter(k => PREDEFINED_KEYS[k].category === 'guide')
-                    .map(key => {
-                      const meta = PREDEFINED_KEYS[key];
-                      const setting = settings.find(s => s.key === key);
-                      const value = setting?.value || "";
-
-                      return (
-                        <div key={key} className="space-y-1.5 bg-slate-50/70 p-4 rounded-2xl border border-slate-200/60 hover:border-slate-300 transition-colors">
-                          <label className="block text-xs font-bold text-slate-800">
-                            {meta.label}
-                          </label>
-                          <p className="text-[11px] text-slate-400 leading-tight mb-2">{meta.description}</p>
-                          
-                          {meta.type === 'file' ? (
-                            <>
-                              {value && (
-                                <div className="mb-3 relative rounded-xl overflow-hidden border border-slate-200 bg-slate-100 h-24 flex items-center justify-center">
-                                  <img src={value} alt={meta.label} className="h-full w-full object-cover" />
-                                </div>
-                              )}
-                              <input
-                                type="file"
-                                accept={meta.accept}
-                                onChange={(e) => {
-                                  if (e.target.files && e.target.files[0]) {
-                                    handleFileUpload(key, e.target.files[0]);
-                                  }
-                                }}
-                                className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all cursor-pointer"
-                              />
-                            </>
-                          ) : meta.type === 'textarea' ? (
-                            <textarea
-                              value={value}
-                              onChange={(e) => updateSettingValue(key, e.target.value)}
-                              placeholder={meta.placeholder}
-                              rows={3}
-                              className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-medium focus:ring-2 focus:ring-[var(--mv-blue)]/30 focus:border-[var(--mv-blue)] outline-none transition-all resize-none"
-                            />
-                          ) : (
-                            <input
-                              type="text"
-                              value={value}
-                              onChange={(e) => updateSettingValue(key, e.target.value)}
-                              placeholder={meta.placeholder}
-                              className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-medium focus:ring-2 focus:ring-[var(--mv-blue)]/30 focus:border-[var(--mv-blue)] outline-none transition-all"
-                            />
-                          )}
-                        </div>
-                      );
-                    })}
-                </div>
-              </div>
-            )}
 
             {/* Category: Ajustes Avanzados */}
             {activeTab === 'advanced' && (

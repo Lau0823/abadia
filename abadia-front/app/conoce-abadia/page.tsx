@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useSettingsStore } from '../store/settingsStore';
+import { useSettingsStore } from '@/store/settingsStore';
 
 // --- DATOS DE LA GUÍA ---
 const SECCIONES_GUIA = [
