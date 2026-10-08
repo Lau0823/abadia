@@ -58,43 +58,30 @@ export class SeedService {
 
   private async seedSettings() {
     const settings = [
-      // SEO
-      { key: 'seo_title', value: 'Abadía | Hotel Boutique', description: 'Título de la página' },
-      { key: 'seo_description', value: 'Un lugar diseñado para el silencio, la lectura y la reconexión espiritual interior.', description: 'Meta descripción' },
+      // GENERAL
+      { key: 'nombre_hotel', value: 'Abadía', description: 'Nombre del hotel' },
+      { key: 'seo_title', value: 'Abadía | Hotel Boutique', description: 'Título de la página (SEO)' },
+      { key: 'seo_description', value: 'Un refugio de paz en la costa de San Antero y Coveñas.', description: 'Meta descripción (SEO)' },
+      { key: 'politica_cancelacion', value: 'Puedes reprogramar o cancelar tu estadía sin penalidad hasta 48 horas antes de tu fecha de llegada. Pasado este tiempo se cobrará el valor de la primera noche.', description: 'Políticas de Cancelación' },
 
-      // HERO
-      { key: 'hero_title', value: 'FOTOS SOÑADAS', description: 'Título principal de la portada' },
-      { key: 'hero_subtitle', value: 'HAGAMOS DE TUS', description: 'Subtítulo del Hero' },
-      { key: 'hero_description', value: 'Fotografía y audiovisual con una mirada editorial, emocional y cinematográfica para parejas que quieren recuerdos que realmente se sientan.', description: 'Texto descriptivo del Hero' },
+      // HERO SECTION
+      { key: 'hero_title', value: 'Desconéctate desde', description: 'Título principal de la portada' },
+      { key: 'hero_subtitle', value: 'Tu refugio de paz en la costa de San Antero y Coveñas', description: 'Subtítulo de la portada' },
 
-      // BIENVENIDA
-      { key: 'welcome_title', value: 'UNA EXPERIENCIA VISUAL QUE SE SIENTE', description: 'Título de bienvenida' },
-      { key: 'welcome_text', value: 'Cada historia merece una estética cuidada, una dirección sensible y una experiencia que conecte desde el primer vistazo hasta la última entrega.', description: 'Texto de bienvenida' },
+      // CONTACTO Y REDES
+      { key: 'email_contacto', value: 'contacto@hotelabadia.com', description: 'Email de contacto y reservas' },
+      { key: 'telefono', value: '+57 300 000 0000', description: 'Teléfono Principal' },
+      { key: 'whatsapp', value: '+57 300 000 0000', description: 'Número de WhatsApp' },
+      { key: 'instagram', value: 'https://instagram.com/hotelabadia', description: 'Instagram' },
+      { key: 'facebook', value: 'https://facebook.com/hotelabadia', description: 'Facebook' },
 
-      // ACERCA DE MI
-      { key: 'about_title', value: 'HISTORIAS REALES, MIRADA EDITORIAL', description: 'Título de Acerca de mí' },
-      { key: 'about_text_1', value: 'Soy Miles, fotógrafo y productor audiovisual. Mi trabajo nace de la sensibilidad, la estética y la intención de transformar cada momento en una pieza visual con emoción, carácter y presencia.', description: 'Párrafo 1 de biografía' },
-      { key: 'about_text_2', value: 'Me interesa crear imágenes que no solo se vean hermosas, sino que también transmitan verdad, atmósfera y una experiencia memorable desde el primer contacto.', description: 'Párrafo 2 de biografía' },
-
-      // SECCIONES
-      { key: 'bodas_desc', value: 'Coberturas con una mirada elegante, emocional y cinematográfica para contar tu historia con belleza, sensibilidad y verdad.', description: 'Descripción sección Bodas' },
-      { key: 'prebodas_desc', value: 'Sesiones íntimas y editoriales para parejas que quieren imágenes delicadas, naturales y con una narrativa visual especial.', description: 'Descripción sección Prebodas' },
-      { key: 'estudio_desc', value: 'Retratos y piezas visuales con una propuesta limpia, refinada y pensada desde la estética, la dirección y el detalle.', description: 'Descripción sección Estudio' },
-
-      // CONTACTO
-      { key: 'contact_email', value: 'hola@abadia.com', description: 'Email de contacto' },
-      { key: 'contact_phone', value: '573148112717', description: 'WhatsApp' },
-      { key: 'instagram_url', value: 'https://instagram.com/abadia', description: 'Instagram' },
-      { key: 'whatsapp_number', value: '573148112717', description: 'Número de WhatsApp para cotizaciones' },
-
-      // RECURSOS MULTIMEDIA (CLOUDINARY)
-      { key: 'hero_video_url', value: 'https://res.cloudinary.com/dgfp5gcjr/video/upload/v1777429058/VIDEO_1_1_b0wg0m.mp4', description: 'Video principal del inicio' },
-      { key: 'middle_video_url', value: 'https://res.cloudinary.com/dgfp5gcjr/video/upload/v1778000231/VIDEO_2_1_ggrrzq.mp4', description: 'Video intermedio de la página' },
-      { key: 'about_image_1', value: 'https://res.cloudinary.com/dgfp5gcjr/image/upload/v1777471870/WhatsApp_Image_2026-04-13_at_12.24.20_PM_1_tooe7y.jpg', description: 'Imagen superior de Acerca de Mí' },
-      { key: 'about_image_2', value: 'https://res.cloudinary.com/dgfp5gcjr/image/upload/v1777471868/WhatsApp_Image_2026-04-13_at_12.24.19_PM_qibzhs.jpg', description: 'Imagen inferior de Acerca de Mí' },
-      { key: 'about_video_url', value: 'https://res.cloudinary.com/dgfp5gcjr/video/upload/v1777429150/VIDEO_4_1_v0pinj.mp4', description: 'Video de la sección nosotros' },
-      { key: 'about_title_top', value: '¿QUIÉNES', description: 'Título superior sección nosotros' },
-      { key: 'about_title_bottom', value: 'SOMOS?', description: 'Título inferior (script) sección nosotros' },
+      // RECURSOS MULTIMEDIA (LOCAL O CLOUDINARY)
+      { key: 'logo_principal', value: '/logo.png', description: 'Logo principal utilizado en barra de navegación y pie de página' },
+      { key: 'logo_secundario', value: '/abadia.png', description: 'Logo utilizado en panel de administración' },
+      { key: 'hero_video', value: '/13597489-hd_1920_1080_30fps.mp4', description: 'Video principal del inicio' },
+      { key: 'login_bg', value: '/WhatsApp Image 2026-07-06 at 20.33.43.jpeg', description: 'Fondo de pantalla del Login Administrativo' },
+      { key: 'about_img_1', value: '/WhatsApp Image 2026-07-08 at 10.54.20 (2).jpeg', description: 'Imagen (1) para las secciones informativas del home' },
+      { key: 'about_img_2', value: '/WhatsApp Image 2026-07-08 at 10.54.20 (1).jpeg', description: 'Imagen (2) para las secciones informativas del home' },
     ];
 
     for (const s of settings) {
