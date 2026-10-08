@@ -65,6 +65,7 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
           fingerprint: SHA256:5uXAbSheTHhyDmpbHQXoDtcdXOtIWe82ys+42Y+s7M4
+          command_timeout: 30m
           script: |
             set -eu
             cd /var/www/abadia-back
