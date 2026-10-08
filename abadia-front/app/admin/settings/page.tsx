@@ -33,7 +33,7 @@ interface Setting {
   isNew?: boolean;
 }
 
-const PREDEFINED_KEYS: Record<string, { label: string; category: 'contact' | 'social' | 'general' | 'integrations' | 'multimedia'; description: string; placeholder: string; type?: string; accept?: string }> = {
+const PREDEFINED_KEYS: Record<string, { label: string; category: 'contact' | 'social' | 'general' | 'integrations' | 'multimedia' | 'home' | 'guide'; description: string; placeholder: string; type?: string; accept?: string }> = {
   telefono: { label: "Teléfono Principal", category: "contact", description: "Número de teléfono para contacto directo y reservas.", placeholder: "+57 300 000 0000", type: "tel" },
   whatsapp: { label: "Número de WhatsApp", category: "contact", description: "WhatsApp oficial donde se enviarán consultas de huéspedes.", placeholder: "+57 300 000 0000", type: "tel" },
   email_contacto: { label: "Correo Electrónico de Notificaciones", category: "contact", description: "Email donde llegarán las confirmaciones y notificaciones del sistema.", placeholder: "contacto@hotelabadia.com", type: "email" },
@@ -58,6 +58,26 @@ const PREDEFINED_KEYS: Record<string, { label: string; category: 'contact' | 'so
   login_bg: { label: "Fondo de Pantalla de Login", category: "multimedia", description: "Imagen mostrada al iniciar sesión.", placeholder: "URL o archivo", type: "file", accept: "image/*" },
   about_img_1: { label: "Imagen Acerca de (1)", category: "multimedia", description: "Primera imagen para la sección de historia.", placeholder: "URL o archivo", type: "file", accept: "image/*" },
   about_img_2: { label: "Imagen Acerca de (2)", category: "multimedia", description: "Segunda imagen para la sección de historia.", placeholder: "URL o archivo", type: "file", accept: "image/*" },
+
+  // Textos y Contenidos del Home
+  home_rooms_subtitle: { label: "Subtítulo Habitaciones", category: "home", description: "Texto sobre el título de habitaciones", placeholder: "— HABITACIONES", type: "text" },
+  home_casa_1_title: { label: "Espacio Casa 1 (Título)", category: "home", description: "Título del primer espacio", placeholder: "El Lobby Principal", type: "text" },
+  home_casa_1_img: { label: "Espacio Casa 1 (Imagen)", category: "home", description: "Imagen del primer espacio", placeholder: "URL o archivo", type: "file", accept: "image/*" },
+  home_casa_2_title: { label: "Espacio Casa 2 (Título)", category: "home", description: "Título del segundo espacio", placeholder: "La Piscina de Calma", type: "text" },
+  home_casa_2_img: { label: "Espacio Casa 2 (Imagen)", category: "home", description: "Imagen del segundo espacio", placeholder: "URL o archivo", type: "file", accept: "image/*" },
+  home_casa_3_title: { label: "Espacio Casa 3 (Título)", category: "home", description: "Título del tercer espacio", placeholder: "Zona de parqueo", type: "text" },
+  home_casa_3_img: { label: "Espacio Casa 3 (Imagen)", category: "home", description: "Imagen del tercer espacio", placeholder: "URL o archivo", type: "file", accept: "image/*" },
+
+  // Conoce Abadía (Guía)
+  guide_sec_1_title: { label: "Sección 1 (Título)", category: "guide", description: "Título de la primera sección de la guía", placeholder: "Nuestra Historia", type: "text" },
+  guide_sec_1_desc: { label: "Sección 1 (Descripción)", category: "guide", description: "Descripción de la primera sección", placeholder: "Lo que comenzó como una casa...", type: "textarea" },
+  guide_sec_1_img: { label: "Sección 1 (Imagen)", category: "guide", description: "Imagen de la primera sección", placeholder: "URL o archivo", type: "file", accept: "image/*" },
+  guide_sec_2_title: { label: "Sección 2 (Título)", category: "guide", description: "Título de la segunda sección", placeholder: "Gastronomía", type: "text" },
+  guide_sec_2_desc: { label: "Sección 2 (Descripción)", category: "guide", description: "Descripción de la segunda sección", placeholder: "Nuestra cocina es una...", type: "textarea" },
+  guide_sec_2_img: { label: "Sección 2 (Imagen)", category: "guide", description: "Imagen de la segunda sección", placeholder: "URL o archivo", type: "file", accept: "image/*" },
+  guide_sec_3_title: { label: "Sección 3 (Título)", category: "guide", description: "Título de la tercera sección", placeholder: "Bienestar", type: "text" },
+  guide_sec_3_desc: { label: "Sección 3 (Descripción)", category: "guide", description: "Descripción de la tercera sección", placeholder: "Sumérjase en un estado...", type: "textarea" },
+  guide_sec_3_img: { label: "Sección 3 (Imagen)", category: "guide", description: "Imagen de la tercera sección", placeholder: "URL o archivo", type: "file", accept: "image/*" },
 };
 
 export default function SettingsPage() {
@@ -66,7 +86,7 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
-  const [activeTab, setActiveTab] = useState<'account' | 'contact' | 'social' | 'general' | 'integrations' | 'multimedia' | 'advanced'>('account');
+  const [activeTab, setActiveTab] = useState<'account' | 'contact' | 'social' | 'general' | 'integrations' | 'multimedia' | 'home' | 'guide' | 'advanced'>('account');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [newKeyModal, setNewKeyModal] = useState(false);
   const [customKeyInput, setCustomKeyInput] = useState({ key: "", value: "", description: "" });
@@ -415,7 +435,31 @@ export default function SettingsPage() {
           }`}
         >
           <PhotoIcon className="w-4 h-4 stroke-[2.5]" />
-          Multimedia
+          Multimedia Global
+        </button>
+
+        <button
+          onClick={() => setActiveTab('home')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
+            activeTab === 'home' 
+              ? 'bg-white text-[var(--mv-blue)] shadow-xs' 
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+          }`}
+        >
+          <DocumentTextIcon className="w-4 h-4 stroke-[2.5]" />
+          Inicio (Página)
+        </button>
+
+        <button
+          onClick={() => setActiveTab('guide')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
+            activeTab === 'guide' 
+              ? 'bg-white text-[var(--mv-blue)] shadow-xs' 
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+          }`}
+        >
+          <GlobeAltIcon className="w-4 h-4 stroke-[2.5]" />
+          Conoce Abadía
         </button>
 
         <button
@@ -847,6 +891,136 @@ export default function SettingsPage() {
                               className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-medium focus:ring-2 focus:ring-[var(--mv-blue)]/30 focus:border-[var(--mv-blue)] outline-none transition-all"
                             />
                           </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+            )}
+
+            {/* Category: Home */}
+            {activeTab === 'home' && (
+              <div className="space-y-5 animate-in fade-in duration-200">
+                <div className="border-b border-slate-100 pb-3">
+                  <h3 className="text-base font-extrabold text-slate-900">Página de Inicio</h3>
+                  <p className="text-xs text-slate-500 font-medium">Personaliza los textos e imágenes de la página principal (Home).</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {Object.keys(PREDEFINED_KEYS)
+                    .filter(k => PREDEFINED_KEYS[k].category === 'home')
+                    .map(key => {
+                      const meta = PREDEFINED_KEYS[key];
+                      const setting = settings.find(s => s.key === key);
+                      const value = setting?.value || "";
+
+                      return (
+                        <div key={key} className="space-y-1.5 bg-slate-50/70 p-4 rounded-2xl border border-slate-200/60 hover:border-slate-300 transition-colors">
+                          <label className="block text-xs font-bold text-slate-800">
+                            {meta.label}
+                          </label>
+                          <p className="text-[11px] text-slate-400 leading-tight mb-2">{meta.description}</p>
+                          
+                          {meta.type === 'file' ? (
+                            <>
+                              {value && (
+                                <div className="mb-3 relative rounded-xl overflow-hidden border border-slate-200 bg-slate-100 h-24 flex items-center justify-center">
+                                  <img src={value} alt={meta.label} className="h-full w-full object-cover" />
+                                </div>
+                              )}
+                              <input
+                                type="file"
+                                accept={meta.accept}
+                                onChange={(e) => {
+                                  if (e.target.files && e.target.files[0]) {
+                                    handleFileUpload(key, e.target.files[0]);
+                                  }
+                                }}
+                                className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all cursor-pointer"
+                              />
+                            </>
+                          ) : meta.type === 'textarea' ? (
+                            <textarea
+                              value={value}
+                              onChange={(e) => updateSettingValue(key, e.target.value)}
+                              placeholder={meta.placeholder}
+                              rows={3}
+                              className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-medium focus:ring-2 focus:ring-[var(--mv-blue)]/30 focus:border-[var(--mv-blue)] outline-none transition-all resize-none"
+                            />
+                          ) : (
+                            <input
+                              type="text"
+                              value={value}
+                              onChange={(e) => updateSettingValue(key, e.target.value)}
+                              placeholder={meta.placeholder}
+                              className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-medium focus:ring-2 focus:ring-[var(--mv-blue)]/30 focus:border-[var(--mv-blue)] outline-none transition-all"
+                            />
+                          )}
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+            )}
+
+            {/* Category: Guide (Conoce Abadía) */}
+            {activeTab === 'guide' && (
+              <div className="space-y-5 animate-in fade-in duration-200">
+                <div className="border-b border-slate-100 pb-3">
+                  <h3 className="text-base font-extrabold text-slate-900">Guía: Conoce Abadía</h3>
+                  <p className="text-xs text-slate-500 font-medium">Personaliza las secciones de información y turismo.</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {Object.keys(PREDEFINED_KEYS)
+                    .filter(k => PREDEFINED_KEYS[k].category === 'guide')
+                    .map(key => {
+                      const meta = PREDEFINED_KEYS[key];
+                      const setting = settings.find(s => s.key === key);
+                      const value = setting?.value || "";
+
+                      return (
+                        <div key={key} className="space-y-1.5 bg-slate-50/70 p-4 rounded-2xl border border-slate-200/60 hover:border-slate-300 transition-colors">
+                          <label className="block text-xs font-bold text-slate-800">
+                            {meta.label}
+                          </label>
+                          <p className="text-[11px] text-slate-400 leading-tight mb-2">{meta.description}</p>
+                          
+                          {meta.type === 'file' ? (
+                            <>
+                              {value && (
+                                <div className="mb-3 relative rounded-xl overflow-hidden border border-slate-200 bg-slate-100 h-24 flex items-center justify-center">
+                                  <img src={value} alt={meta.label} className="h-full w-full object-cover" />
+                                </div>
+                              )}
+                              <input
+                                type="file"
+                                accept={meta.accept}
+                                onChange={(e) => {
+                                  if (e.target.files && e.target.files[0]) {
+                                    handleFileUpload(key, e.target.files[0]);
+                                  }
+                                }}
+                                className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all cursor-pointer"
+                              />
+                            </>
+                          ) : meta.type === 'textarea' ? (
+                            <textarea
+                              value={value}
+                              onChange={(e) => updateSettingValue(key, e.target.value)}
+                              placeholder={meta.placeholder}
+                              rows={3}
+                              className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-medium focus:ring-2 focus:ring-[var(--mv-blue)]/30 focus:border-[var(--mv-blue)] outline-none transition-all resize-none"
+                            />
+                          ) : (
+                            <input
+                              type="text"
+                              value={value}
+                              onChange={(e) => updateSettingValue(key, e.target.value)}
+                              placeholder={meta.placeholder}
+                              className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-medium focus:ring-2 focus:ring-[var(--mv-blue)]/30 focus:border-[var(--mv-blue)] outline-none transition-all"
+                            />
+                          )}
                         </div>
                       );
                     })}

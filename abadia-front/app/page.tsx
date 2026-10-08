@@ -112,6 +112,12 @@ export default function HomePage() {
     return () => clearInterval(intervaloHero);
   }, [isMounted]);
 
+  const CASA_DINAMICA: EspacioCasa[] = [
+    { id: "casa-1", titulo: getSetting('home_casa_1_title', 'El Lobby Principal'), imagen: getSetting('home_casa_1_img', 'https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=800&q=80') },
+    { id: "casa-2", titulo: getSetting('home_casa_2_title', 'La Piscina de Calma'), imagen: getSetting('home_casa_2_img', 'https://i.pinimg.com/736x/5a/27/d9/5a27d98eb8014c3754af2a16af649e6a.jpg') },
+    { id: "casa-3", titulo: getSetting('home_casa_3_title', 'Zona de parqueo'), imagen: getSetting('home_casa_3_img', 'https://i.pinimg.com/736x/00/e2/d8/00e2d88dc3d58b815f6678eccc353832.jpg') },
+  ];
+
   const activarVolteoCard = (id: string) => {
     setHabitacionConPrecio(habitacionConPrecio === id ? null : id);
   };
@@ -207,7 +213,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto">
           
           <div className="text-left mb-16 select-none">
-            <span className="text-[10px] uppercase tracking-[0.4em] text-[#3d342e]/40 font-medium block mb-2">— HABITACIONES</span>
+            <span className="text-[10px] uppercase tracking-[0.4em] text-[#3d342e]/40 font-medium block mb-2">{getSetting('home_rooms_subtitle', '— HABITACIONES')}</span>
             <h2 className="text-4xl md:text-6xl text-[#3d342e] uppercase leading-none flex flex-col">
               <span className="font-luxury-title tracking-tight">Estancias de</span>
               <span className="font-luxury-script text-5xl md:text-8xl text-[#7a6e5d] -mt-3 md:-mt-6 normal-case tracking-normal">Ensueño</span>
@@ -358,7 +364,7 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
-            {CASA.map((item) => (
+            {CASA_DINAMICA.map((item) => (
               <div key={item.id} className="relative aspect-[4/5] overflow-hidden rounded-[2.5rem] bg-[#f4f1ea] shadow-sm border border-[#f4f1ea]/30 transition-transform duration-500 hover:scale-[1.01] group cursor-pointer">
                 <Image src={item.imagen} alt={item.titulo} fill unoptimized sizes="(max-width: 768px) 100vw, 33vw" className="object-cover" loading="lazy" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent p-8 z-10 text-left">

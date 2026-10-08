@@ -63,6 +63,33 @@ export default function ConoceAbadiaPage() {
     fetchSettings();
   }, [fetchSettings]);
 
+  const SECCIONES_GUIA_DINAMICA = [
+    {
+      id: "historia",
+      titulo: getSetting('guide_sec_1_title', 'Nuestra Historia'),
+      subtitulo: "El Origen de Abadía",
+      descripcion: getSetting('guide_sec_1_desc', 'Lo que comenzó como una casa familiar de descanso frente al Mar Caribe, se ha transformado en un refugio exclusivo donde la arquitectura vernácula se encuentra con el confort moderno. Cada rincón de La Abadía ha sido cuidadosamente restaurado para preservar la esencia de la costa cordobesa.'),
+      imagen: getSetting('guide_sec_1_img', 'https://images.unsplash.com/photo-1549294413-26f195200c16?auto=format&fit=crop&w=1200&q=80'),
+      inverso: false
+    },
+    {
+      id: "gastronomia",
+      titulo: getSetting('guide_sec_2_title', 'Gastronomía'),
+      subtitulo: "Sabores del Caribe",
+      descripcion: getSetting('guide_sec_2_desc', 'Nuestra cocina es una celebración de los ingredientes locales. Trabajamos con pescadores artesanales de la región para llevar del mar a la mesa los pescados y mariscos más frescos, fusionando recetas ancestrales con técnicas de vanguardia.'),
+      imagen: getSetting('guide_sec_2_img', 'https://images.unsplash.com/photo-1544148103-0773bf10d330?auto=format&fit=crop&w=1200&q=80'),
+      inverso: true
+    },
+    {
+      id: "bienestar",
+      titulo: getSetting('guide_sec_3_title', 'Bienestar'),
+      subtitulo: "Spa & Relajación",
+      descripcion: getSetting('guide_sec_3_desc', 'Sumérjase en un estado de calma absoluta. Nuestros rituales de spa utilizan esencias extraídas de la flora local, ofreciendo terapias de renovación corporal y mental a tan solo pasos de la suave brisa del océano.'),
+      imagen: getSetting('guide_sec_3_img', 'https://i.pinimg.com/736x/53/0e/d7/530ed71269d7970063d8d12596cbd559.jpg'),
+      inverso: false
+    }
+  ];
+
   if (!isMounted) return <div className="min-h-screen bg-white" />;
 
   return (
@@ -138,7 +165,7 @@ export default function ConoceAbadiaPage() {
       {/* 3. BLOQUES DE CONTENIDO (ZIG-ZAG ORIGINAL) */}
       <section className="py-12 bg-white">
         <div className="max-w-7xl mx-auto px-4 md:px-8 space-y-24 md:space-y-32">
-          {SECCIONES_GUIA.map((seccion, idx) => (
+          {SECCIONES_GUIA_DINAMICA.map((seccion, idx) => (
             <div key={seccion.id} className={`flex flex-col gap-10 md:gap-16 items-center ${seccion.inverso ? 'md:flex-row-reverse' : 'md:flex-row'}`}>
               
               <div className="w-full md:w-1/2 relative aspect-[4/3] rounded-[2.5rem] overflow-hidden shadow-lg group">
