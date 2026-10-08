@@ -179,7 +179,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
             </div>
 
             {/* Navigation items */}
-            <div className="flex-1 overflow-y-auto overflow-x-hidden mv-scrollbar">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               <nav className="mt-5 flex flex-col gap-1.5 px-2.5 pb-4">
               {navigation.filter(item => {
                 if (!user.rol) return true;
