@@ -132,9 +132,8 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
         } ${
           isCollapsed ? 'md:w-20' : 'md:w-64'
         }`}>
-          <div>
             {/* Header / Bigger Logo with minimal padding */}
-            <div className="h-20 flex items-center justify-between px-3 border-b border-[var(--mv-sage)]/10 w-full relative">
+            <div className="h-20 shrink-0 flex items-center justify-between px-3 border-b border-[var(--mv-sage)]/10 w-full relative">
               <div className="flex items-center justify-center w-full py-1">
                 {(!isCollapsed || isMobileOpen) ? (
                   <Image
@@ -180,7 +179,8 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
             </div>
 
             {/* Navigation items */}
-            <nav className="mt-5 flex flex-col gap-1.5 px-2.5">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden mv-scrollbar">
+              <nav className="mt-5 flex flex-col gap-1.5 px-2.5 pb-4">
               {navigation.filter(item => {
                 if (!user.rol) return true;
                 const userRoleNorm = user.rol.toLowerCase().replace(/_/g, '');
@@ -219,8 +219,8 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
                   </Tooltip>
                 );
               })}
-            </nav>
-          </div>
+              </nav>
+            </div>
 
           {/* Footer / Logout */}
           <div className="p-3 border-t border-[var(--mv-sage)]/10">
