@@ -179,10 +179,10 @@ export default function MultimediaPage() {
       <div className="mb-8">
         <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
           <PhotoIcon className="w-8 h-8 text-[var(--mv-blue)]" />
-          Gestor Multimedia
+          Mi Página Web (Fotos y Textos)
         </h1>
         <p className="text-sm text-slate-500 mt-2 font-medium max-w-2xl">
-          Administre de forma visual todas las imágenes, videos y textos que componen la interfaz de su portal web. Reemplace los archivos haciendo clic sobre ellos.
+          Aquí puedes personalizar toda la información, imágenes y videos que verán tus visitantes. Simplemente haz clic sobre lo que quieras modificar y se actualizará en tu sitio.
         </p>
       </div>
 
@@ -234,8 +234,8 @@ export default function MultimediaPage() {
       {activeTab === 'home' && (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="bg-blue-50/50 border border-blue-100 rounded-2xl p-5 mb-4">
-            <h3 className="text-sm font-bold text-blue-900">Sección: Conoce la Casa Hotel</h3>
-            <p className="text-xs text-blue-700 mt-1">Estas 3 tarjetas se muestran juntas debajo del banner de habitaciones en la portada principal.</p>
+            <h3 className="text-sm font-bold text-blue-900">Fotos de "Conoce la Casa Hotel"</h3>
+            <p className="text-xs text-blue-700 mt-1">Sube aquí las 3 fotos principales que se muestran juntas justo debajo de las habitaciones en tu página de inicio.</p>
           </div>
           {renderExtendedCard(1, 'home_casa_1_img', 'Espacio Casa 1', [{key: 'home_casa_1_title', label: 'Título', type: 'text'}])}
           {renderExtendedCard(2, 'home_casa_2_img', 'Espacio Casa 2', [{key: 'home_casa_2_title', label: 'Título', type: 'text'}])}
@@ -247,8 +247,8 @@ export default function MultimediaPage() {
       {activeTab === 'guide' && (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="bg-amber-50/50 border border-amber-100 rounded-2xl p-5 mb-4">
-            <h3 className="text-sm font-bold text-amber-900">Guía Turística Exclusiva</h3>
-            <p className="text-xs text-amber-700 mt-1">Estos bloques se alternan en zig-zag en la página secundaria "Conoce Abadía".</p>
+            <h3 className="text-sm font-bold text-amber-900">Fotos para "Conoce Abadía" (Guía Turística)</h3>
+            <p className="text-xs text-amber-700 mt-1">Aquí puedes cambiar las imágenes gigantes que adornan la sección donde cuentas la historia, la gastronomía y el bienestar de Abadía.</p>
           </div>
           {renderExtendedCard(1, 'guide_sec_1_img', 'Bloque Historia', [
             {key: 'guide_sec_1_title', label: 'Título', type: 'text'},
@@ -269,8 +269,8 @@ export default function MultimediaPage() {
       {activeTab === 'planes' && (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="bg-emerald-50/50 border border-emerald-100 rounded-2xl p-5 mb-4">
-            <h3 className="text-sm font-bold text-emerald-900">Nuestros Planes / Experiencias</h3>
-            <p className="text-xs text-emerald-700 mt-1">Modifique la información, etiquetas y precios de los paquetes y experiencias del hotel.</p>
+            <h3 className="text-sm font-bold text-emerald-900">Tus Planes y Experiencias</h3>
+            <p className="text-xs text-emerald-700 mt-1">Configura las fotos, títulos y precios de los pasadías, planes románticos o paquetes especiales que quieres destacar.</p>
           </div>
           {renderExtendedCard(1, 'plan_1_img', 'Plan Principal (Romántica)', [
             {key: 'plan_1_title', label: 'Título', type: 'text'},
@@ -300,8 +300,8 @@ export default function MultimediaPage() {
       {activeTab === 'turismo' && (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="bg-purple-50/50 border border-purple-100 rounded-2xl p-5 mb-4">
-            <h3 className="text-sm font-bold text-purple-900">Lugares de Interés (Entorno)</h3>
-            <p className="text-xs text-purple-700 mt-1">Modifique los puntos de interés cercanos que se muestran al final de la página principal.</p>
+            <h3 className="text-sm font-bold text-purple-900">Lugares de Interés (Turismo Local)</h3>
+            <p className="text-xs text-purple-700 mt-1">Recomiéndale a tus clientes los mejores lugares turísticos cercanos. Esta información aparecerá al final de tu página de inicio.</p>
           </div>
           {renderExtendedCard(1, 'turismo_1_img', 'Lugar Turístico 1', [
             {key: 'turismo_1_lugar', label: 'Municipio / Sector', type: 'text'},
