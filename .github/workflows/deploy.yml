@@ -69,10 +69,10 @@ jobs:
           script: |
             set -eu
             cd /var/www/abadia-back
-            npm ci
+            npm install --no-audit --no-fund --prefer-offline
             npm run build
             cd /var/www/abadia-front
-            npm ci
+            npm install --no-audit --no-fund --prefer-offline
             npm run build
             pm2 startOrReload /var/www/abadia-back/ecosystem.config.cjs
             pm2 save
