@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useSettingsStore } from '../store/settingsStore';
 
 // --- DATOS DE LA GUÍA ---
 const SECCIONES_GUIA = [
@@ -55,10 +56,12 @@ const LUGARES_INTERES = [
 
 export default function ConoceAbadiaPage() {
   const [isMounted, setIsMounted] = useState(false);
+  const { fetchSettings, getSetting } = useSettingsStore();
 
   useEffect(() => {
     setIsMounted(true);
-  }, []);
+    fetchSettings();
+  }, [fetchSettings]);
 
   if (!isMounted) return <div className="min-h-screen bg-white" />;
 
@@ -97,7 +100,7 @@ export default function ConoceAbadiaPage() {
         <div className="absolute top-12 left-0 right-0 z-30 flex justify-center px-4 pointer-events-none">
           <div className="relative w-64 h-24 md:w-80 md:h-32 flex items-center justify-center">
             <div className="absolute inset-0 w-full h-full">
-              <Image src="/logo.png" alt="Logo Abadía" fill priority sizes="(max-width: 768px) 256px, 320px" className="object-contain filter brightness-0 invert" />
+              <Image src={getSetting('logo_principal', '/logo.png')} alt="Logo Abadía" fill priority sizes="(max-width: 768px) 256px, 320px" className="object-contain filter brightness-0 invert" />
             </div>
           </div>
         </div>

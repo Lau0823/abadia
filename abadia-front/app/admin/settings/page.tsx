@@ -20,7 +20,9 @@ import {
   UserIcon,
   LockClosedIcon,
   EyeIcon,
-  EyeSlashIcon
+  EyeSlashIcon,
+  PhotoIcon,
+  FilmIcon
 } from "@heroicons/react/24/outline";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/Tooltip";
 
@@ -31,7 +33,7 @@ interface Setting {
   isNew?: boolean;
 }
 
-const PREDEFINED_KEYS: Record<string, { label: string; category: 'contact' | 'social' | 'general' | 'integrations'; description: string; placeholder: string; type?: string }> = {
+const PREDEFINED_KEYS: Record<string, { label: string; category: 'contact' | 'social' | 'general' | 'integrations' | 'multimedia'; description: string; placeholder: string; type?: string; accept?: string }> = {
   telefono: { label: "Teléfono Principal", category: "contact", description: "Número de teléfono para contacto directo y reservas.", placeholder: "+57 300 000 0000", type: "tel" },
   whatsapp: { label: "Número de WhatsApp", category: "contact", description: "WhatsApp oficial donde se enviarán consultas de huéspedes.", placeholder: "+57 300 000 0000", type: "tel" },
   email_contacto: { label: "Correo Electrónico de Notificaciones", category: "contact", description: "Email donde llegarán las confirmaciones y notificaciones del sistema.", placeholder: "contacto@hotelabadia.com", type: "email" },
@@ -49,6 +51,13 @@ const PREDEFINED_KEYS: Record<string, { label: string; category: 'contact' | 'so
   politica_cancelacion: { label: "Políticas de Cancelación", category: "general", description: "Términos breves sobre cancelaciones y reembolsos.", placeholder: "Cancelaciones gratuitas con 48 horas de anticipación.", type: "textarea" },
 
   google_calendar_id: { label: "ID de Google Calendar", category: "integrations", description: "ID del calendario vinculado para sincronización de reservas.", placeholder: "primary o id@group.calendar.google.com", type: "text" },
+
+  logo_principal: { label: "Logo Principal", category: "multimedia", description: "Logo principal utilizado en barra de navegación y pie de página.", placeholder: "URL o archivo", type: "file", accept: "image/*" },
+  logo_secundario: { label: "Logo Secundario", category: "multimedia", description: "Logo utilizado en panel de administración.", placeholder: "URL o archivo", type: "file", accept: "image/*" },
+  hero_video: { label: "Video Principal (Inicio)", category: "multimedia", description: "Video de fondo en la página de inicio.", placeholder: "URL o archivo", type: "file", accept: "video/*" },
+  login_bg: { label: "Fondo de Pantalla de Login", category: "multimedia", description: "Imagen mostrada al iniciar sesión.", placeholder: "URL o archivo", type: "file", accept: "image/*" },
+  about_img_1: { label: "Imagen Acerca de (1)", category: "multimedia", description: "Primera imagen para la sección de historia.", placeholder: "URL o archivo", type: "file", accept: "image/*" },
+  about_img_2: { label: "Imagen Acerca de (2)", category: "multimedia", description: "Segunda imagen para la sección de historia.", placeholder: "URL o archivo", type: "file", accept: "image/*" },
 };
 
 export default function SettingsPage() {
@@ -57,7 +66,7 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
-  const [activeTab, setActiveTab] = useState<'account' | 'contact' | 'social' | 'general' | 'integrations' | 'advanced'>('account');
+  const [activeTab, setActiveTab] = useState<'account' | 'contact' | 'social' | 'general' | 'integrations' | 'multimedia' | 'advanced'>('account');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [newKeyModal, setNewKeyModal] = useState(false);
   const [customKeyInput, setCustomKeyInput] = useState({ key: "", value: "", description: "" });
@@ -254,6 +263,42 @@ export default function SettingsPage() {
     }
   };
 
+  const handleFileUpload = async (key: string, file: File) => {
+    if (!file) return;
+    setSaving(true);
+    setSuccessMsg("");
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const token = useAuthStore.getState().token;
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002";
+      
+      const res = await fetch(`${apiUrl}/settings/upload-image/${key}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Error al subir archivo");
+      }
+      
+      const data = await res.json();
+      updateSettingValue(key, data.value);
+      setSuccessMsg("Archivo multimedia subido con éxito");
+      setTimeout(() => setSuccessMsg(""), 4000);
+    } catch (error: any) {
+      console.error("Error subiendo archivo", error);
+      alert(error.message || "Hubo un error al subir el archivo.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const customSettings = settings.filter(s => !PREDEFINED_KEYS[s.key]);
 
   return (
@@ -359,6 +404,18 @@ export default function SettingsPage() {
         >
           <GlobeAltIcon className="w-4 h-4 stroke-[2.5]" />
           Integraciones
+        </button>
+
+        <button
+          onClick={() => setActiveTab('multimedia')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
+            activeTab === 'multimedia' 
+              ? 'bg-white text-[var(--mv-blue)] shadow-xs' 
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+          }`}
+        >
+          <PhotoIcon className="w-4 h-4 stroke-[2.5]" />
+          Multimedia
         </button>
 
         <button
@@ -730,6 +787,66 @@ export default function SettingsPage() {
                             placeholder={meta.placeholder}
                             className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium focus:ring-2 focus:ring-[var(--mv-blue)]/30 focus:border-[var(--mv-blue)] outline-none transition-all"
                           />
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+            )}
+
+            {/* Category: Multimedia */}
+            {activeTab === 'multimedia' && (
+              <div className="space-y-5 animate-in fade-in duration-200">
+                <div className="border-b border-slate-100 pb-3">
+                  <h3 className="text-base font-extrabold text-slate-900">Archivos Multimedia</h3>
+                  <p className="text-xs text-slate-500 font-medium">Sube logos, videos de fondo y las imágenes principales para personalizar el sitio web.</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {Object.keys(PREDEFINED_KEYS)
+                    .filter(k => PREDEFINED_KEYS[k].category === 'multimedia')
+                    .map(key => {
+                      const meta = PREDEFINED_KEYS[key];
+                      const setting = settings.find(s => s.key === key);
+                      const value = setting?.value || "";
+
+                      return (
+                        <div key={key} className="space-y-1.5 bg-slate-50/70 p-4 rounded-2xl border border-slate-200/60 hover:border-slate-300 transition-colors">
+                          <label className="block text-xs font-bold text-slate-800">
+                            {meta.label}
+                          </label>
+                          <p className="text-[11px] text-slate-400 leading-tight mb-2">{meta.description}</p>
+                          
+                          {value && (
+                            <div className="mb-3 relative rounded-xl overflow-hidden border border-slate-200 bg-slate-100 h-24 flex items-center justify-center">
+                              {meta.accept?.includes('video') ? (
+                                <video src={value} className="h-full w-full object-cover" muted loop autoPlay />
+                              ) : (
+                                <img src={value} alt={meta.label} className="h-full w-full object-contain p-2" />
+                              )}
+                            </div>
+                          )}
+
+                          <div className="flex flex-col gap-2">
+                            <input
+                              type="file"
+                              accept={meta.accept}
+                              onChange={(e) => {
+                                if (e.target.files && e.target.files[0]) {
+                                  handleFileUpload(key, e.target.files[0]);
+                                }
+                              }}
+                              className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all cursor-pointer"
+                            />
+                            <div className="text-[10px] text-slate-400 font-medium">O ingrese la URL directamente:</div>
+                            <input
+                              type="text"
+                              value={value}
+                              onChange={(e) => updateSettingValue(key, e.target.value)}
+                              placeholder={meta.placeholder}
+                              className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-medium focus:ring-2 focus:ring-[var(--mv-blue)]/30 focus:border-[var(--mv-blue)] outline-none transition-all"
+                            />
+                          </div>
                         </div>
                       );
                     })}

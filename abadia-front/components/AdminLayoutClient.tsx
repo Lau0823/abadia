@@ -26,6 +26,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/Tooltip";
 import { useAuthStore } from "../store/authStore";
+import { useSettingsStore } from "../store/settingsStore";
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: HomeIcon, roles: ["superadmin", "admin", "supervisor", "empleado", "employee"] },
@@ -41,6 +42,7 @@ const navigation = [
 
 export default function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   const { user, isAuthenticated, isLoading: loading, checkSession, logout } = useAuthStore();
+  const { fetchSettings, getSetting } = useSettingsStore();
   const router = useRouter();
   const pathname = usePathname();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -51,7 +53,8 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
 
   useEffect(() => {
     checkSession();
-  }, [checkSession]);
+    fetchSettings();
+  }, [checkSession, fetchSettings]);
 
   useEffect(() => {
     // Read persisted sidebar state from localStorage
@@ -133,7 +136,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
               <div className="flex items-center justify-center w-full py-1">
                 {(!isCollapsed || isMobileOpen) ? (
                   <Image
-                    src="/abadia.png"
+                    src={getSetting('logo_secundario', '/abadia.png')}
                     alt="Abadia Logo"
                     width={110}
                     height={110}
@@ -142,7 +145,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
                   />
                 ) : (
                   <Image
-                    src="/abadia.png"
+                    src={getSetting('logo_secundario', '/abadia.png')}
                     alt="Abadia Logo"
                     width={48}
                     height={48}

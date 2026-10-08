@@ -42,12 +42,7 @@ interface TerminoPolitica {
   contenido: string;
 }
 
-// --- IMÁGENES DEL CARRUSEL PRINCIPAL (HERO) ---
-const IMAGENES_HERO: string[] = [
-  "/WhatsApp Image 2026-07-08 at 10.54.20 (2).jpeg", 
-  "/WhatsApp Image 2026-07-08 at 10.54.20 (1).jpeg", 
-  "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=1920&q=80"  
-];
+// --- IMAGENES DEL CARRUSEL PRINCIPAL (HERO) - MOVIDO DENTRO DEL COMPONENTE ---
 
 
 
@@ -81,8 +76,11 @@ const TERMINOS_POLITICAS: TerminoPolitica[] = [
   { id: "term-3", titulo: "Normas de Convivencia y Mascotas", contenido: "Somos un espacio de desconexión y calma. Se admiten mascotas de razas pequeñas bajo previa solicitud y con responsabilidad directa de sus cuidadores." }
 ];
 
+import { useSettingsStore } from '../store/settingsStore';
+
 export default function HomePage() {
   const { habitaciones, fetchHabitaciones, isLoading } = useHabitacionesStore();
+  const { fetchSettings, getSetting } = useSettingsStore();
   const [heroActivo, setHeroActivo] = useState<number>(0);
   const [planActivo, setPlanActivo] = useState<string>("romantica");
   const [logoError, setLogoError] = useState<boolean>(false);
@@ -97,7 +95,14 @@ export default function HomePage() {
   useEffect(() => {
     setIsMounted(true);
     fetchHabitaciones();
-  }, [fetchHabitaciones]);
+    fetchSettings();
+  }, [fetchHabitaciones, fetchSettings]);
+
+  const IMAGENES_HERO = [
+    getSetting('about_img_1', '/WhatsApp Image 2026-07-08 at 10.54.20 (2).jpeg'),
+    getSetting('about_img_2', '/WhatsApp Image 2026-07-08 at 10.54.20 (1).jpeg'),
+    getSetting('login_bg', 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=1920&q=80')
+  ];
 
   useEffect(() => {
     if (!isMounted) return;
@@ -157,10 +162,10 @@ export default function HomePage() {
         <div className="absolute top-12 left-0 right-0 z-30 flex justify-center px-4 pointer-events-none">
           <div className="relative w-64 h-24 md:w-80 md:h-32 flex items-center justify-center">
             <div className={`absolute inset-0 w-full h-full transition-opacity duration-500 ${logoError ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-              <Image src="/logo.png" alt="Logo Abadía" fill priority sizes="(max-width: 768px) 256px, 320px" className="object-contain" onError={() => setLogoError(true)} />
+              <Image src={getSetting('logo_principal', '/logo.png')} alt="Logo Abadía" fill priority sizes="(max-width: 768px) 256px, 320px" className="object-contain" onError={() => setLogoError(true)} />
             </div>
             <div className={`text-center absolute inset-0 flex flex-col justify-center transition-opacity duration-500 ${logoError ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-              <span className="tracking-[0.4em] text-white text-3xl md:text-4xl uppercase block font-light">Abadía</span>
+              <span className="tracking-[0.4em] text-white text-3xl md:text-4xl uppercase block font-light">{getSetting('nombre_hotel', 'Abadía')}</span>
               <span className="text-[9px] uppercase tracking-[0.5em] text-neutral-300 block mt-2 font-light">Hotel Boutique</span>
             </div>
           </div>
@@ -189,10 +194,10 @@ export default function HomePage() {
       <section className="bg-[#f4f1ea]/60 py-14 px-4 text-center border-y border-[#e6dfd1]/30">
         <div className="max-w-4xl mx-auto">
           <h3 className="text-xl md:text-3xl font-light tracking-widest text-[#3d342e] uppercase leading-tight font-luxury-title">
-            Desconéctate desde <span className="font-editorial-italic text-[#7a6e5d] font-normal lowercase tracking-normal">$70.000 cop</span> la noche
+            {getSetting('hero_title', 'Desconéctate desde')} <span className="font-editorial-italic text-[#7a6e5d] font-normal lowercase tracking-normal">$70.000 cop</span> la noche
           </h3>
           <p className="text-neutral-400 text-[10px] mt-2 tracking-[0.3em] uppercase font-light">
-            Tu refugio de paz en la costa de San Antero y Coveñas
+            {getSetting('hero_subtitle', 'Tu refugio de paz en la costa de San Antero y Coveñas')}
           </p>
         </div>
       </section>
@@ -239,7 +244,7 @@ export default function HomePage() {
                     
                     <div className="w-full flex flex-col items-center border-b border-white/10 pb-3">
                       <div className="relative w-36 h-12 flex items-center justify-center filter brightness-0 invert opacity-90">
-                        <Image src="/logo.png" alt="Logo Abadía" fill sizes="(max-width: 768px) 150px, 150px" className="object-contain" />
+                        <Image src={getSetting('logo_principal', '/logo.png')} alt="Logo Abadía" fill sizes="(max-width: 768px) 150px, 150px" className="object-contain" />
                       </div>
                       <span className="text-[9px] uppercase tracking-widest bg-white/10 text-[#f4f1ea] px-3 py-1 rounded-full font-medium mt-2">
                         {hab.ocupacion}
@@ -334,8 +339,8 @@ export default function HomePage() {
       <section className="relative h-[80vh] w-full overflow-hidden bg-black">
         <div className="absolute inset-0 bg-black/10 z-10 pointer-events-none" />
         <div className="absolute inset-0 w-full h-full z-0">
-          <video autoPlay loop muted playsInline controls={false} className="w-full h-full object-cover opacity-85">
-            <source src="/13597489-hd_1920_1080_30fps.mp4" type="video/mp4" />
+          <video key={getSetting('hero_video', '/13597489-hd_1920_1080_30fps.mp4')} autoPlay loop muted playsInline controls={false} className="w-full h-full object-cover opacity-85">
+            <source src={getSetting('hero_video', '/13597489-hd_1920_1080_30fps.mp4')} type="video/mp4" />
           </video>
         </div>
       </section>
