@@ -438,10 +438,10 @@ function GlobalHeader() {
               Inicio
             </Link>
             <Link onClick={() => setMenuAbierto(false)} href="/habitaciones" className="text-base sm:text-lg font-medium uppercase tracking-wider text-white hover:text-[#C5A059] transition-colors">
-              Nuestras Habitaciones
+              Habitaciones
             </Link>
             <Link onClick={() => setMenuAbierto(false)} href="/gastronomia" className="text-base sm:text-lg font-medium uppercase tracking-wider text-white hover:text-[#C5A059] transition-colors">
-              Gastronomía de Autor
+              Gastronomía 
             </Link>
             <Link onClick={() => setMenuAbierto(false)} href="/transporte" className="text-base sm:text-lg font-medium uppercase tracking-wider text-white hover:text-[#C5A059] transition-colors">
               Cómo Llegar & Transporte

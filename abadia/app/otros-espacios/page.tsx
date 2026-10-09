@@ -29,7 +29,7 @@ const NUMERO_WHATSAPP = "573122373415";
 const VIDEOS_HERO_ESPACIOS = [
   {
     id: 1,
-    titulo: "Piscina & Solárium",
+    titulo: "Piscina & Parqueadero ",
     src: "/IMG_2254.mov",
     poster: "/piscina.png"
   },
@@ -328,7 +328,7 @@ export default function PaginaOtrosEspacios() {
       <section id="detalle-espacios" className="bg-[#FAF7F2] py-12 sm:py-16 px-6 text-center border-b border-[#E8DDD0]">
         <div className="max-w-2xl mx-auto space-y-1">
           <span className={`${montserrat.className} text-[9px] sm:text-[10px] uppercase tracking-[0.35em] text-[#8c7355] font-bold block`}>
-            — AMENIDADES EXCLUSIVAS
+            
           </span>
           <div className="relative inline-block">
             <h2 className={`${montserrat.className} text-2xl sm:text-4xl font-extrabold uppercase tracking-tight text-[#2a2421]`}>
