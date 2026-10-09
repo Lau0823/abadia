@@ -794,7 +794,7 @@ export default function SettingsPage() {
             <div className="mt-8 p-4 bg-slate-50 rounded-2xl border border-slate-200/60 text-xs text-slate-600 flex items-start gap-3">
               <ShieldCheckIcon className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
               <div>
-                <strong className="text-slate-800">Seguridad & Privacidad:</strong> Las contraseñas se almacenan encriptadas con algoritmos de hashing seguro (Bcrypt). El token de sesión expira automáticamente para proteger el acceso.
+                <strong className="text-slate-800">Seguridad & Privacidad:</strong> Las contraseñas y datos de acceso están encriptados y protegidos para garantizar la total seguridad de su información.
               </div>
             </div>
           </div>
