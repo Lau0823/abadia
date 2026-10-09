@@ -1,5 +1,6 @@
 import LoginForm from "@/components/LoginForm";
 import Image from "next/image";
+import { API_URL } from "@/lib/api";
 
 export const metadata = {
   title: "Iniciar Sesión | Abadia",
@@ -8,7 +9,7 @@ export const metadata = {
 
 async function getSettings() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002'}/settings`, { next: { revalidate: 60 } });
+    const res = await fetch(`${API_URL}/settings`, { next: { revalidate: 60 } });
     if (!res.ok) return [];
     const data = await res.json();
     return Array.isArray(data) ? data : (data.data || []);

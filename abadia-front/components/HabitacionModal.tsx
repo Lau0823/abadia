@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { API_URL } from "@/lib/api";
 import { fetchApi } from "@/lib/api";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/Tooltip";
 
@@ -182,7 +183,7 @@ export default function HabitacionModal({ isOpen, onClose, onSuccess, habitacion
           formDataUpload.append("files", file);
         });
         
-        const uploadUrl = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002"}/habitaciones/${roomId}/imagenes`;
+        const uploadUrl = `${API_URL}/habitaciones/${roomId}/imagenes`;
         const uploadRes = await fetch(uploadUrl, {
           method: "POST",
           credentials: "include",

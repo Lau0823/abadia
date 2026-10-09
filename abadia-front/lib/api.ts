@@ -1,4 +1,5 @@
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
+const isServer = typeof window === 'undefined';
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || (isServer ? 'http://127.0.0.1:3102' : '/api');
 
 export interface FetchApiOptions extends RequestInit {
   isFormData?: boolean;

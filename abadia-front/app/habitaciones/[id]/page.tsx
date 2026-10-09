@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { API_URL } from '@/lib/api';
 import { useParams, useRouter } from 'next/navigation';
 
 interface Suite {
@@ -35,7 +36,7 @@ export default function SuiteDetailPage() {
 
   useEffect(() => {
     if (id) {
-      fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002'}/habitaciones/${id}`)
+      fetch(`${API_URL}/habitaciones/${id}`)
         .then(res => res.json())
         .then(data => {
           if (data && !data.error) {
@@ -79,7 +80,7 @@ export default function SuiteDetailPage() {
     // 1. Enviar silenciosamente la reserva a la Base de Datos
     if (suite) {
       try {
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002'}/reservations/book`, {
+        await fetch(`${API_URL}/reservations/book`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
