@@ -1,5 +1,6 @@
 import React from 'react';
 import './globals.css'; // Importa tus estilos globales
+import BottomFloatingGlassNav from './components/BottomFloatingMenu';
 
 export const metadata = {
   title: 'Abadía Hotel Boutique',
@@ -15,6 +16,7 @@ export default function RootLayout({
     <html lang="es">
       <body>
         {children}
+        <BottomFloatingGlassNav />
       </body>
     </html>
   );

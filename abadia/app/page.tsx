@@ -61,7 +61,7 @@ const CATEGORIAS_CIRCULARES: CategoriaCircular[] = [
   {
     id: "atardeceres",
     nombre: "Atardeceres",
-    ruta: "#atardeceres-san-antero",
+    ruta: "atardeceres",
     imagen: "/categorias/atardecer.png"
   }
 ];
