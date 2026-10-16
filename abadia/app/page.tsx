@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Montserrat, Outfit } from 'next/font/google';
+import { Bitter, Outfit } from 'next/font/google';
 
-const montserrat = Montserrat({
+const bitter = Bitter({
   subsets: ['latin'],
-  weight: ['400', '600', '700', '800'],
+  weight: ['400', '500', '600', '700', '800'],
   display: 'swap',
 });
 
@@ -19,7 +19,7 @@ const outfit = Outfit({
 
 const NUMERO_WHATSAPP = "573122373415";
 
-// --- CATEGORÍAS EN CÍRCULOS (DE A 3 POR HORIZONTAL) ---
+// --- CATEGORÍAS (3 POR FILA EN MÓVIL Y DESKTOP) ---
 interface CategoriaCircular {
   id: string;
   nombre: string;
@@ -66,7 +66,6 @@ const CATEGORIAS_CIRCULARES: CategoriaCircular[] = [
   }
 ];
 
-// --- VIDEOS HERO PRINCIPAL ---
 const VIDEOS_HERO = [
   {
     id: 1,
@@ -101,11 +100,6 @@ const Icons = {
       <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
     </svg>
   ),
-  WhatsApp: () => (
-    <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-      <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.969.54 1.761.815 2.796.815 3.183 0 5.769-2.587 5.77-5.766.001-3.182-2.585-5.802-5.77-5.802zm9.969 5.828c0 5.518-4.481 9.999-10 9.999-1.745 0-3.385-.45-4.816-1.238l-7.184 1.889 1.921-7.018c-.859-1.488-1.353-3.218-1.353-5.064 0-5.518 4.482-10 10-10 5.519 0 10 4.482 10 10z" />
-    </svg>
-  ),
   VolumeUp: () => (
     <svg className="w-4 h-4 stroke-current fill-none" viewBox="0 0 24 24" strokeWidth="1.8">
       <path strokeLinecap="round" strokeLinejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.83 0-1.51-.68-1.51-1.51V9.75c0-.83.68-1.5 1.51-1.5h2.24z" />
@@ -128,13 +122,9 @@ const esVideo = (url?: string) => {
 interface Habitacion {
   id: string;
   numero: string;
-  categoria: string;
   titulo: string;
   precio: string;
   noches: string;
-  ocupacion: string;
-  camas: string;
-  servicios: string[];
   medios: string[];
 }
 
@@ -142,13 +132,9 @@ const HABITACIONES: Habitacion[] = [
   {
     id: "habitacion-1",
     numero: "1",
-    categoria: "Confort & Mar",
     titulo: "Habitación 1",
     precio: "$70.000",
     noches: "/ noche por persona",
-    ocupacion: "2 a 3 Huéspedes",
-    camas: "1 Cama doble + Camarote cama semidoble",
-    servicios: ["Aire acondicionado", "Mininevera", "Smart TV", "Wi-Fi"],
     medios: [
       "/Habitaciones/habitacion1.jpeg",
       "/WhatsApp Image 2026-07-08 at 10.54.20 (1).jpeg",
@@ -158,13 +144,9 @@ const HABITACIONES: Habitacion[] = [
   {
     id: "habitacion-2",
     numero: "2",
-    categoria: "Brisa Serena",
     titulo: "Habitación 2",
     precio: "$70.000",
     noches: "/ noche por persona",
-    ocupacion: "Hasta 3 Huéspedes",
-    camas: "1 Cama doble + Camarote cama semidoble",
-    servicios: ["Aire acondicionado", "Mininevera", "Smart TV", "Wi-Fi"],
     medios: [
       "/Habitaciones/habitacion2.mov",
       "/Habitaciones/habitacion2.PNG",
@@ -174,13 +156,9 @@ const HABITACIONES: Habitacion[] = [
   {
     id: "habitacion-3",
     numero: "3",
-    categoria: "Ala Silente",
     titulo: "Habitación 3",
     precio: "$70.000",
     noches: "/ noche por persona",
-    ocupacion: "2 a 5 Huéspedes",
-    camas: "1 Cama sencilla",
-    servicios: ["Aire acondicionado", "Mininevera", "Smart TV", "Wi-Fi"],
     medios: [
       "/Habitaciones/habitacion301.png",
       "/Habitaciones/habitacion3.jpeg",
@@ -190,13 +168,9 @@ const HABITACIONES: Habitacion[] = [
   {
     id: "habitacion-4",
     numero: "4",
-    categoria: "Acceso a Playa",
     titulo: "Habitación 4",
     precio: "$70.000",
     noches: "/ noche por persona",
-    ocupacion: "Hasta 4 Huéspedes",
-    camas: "2 Camas Dobles",
-    servicios: ["Aire acondicionado", "Mininevera", "Smart TV", "Wi-Fi"],
     medios: [
       "/Habitaciones/habitacion4.jpeg",
       "/DSC05650.jpeg",
@@ -206,13 +180,9 @@ const HABITACIONES: Habitacion[] = [
   {
     id: "habitacion-5",
     numero: "5",
-    categoria: "Terraza Privada",
     titulo: "Habitación 5",
     precio: "$80.000",
     noches: "/ noche por persona",
-    ocupacion: "Hasta 4 - 5 Huéspedes",
-    camas: "1 Cama Queen + 1 Cama Semidoble + 1 Cama Junior",
-    servicios: ["Aire acondicionado", "Mininevera", "Smart TV", "Wi-Fi"],
     medios: [
       "/videosdebanner/copy_359F2AF5-3796-41C5-B3D0-B9AC83EF213B.mov",
       "/Habitaciones/habitacion5/DSC05772.jpeg",
@@ -223,112 +193,36 @@ const HABITACIONES: Habitacion[] = [
   {
     id: "habitacion-6",
     numero: "6",
-    categoria: "Vista Abierta",
     titulo: "Habitación 6",
     precio: "$80.000",
     noches: "/ noche por persona",
-    ocupacion: "Hasta 4 - 5 Huéspedes",
-    camas: "1 Cama Queen + 1 Cama Semidoble + 1 Cama Junior",
-    servicios: ["Aire acondicionado", "Mininevera", "Smart TV", "Wi-Fi"],
     medios: [
       "/Habitaciones/habitacion6.jpeg",
     ]
   }
 ];
 
-interface EspacioCasa {
-  id: string;
-  tag: string;
-  titulo: string;
-  recurso: string;
-}
-
-const OTROS_ESPACIOS: EspacioCasa[] = [
-  {
-    id: "Piscina",
-    tag: "Recreación",
-    titulo: "Piscina Abadía",
-    recurso: "/IMG_2254.mov"
-  },
-  {
-    id: "Parqueadero",
-    tag: "Seguridad",
-    titulo: "Entrada y Parqueadero Privado",
-    recurso: "/IMG_2396.MOV"
-  }
+const OTROS_ESPACIOS = [
+  { id: "piscina", titulo: "Piscina Abadía", recurso: "/IMG_2254.mov" },
+  { id: "parqueadero", titulo: "Entrada y Parqueadero Privado", recurso: "/IMG_2396.MOV" }
 ];
 
-interface Experiencia {
-  id: string;
-  tag: string;
-  titulo: string;
-  recurso: string;
-}
-
-const EXPERIENCIAS_SAN_ANTERO: Experiencia[] = [
-  {
-    id: "vicenta",
-    tag: "Gastronomía",
-    titulo: "Vicenta Arepa de Huevo",
-    recurso: "/vicenta.MOV"
-  },
-  {
-    id: "punta-bonita",
-    tag: "Mirador",
-    titulo: "Punta Bonita",
-    recurso: "/atardecer.jpg"
-  },
-  {
-    id: "playa",
-    tag: "Playa",
-    titulo: "Playa Serena",
-    recurso: "/mar.mp4"
-  },
-  {
-    id: "moto-acuatica",
-    tag: "Aventura",
-    titulo: "Moto Acuática",
-    recurso: "/IMG_2277.mov"
-  }
+// ACTIVIDADES PARA LA CUADRÍCULA ESTÁTICA RESPONSIVA (SIN CARRUSEL)
+const QUE_HACER_ITEMS = [
+  { id: 1, titulo: "Vicenta Arepa de Huevo", desc: "El sabor tradicional más famoso de la región.", src: "/vicenta.MOV", isVideo: true },
+  { id: 2, titulo: "Punta Bonita", desc: "Mirador con vista abierta a los colores del atardecer.", src: "/atardecer.jpg", isVideo: false },
+  { id: 3, titulo: "Playa Serena", desc: "Aguas calmas y arena suave para desconectar.", src: "/mar.mp4", isVideo: true },
+  { id: 4, titulo: "Moto Acuática", desc: "Recorridos guiados por las bahías de San Antero.", src: "/IMG_2277.mov", isVideo: true },
+  { id: 5, titulo: "Gastronomía Local", desc: "Restaurantes recomendados a minutos del hotel.", src: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80", isVideo: false },
+  { id: 6, titulo: "Ecoturismo & Manglares", desc: "Paseos en lancha hacia la bahía de Cispatá.", src: "/atardeceres/DSC00012.JPG", isVideo: false }
 ];
 
-interface AtardecerFoto {
-  id: number;
-  titulo: string;
-  src: string;
-}
-
-const ATARDECERES_FOTOS: AtardecerFoto[] = [
-  {
-    id: 1,
-    titulo: "Playa Blanca",
-    src: "/atardeceres/abe23f00-6c34-41ab-920c-449ea7f703b0.JPG"
-  },
-  {
-    id: 2,
-    titulo: "Marea Baja",
-    src: "/atardeceres/abe23f00-6c34-41ab-920c-449ea7f703b0.JPG"
-  },
-  {
-    id: 3,
-    titulo: "Palmeras",
-    src: "/atardeceres/DSC00012.JPG"
-  },
-  {
-    id: 4,
-    titulo: "Punta Bonita",
-    src: "/sunshine.JPG"
-  },
-  {
-    id: 5,
-    titulo: "San Antero",
-    src: "/amanecersan atnero.JPG"
-  },
-];
-
-const ATARDECERES_FOTOS_DUPLICADOS: AtardecerFoto[] = [
-  ...ATARDECERES_FOTOS,
-  ...ATARDECERES_FOTOS.map((f) => ({ ...f, id: f.id + 100 }))
+const ATARDECERES_FOTOS = [
+  { id: 1, titulo: "Playa Blanca", src: "/atardeceres/abe23f00-6c34-41ab-920c-449ea7f703b0.JPG" },
+  { id: 2, titulo: "Marea Baja", src: "/atardeceres/abe23f00-6c34-41ab-920c-449ea7f703b0.JPG" },
+  { id: 3, titulo: "Palmeras al Atardecer", src: "/atardeceres/DSC00012.JPG" },
+  { id: 4, titulo: "Punta Bonita", src: "/sunshine.JPG" },
+  { id: 5, titulo: "San Antero Mágico", src: "/amanecersan atnero.JPG" },
 ];
 
 function GlobalHeader() {
@@ -354,7 +248,7 @@ function GlobalHeader() {
         <div className="pointer-events-auto">
           <button 
             onClick={() => setMenuAbierto(true)}
-            className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#071326]/70 hover:bg-[#071326] text-white border border-white/20 flex items-center justify-center active:scale-90 transition-all duration-300 cursor-pointer backdrop-blur-xl"
+            className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#071326]/75 hover:bg-[#071326] text-white border border-white/20 flex items-center justify-center active:scale-90 transition-all duration-300 cursor-pointer backdrop-blur-xl shadow-md"
             aria-label="Abrir Menú"
           >
             <span className="text-lg sm:text-xl">☰</span>
@@ -373,7 +267,7 @@ function GlobalHeader() {
           menuAbierto ? 'translate-x-0' : 'translate-x-full'
         }`}>
           <div className="flex items-center justify-between border-b border-white/10 pb-5">
-            <span className="text-[10px] uppercase tracking-[0.3em] text-white/90 font-bold">
+            <span className={`${bitter.className} text-xs uppercase tracking-[0.25em] text-white/90 font-bold`}>
               Abadía Casa Hotel
             </span>
             <button
@@ -386,31 +280,31 @@ function GlobalHeader() {
           </div>
 
           <nav className="flex flex-col gap-4 text-left my-auto py-6">
-            <Link onClick={() => setMenuAbierto(false)} href="/" className="text-base sm:text-lg font-medium uppercase tracking-wider text-white hover:text-slate-300 transition-colors">
+            <Link onClick={() => setMenuAbierto(false)} href="/" className={`${bitter.className} text-base sm:text-lg uppercase tracking-wider text-white hover:text-slate-300 transition-colors`}>
               Inicio
             </Link>
-            <Link onClick={() => setMenuAbierto(false)} href="/habitaciones" className="text-base sm:text-lg font-medium uppercase tracking-wider text-white hover:text-slate-300 transition-colors">
+            <Link onClick={() => setMenuAbierto(false)} href="/habitaciones" className={`${bitter.className} text-base sm:text-lg uppercase tracking-wider text-white hover:text-slate-300 transition-colors`}>
               Habitaciones
             </Link>
-            <Link onClick={() => setMenuAbierto(false)} href="/gastronomia" className="text-base sm:text-lg font-medium uppercase tracking-wider text-white hover:text-slate-300 transition-colors">
+            <Link onClick={() => setMenuAbierto(false)} href="/gastronomia" className={`${bitter.className} text-base sm:text-lg uppercase tracking-wider text-white hover:text-slate-300 transition-colors`}>
               Gastronomía 
             </Link>
-            <Link onClick={() => setMenuAbierto(false)} href="/transporte" className="text-base sm:text-lg font-medium uppercase tracking-wider text-white hover:text-slate-300 transition-colors">
+            <Link onClick={() => setMenuAbierto(false)} href="/transporte" className={`${bitter.className} text-base sm:text-lg uppercase tracking-wider text-white hover:text-slate-300 transition-colors`}>
               Cómo Llegar & Transporte
             </Link>
-            <Link onClick={() => setMenuAbierto(false)} href="/otros-espacios" className="text-base sm:text-lg font-medium uppercase tracking-wider text-white hover:text-slate-300 transition-colors">
+            <Link onClick={() => setMenuAbierto(false)} href="/otros-espacios" className={`${bitter.className} text-base sm:text-lg uppercase tracking-wider text-white hover:text-slate-300 transition-colors`}>
               Otros Espacios de la Casa
             </Link>
-            <Link onClick={() => setMenuAbierto(false)} href="/que-hacer" className="text-base sm:text-lg font-medium uppercase tracking-wider text-white hover:text-slate-300 transition-colors">
+            <Link onClick={() => setMenuAbierto(false)} href="/que-hacer" className={`${bitter.className} text-base sm:text-lg uppercase tracking-wider text-white hover:text-slate-300 transition-colors`}>
               Qué hacer en San Antero
             </Link>
-            <Link onClick={() => setMenuAbierto(false)} href="#atardeceres-san-antero" className="text-base sm:text-lg font-medium uppercase tracking-wider text-white hover:text-slate-300 transition-colors">
+            <Link onClick={() => setMenuAbierto(false)} href="#atardeceres-san-antero" className={`${bitter.className} text-base sm:text-lg uppercase tracking-wider text-white hover:text-slate-300 transition-colors`}>
               Atardeceres Playa Blanca
             </Link>
-            <Link onClick={() => setMenuAbierto(false)} href="/testimonios" className="text-base sm:text-lg font-medium uppercase tracking-wider text-white hover:text-slate-300 transition-colors">
+            <Link onClick={() => setMenuAbierto(false)} href="/testimonios" className={`${bitter.className} text-base sm:text-lg uppercase tracking-wider text-white hover:text-slate-300 transition-colors`}>
               Testimonios & Huéspedes
             </Link>
-            <Link onClick={() => setMenuAbierto(false)} href="/reservas-y-pagos" className="text-base sm:text-lg font-medium uppercase tracking-wider text-white hover:text-slate-300 transition-colors">
+            <Link onClick={() => setMenuAbierto(false)} href="/reservas-y-pagos" className={`${bitter.className} text-base sm:text-lg uppercase tracking-wider text-white hover:text-slate-300 transition-colors`}>
               Cómo Reservar & Pagos
             </Link>
           </nav>
@@ -429,18 +323,38 @@ function GlobalHeader() {
 
 function GlobalFooter() {
   return (
-    <footer className="w-full bg-[#071326] text-white py-12 sm:py-16 px-6 text-center border-t border-white/10">
-      <div className="max-w-3xl mx-auto flex flex-col items-center gap-5">
-        <div className="relative w-36 sm:w-44 h-14 sm:h-16 filter brightness-0 invert opacity-90">
-          <Image src="/logo.png" alt="Logo Abadía Footer" fill sizes="(max-width: 640px) 144px, 176px" className="object-contain" />
+    <footer className="w-full bg-[#071326] text-white py-14 px-6 text-center border-t border-white/10">
+      <div className="max-w-4xl mx-auto flex flex-col items-center gap-6">
+        <div className="relative w-40 sm:w-48 h-14 sm:h-16 filter brightness-0 invert opacity-95">
+          <Image src="/logo.png" alt="Logo Abadía Footer" fill sizes="192px" className="object-contain" />
         </div>
-        <p className="text-xs sm:text-sm text-white/90 max-w-md leading-relaxed font-light">
-          Playa Blanca, San Antero & Coveñas — Colombia <br /> Un espacio para la desconexión total y la calma.
-        </p>
-        <div className="w-12 h-[1px] bg-white/20 my-2" />
-        <p className="text-[10px] uppercase tracking-[0.25em] text-white/50 font-semibold font-mono">
-          © 2026 Abadía Casa Hotel. Todos los derechos reservados.
-        </p>
+        
+        <div className="space-y-1">
+          <p className={`${bitter.className} text-sm sm:text-base font-semibold tracking-wide`}>
+            Abadía Casa Hotel • Playa Blanca, San Antero & Coveñas
+          </p>
+          <p className="text-xs sm:text-sm text-slate-300 font-light">
+            Un refugio de mar, calma y descanso auténtico frente al Golfo de Morrosquillo.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-slate-400 font-mono">
+          <span>WhatsApp: +57 312 237 3415</span>
+          <span>•</span>
+          <span>San Antero, Córdoba, Colombia</span>
+        </div>
+
+        <div className="w-16 h-[1px] bg-white/20 my-1" />
+
+        <div className="flex flex-col sm:flex-row items-center justify-between w-full pt-2 gap-3 text-[11px] text-slate-400 font-light">
+          <p>© 2026 Abadía Casa Hotel. Todos los derechos reservados.</p>
+          <p className="tracking-wide">
+            Hecho por{' '}
+            <span className={`${bitter.className} font-bold text-white hover:text-slate-200 transition-colors`}>
+              Si Forever Studio
+            </span>
+          </p>
+        </div>
       </div>
     </footer>
   );
@@ -451,22 +365,23 @@ export default function HomePage() {
   const [heroSonido, setHeroSonido] = useState(false);
   const [habitacionSonido, setHabitacionSonido] = useState(false);
   const [espacioSonido, setEspacioSonido] = useState(false);
-  const [experienciaSonido, setExperienciaSonido] = useState(false);
 
   const [habitacionActivaIndex, setHabitacionActivaIndex] = useState(0);
   const [fotoHabitacionIndex, setFotoHabitacionIndex] = useState(0);
 
   const [espacioActivoIndex, setEspacioActivoIndex] = useState(0);
-  const [experienciaActivaIndex, setExperienciaActivaIndex] = useState(0);
-
   const [atardecerActivoIndex, setAtardecerActivoIndex] = useState(0);
 
   const [isMounted, setIsMounted] = useState(false);
+
+  // Detección de gestos táctiles (Swipe) en móvil para habitaciones
+  const touchStartX = useRef<number | null>(null);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
+  // Rotación del Hero
   useEffect(() => {
     if (!isMounted) return;
     const intervalHero = setInterval(() => {
@@ -475,14 +390,16 @@ export default function HomePage() {
     return () => clearInterval(intervalHero);
   }, [isMounted]);
 
+  // Rotación rápida de fotos en habitaciones (2.2s)
   useEffect(() => {
     if (!isMounted) return;
     const intervalHab = setInterval(() => {
       setFotoHabitacionIndex((prev) => (prev + 1) % HABITACIONES[habitacionActivaIndex].medios.length);
-    }, 6000);
+    }, 2200);
     return () => clearInterval(intervalHab);
   }, [isMounted, habitacionActivaIndex]);
 
+  // Rotación espacios
   useEffect(() => {
     if (!isMounted) return;
     const intervalEsp = setInterval(() => {
@@ -491,31 +408,22 @@ export default function HomePage() {
     return () => clearInterval(intervalEsp);
   }, [isMounted]);
 
-  useEffect(() => {
-    if (!isMounted) return;
-    const intervalExp = setInterval(() => {
-      setExperienciaActivaIndex((prev) => (prev + 1) % EXPERIENCIAS_SAN_ANTERO.length);
-    }, 7000);
-    return () => clearInterval(intervalExp);
-  }, [isMounted]);
-
+  // Rotación atardeceres
   useEffect(() => {
     if (!isMounted) return;
     const intervalAtardeceres = setInterval(() => {
       setAtardecerActivoIndex((prev) => (prev + 1) % ATARDECERES_FOTOS.length);
-    }, 5000);
+    }, 4500);
     return () => clearInterval(intervalAtardeceres);
   }, [isMounted]);
 
   const habitacionActual = HABITACIONES[habitacionActivaIndex];
   const espacioActual = OTROS_ESPACIOS[espacioActivoIndex];
-  const experienciaActual = EXPERIENCIAS_SAN_ANTERO[experienciaActivaIndex];
   const atardecerActual = ATARDECERES_FOTOS[atardecerActivoIndex];
 
   const medioActual = habitacionActual.medios[fotoHabitacionIndex];
   const esRecursoVideo = esVideo(medioActual);
   const espacioEsVideo = esVideo(espacioActual.recurso);
-  const experienciaEsVideo = esVideo(experienciaActual.recurso);
 
   const siguienteFoto = () => {
     setFotoHabitacionIndex((prev) => (prev + 1) % habitacionActual.medios.length);
@@ -525,29 +433,28 @@ export default function HomePage() {
     setFotoHabitacionIndex((prev) => (prev === 0 ? habitacionActual.medios.length - 1 : prev - 1));
   };
 
+  // Manejadores touch para responsive
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchStartX.current - touchEndX;
+
+    // Desplazamiento mínimo de 45px para cambiar de foto
+    if (diff > 45) {
+      siguienteFoto();
+    } else if (diff < -45) {
+      anteriorFoto();
+    }
+    touchStartX.current = null;
+  };
+
   const cambiarHabitacion = (idx: number) => {
     setHabitacionActivaIndex(idx);
     setFotoHabitacionIndex(0);
-  };
-
-  const siguienteExperiencia = () => {
-    setExperienciaActivaIndex((prev) => (prev + 1) % EXPERIENCIAS_SAN_ANTERO.length);
-  };
-
-  const anteriorExperiencia = () => {
-    setExperienciaActivaIndex((prev) =>
-      prev === 0 ? EXPERIENCIAS_SAN_ANTERO.length - 1 : prev - 1
-    );
-  };
-
-  const siguienteAtardecer = () => {
-    setAtardecerActivoIndex((prev) => (prev + 1) % ATARDECERES_FOTOS.length);
-  };
-
-  const anteriorAtardecer = () => {
-    setAtardecerActivoIndex((prev) =>
-      prev === 0 ? ATARDECERES_FOTOS.length - 1 : prev - 1
-    );
   };
 
   const cotizarWhatsApp = (asunto: string) => {
@@ -564,7 +471,7 @@ export default function HomePage() {
       <GlobalHeader />
 
       {/* ========================================================
-          1. BANNER PRINCIPAL (HERO)
+          1. BANNER FULL SCREEN (HERO)
           ======================================================== */}
       <section className="relative h-[100dvh] w-full overflow-hidden bg-black flex flex-col justify-end pb-12 sm:pb-20 items-center">
         {VIDEOS_HERO.map((video, idx) => {
@@ -597,10 +504,8 @@ export default function HomePage() {
         })}
 
         {/* SELECTOR EN HERO */}
-        <div className="absolute top-20 sm:top-28 z-30 flex items-center gap-2.5 bg-[#071326]/70 backdrop-blur-md px-3 sm:px-4 py-1.5 rounded-full border border-white/10">
-          <span className="text-[9px] sm:text-[10px] uppercase font-mono tracking-widest text-white/70">
-            Video
-          </span>
+        <div className="absolute top-20 sm:top-28 z-30 flex items-center gap-2.5 bg-[#071326]/75 backdrop-blur-md px-3 sm:px-4 py-1.5 rounded-full border border-white/10">
+         
           <div className="flex items-center gap-1.5">
             {VIDEOS_HERO.map((_, i) => (
               <button
@@ -620,12 +525,12 @@ export default function HomePage() {
         {/* AUDIO HERO */}
         <button
           onClick={() => setHeroSonido(!heroSonido)}
-          className="absolute bottom-6 right-4 sm:right-12 z-30 bg-[#071326]/75 hover:bg-[#071326] text-white p-2.5 sm:p-3 rounded-full backdrop-blur-xl border border-white/10 transition-all duration-300 active:scale-90 cursor-pointer flex items-center gap-2"
+          className="absolute bottom-6 right-4 sm:right-12 z-30 bg-[#071326]/75 hover:bg-[#071326] text-white p-2.5 sm:p-3 rounded-full backdrop-blur-xl border border-white/10 transition-all duration-300 active:scale-90 cursor-pointer flex items-center gap-2 shadow-lg"
           aria-label={heroSonido ? "Silenciar video" : "Activar sonido"}
           title={heroSonido ? "Silenciar video" : "Activar sonido"}
         >
           {heroSonido ? <Icons.VolumeUp /> : <Icons.VolumeMute />}
-          <span className="text-[9px] uppercase font-mono tracking-widest hidden sm:inline">
+          <span className={`${bitter.className} text-[9px] uppercase tracking-widest hidden sm:inline`}>
             {heroSonido ? "Sonido ON" : "Sonido OFF"}
           </span>
         </button>
@@ -634,7 +539,7 @@ export default function HomePage() {
         <div className="relative z-20 flex flex-col items-center">
           <Link
             href="/reservas-y-pagos"
-            className={`${montserrat.className} bg-[#071326] hover:bg-[#0d2242] text-white px-9 sm:px-12 py-3.5 sm:py-4 rounded-full text-xs font-bold uppercase tracking-[0.25em] transition-all duration-300 active:scale-95 cursor-pointer flex items-center gap-2.5 border border-white/20`}
+            className={`${bitter.className} bg-[#071326] hover:bg-[#0d2242] text-white px-9 sm:px-12 py-3.5 sm:py-4 rounded-full text-xs font-bold uppercase tracking-[0.25em] transition-all duration-300 active:scale-95 cursor-pointer flex items-center gap-2.5 border border-white/20 shadow-xl`}
           >
             <span>Reservar Ahora</span>
             <Icons.ArrowUpRight />
@@ -643,18 +548,18 @@ export default function HomePage() {
       </section>
 
       {/* ========================================================
-          CATEGORÍAS EN CÍRCULOS: DE A 3 POR HORIZONTAL
+          2. CATEGORÍAS EN CÍRCULOS (3 POR FILA)
           ======================================================== */}
-      <section className="bg-white py-10 sm:py-14 px-4 border-b border-slate-200">
+      <section className="bg-white py-12 sm:py-16 px-4 border-b border-slate-200">
         <div className="max-w-4xl mx-auto">
           <div className="grid grid-cols-3 gap-y-8 gap-x-4 sm:gap-x-12 place-items-center">
             {CATEGORIAS_CIRCULARES.map((cat) => (
               <Link
                 key={cat.id}
                 href={cat.ruta}
-                className="flex flex-col items-center gap-2.5 group w-full max-w-[120px]"
+                className="flex flex-col items-center gap-3 group w-full max-w-[120px]"
               >
-                <div className="relative w-20 h-20 sm:w-28 sm:h-28 rounded-full p-[2px] border-2 border-[#071326] group-hover:border-slate-400 transition-all duration-300 group-hover:scale-105">
+                <div className="relative w-20 h-20 sm:w-28 sm:h-28 rounded-full p-[2.5px] border-2 border-[#071326] group-hover:border-slate-400 transition-all duration-300 group-hover:scale-105 shadow-sm">
                   <div className="relative w-full h-full rounded-full overflow-hidden bg-slate-100">
                     <Image
                       src={cat.imagen}
@@ -666,7 +571,7 @@ export default function HomePage() {
                   </div>
                 </div>
                 
-                <span className={`${montserrat.className} text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-[#071326] group-hover:text-slate-600 transition-colors text-center`}>
+                <span className={`${bitter.className} text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-[#071326] group-hover:text-slate-600 transition-colors text-center`}>
                   {cat.nombre}
                 </span>
               </Link>
@@ -676,20 +581,47 @@ export default function HomePage() {
       </section>
 
       {/* ========================================================
-          TÍTULO: HABITACIONES
+          3. NUESTRAS HABITACIONES (TEXTO + BOTONES 1 AL 6)
           ======================================================== */}
-      <section className="bg-white py-6 px-4 text-center border-b border-slate-200">
-        <h2 className={`${montserrat.className} text-xl sm:text-2xl font-extrabold uppercase tracking-tight text-[#071326]`}>
-          Nuestras Habitaciones
-        </h2>
+      <section className="bg-white pt-10 pb-6 px-4 text-center border-b border-slate-200">
+        <div className="max-w-3xl mx-auto space-y-4">
+          <h2 className={`${bitter.className} text-2xl sm:text-3xl font-extrabold uppercase tracking-tight text-[#071326]`}>
+            Nuestras Habitaciones
+          </h2>
+          
+          <p className="text-sm sm:text-base text-slate-700 leading-relaxed font-light">
+            Encuentra habitaciones privadas, áreas comunes para conectar y relajarte, wifi ilimitado, piscina, parqueadero y playa, todo en un solo lugar.
+          </p>
+
+          {/* BOTONCITOS HORIZONTALES 1 AL 6: BLANCOS, LETRA AZUL Y CON SOMBRA */}
+          <div className="pt-2 flex items-center justify-center gap-3 sm:gap-4 overflow-x-auto no-scrollbar py-2">
+            {HABITACIONES.map((hab, idx) => {
+              const activa = idx === habitacionActivaIndex;
+              return (
+                <button
+                  key={hab.id}
+                  onClick={() => cambiarHabitacion(idx)}
+                  className={`${bitter.className} w-11 h-11 sm:w-13 sm:h-13 rounded-full flex items-center justify-center font-bold text-sm sm:text-base transition-all duration-300 cursor-pointer ${
+                    activa
+                      ? 'bg-white text-[#071326] border-2 border-[#071326] shadow-xl scale-110 ring-2 ring-[#071326]/20'
+                      : 'bg-white text-[#071326] border border-slate-200 shadow-md hover:shadow-lg hover:scale-105'
+                  }`}
+                  aria-label={`Ver Habitación ${hab.numero}`}
+                >
+                  {hab.numero}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </section>
 
-      {/* ========================================================
-          2. BANNER HABITACIÓN FULL SCREEN
-          ======================================================== */}
+      {/* VISOR RESPONSIVE CON SWIPE TÁCTIL Y ROTACIÓN RÁPIDA */}
       <section 
         id="seccion-habitaciones" 
-        className="relative h-[80dvh] sm:h-[100dvh] w-full overflow-hidden bg-black flex flex-col justify-between select-none"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        className="relative h-[75dvh] sm:h-[90dvh] w-full overflow-hidden bg-black flex flex-col justify-between select-none touch-pan-y"
       >
         <div className="absolute inset-0 z-0">
           {esRecursoVideo ? (
@@ -703,7 +635,7 @@ export default function HomePage() {
               onLoadedData={(e) => {
                 e.currentTarget.play().catch(() => {});
               }}
-              className="w-full h-full object-cover transition-all duration-700"
+              className="w-full h-full object-cover transition-all duration-500"
             >
               <source src={medioActual} type="video/quicktime" />
               <source src={medioActual} type="video/mp4" />
@@ -712,45 +644,20 @@ export default function HomePage() {
             <Image
               key={medioActual}
               src={medioActual}
-              alt={`${habitacionActual.titulo} medio ${fotoHabitacionIndex + 1}`}
+              alt={habitacionActual.titulo}
               fill
               priority
               unoptimized
-              className="object-cover transition-all duration-700"
+              className="object-cover transition-all duration-500"
             />
           )}
-
-          <div className="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-black/60 to-transparent pointer-events-none" />
-          <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
+          <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
         </div>
 
-        {/* SELECTOR SUPERIOR: SOLO NÚMEROS 01 AL 06 */}
-        <div className="relative z-30 pt-16 sm:pt-24 px-3 sm:px-12 flex justify-center">
-          <div className="max-w-md w-full flex items-center justify-between gap-1.5 sm:gap-2 bg-[#071326]/75 backdrop-blur-3xl p-1.5 rounded-full border border-white/20">
-            {HABITACIONES.map((hab, idx) => {
-              const activa = idx === habitacionActivaIndex;
-              return (
-                <button
-                  key={hab.id}
-                  onClick={() => cambiarHabitacion(idx)}
-                  className={`flex-1 py-1.5 sm:py-2 px-2 rounded-full text-center text-xs sm:text-sm font-mono font-bold tracking-wider transition-all duration-300 cursor-pointer ${
-                    activa
-                      ? 'bg-blue-900 text-white scale-105 border border-white/50'
-                      : 'bg-white/10 hover:bg-[#071326] text-white/90 border border-white/10'
-                  }`}
-                  aria-label={`Ver Habitación 0${hab.numero}`}
-                >
-                  0{hab.numero}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* CONTROLES LATERALES */}
+        {/* CONTROLES LATERALES ACCESIBLES EN MÓVIL Y DESKTOP */}
         <button
           onClick={anteriorFoto}
-          className="absolute left-3 sm:left-10 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-16 sm:h-16 rounded-full bg-[#071326]/60 hover:bg-[#071326] text-white backdrop-blur-3xl border border-white/20 flex items-center justify-center transition-all duration-300 active:scale-90 cursor-pointer"
+          className="absolute left-2 sm:left-10 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-[#071326]/65 hover:bg-[#071326] text-white backdrop-blur-3xl border border-white/20 flex items-center justify-center transition-all duration-300 active:scale-90 cursor-pointer shadow-lg"
           aria-label="Foto anterior"
         >
           <Icons.ChevronLeft />
@@ -758,17 +665,17 @@ export default function HomePage() {
 
         <button
           onClick={siguienteFoto}
-          className="absolute right-3 sm:right-10 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-16 sm:h-16 rounded-full bg-[#071326]/60 hover:bg-[#071326] text-white backdrop-blur-3xl border border-white/20 flex items-center justify-center transition-all duration-300 active:scale-90 cursor-pointer"
+          className="absolute right-2 sm:right-10 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-[#071326]/65 hover:bg-[#071326] text-white backdrop-blur-3xl border border-white/20 flex items-center justify-center transition-all duration-300 active:scale-90 cursor-pointer shadow-lg"
           aria-label="Siguiente foto"
         >
           <Icons.ChevronRight />
         </button>
 
-        {/* BOTÓN AUDIO */}
+        {/* AUDIO SI ES VIDEO */}
         {esRecursoVideo && (
           <button
             onClick={() => setHabitacionSonido(!habitacionSonido)}
-            className="absolute bottom-6 right-4 sm:right-12 z-30 bg-[#071326]/75 hover:bg-[#071326] text-white px-3.5 py-1.5 rounded-full backdrop-blur-3xl border border-white/20 transition-all duration-300 text-xs font-mono flex items-center gap-1.5 cursor-pointer"
+            className="absolute bottom-20 right-4 sm:right-12 z-30 bg-[#071326]/75 hover:bg-[#071326] text-white px-3.5 py-1.5 rounded-full backdrop-blur-3xl border border-white/20 transition-all duration-300 text-xs font-mono flex items-center gap-1.5 cursor-pointer shadow-md"
             aria-label={habitacionSonido ? "Silenciar video" : "Activar sonido"}
           >
             {habitacionSonido ? <Icons.VolumeUp /> : <Icons.VolumeMute />}
@@ -778,85 +685,37 @@ export default function HomePage() {
           </button>
         )}
 
-        {/* PIE DEL VISOR */}
-        <div className="relative z-20 pb-4 sm:pb-6 px-4 flex flex-col items-center pointer-events-none">
-          <span className="bg-[#071326]/75 backdrop-blur-3xl border border-white/20 px-3.5 py-1 rounded-full text-[10px] sm:text-[11px] text-white/90 font-mono">
-            {fotoHabitacionIndex + 1} / {habitacionActual.medios.length} fotografías
-          </span>
-        </div>
-      </section>
-
-      {/* ========================================================
-          3. FICHA TÉCNICA (LIMPIA, SIN DESCRIPCIÓN)
-          ======================================================== */}
-      <section className="bg-white py-6 sm:py-8 px-4 sm:px-12 border-b border-slate-200">
-        <div className="max-w-6xl mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-6 sm:gap-10 text-left">
-
-          <div className="space-y-2.5 max-w-2xl">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className={`${montserrat.className} bg-[#071326] text-white text-[9px] sm:text-[10px] uppercase tracking-[0.2em] font-bold px-2.5 py-0.5 rounded-full`}>
-                Habitación 0{habitacionActual.numero}
-              </span>
-              <span className={`${montserrat.className} text-xs font-semibold uppercase tracking-wider text-slate-500`}>
-                {habitacionActual.categoria}
-              </span>
-            </div>
-
-            <h3 className={`${montserrat.className} text-xl sm:text-2xl font-extrabold uppercase tracking-tight text-[#071326]`}>
+        {/* BARRA INFERIOR DE ACCIÓN RÁPIDA */}
+        <div className="relative z-20 pb-6 px-4 sm:px-6 max-w-4xl mx-auto w-full flex items-center justify-between text-white">
+          <div>
+            <h3 className={`${bitter.className} text-lg sm:text-2xl font-bold uppercase tracking-tight`}>
               {habitacionActual.titulo}
             </h3>
-
-            <div className="pt-1 flex flex-wrap items-center gap-2 text-sm text-slate-700 font-medium">
-              <span>👥 {habitacionActual.ocupacion}</span>
-              <span>•</span>
-              <span className="font-semibold text-[#071326]">🛏️ {habitacionActual.camas}</span>
-            </div>
-
-            {/* SERVICIOS RESUMIDOS */}
-            <div className="flex flex-wrap gap-2 pt-2">
-              {habitacionActual.servicios.map((srv, i) => (
-                <span
-                  key={i}
-                  className="bg-slate-50 text-slate-700 px-3 py-1 rounded-lg border border-slate-200 text-xs font-medium"
-                >
-                  ✓ {srv}
-                </span>
-              ))}
-            </div>
+            <span className="text-xs text-slate-300 font-mono">
+              {habitacionActual.precio} {habitacionActual.noches}
+            </span>
           </div>
 
-          {/* Tarjeta de tarifa oficial y botón WhatsApp */}
-          <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 flex flex-col justify-between gap-4 shrink-0 lg:w-80">
-            <div>
-              <div className={`${montserrat.className} text-2xl sm:text-3xl font-bold text-[#071326]`}>
-                {habitacionActual.precio} <span className="text-sm text-slate-500 font-normal">{habitacionActual.noches}</span>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <button
-                onClick={() => cotizarWhatsApp(`reservar la ${habitacionActual.titulo} (${habitacionActual.precio} por persona la noche)`)}
-                className={`${montserrat.className} w-full bg-[#071326] hover:bg-[#0d2242] text-white py-3 px-4 rounded-xl text-xs font-bold uppercase tracking-[0.15em] transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 cursor-pointer`}
-              >
-                <Icons.WhatsApp />
-                <span>Reservar WhatsApp</span>
-              </button>
-
-              <Link
-                href={`/habitaciones?id=${habitacionActual.id}`}
-                className={`${montserrat.className} w-full bg-white hover:bg-slate-50 text-[#071326] border border-slate-200 py-3 px-4 rounded-xl text-xs font-semibold uppercase tracking-[0.15em] transition-all duration-300 active:scale-95 flex items-center justify-center gap-1.5 text-center`}
-              >
-                <span>Ver al Detalle</span>
-                <Icons.ArrowUpRight />
-              </Link>
-            </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => cotizarWhatsApp(`reservar la ${habitacionActual.titulo}`)}
+              className={`${bitter.className} bg-white text-[#071326] hover:bg-slate-100 py-2 sm:py-2.5 px-4 sm:px-5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 active:scale-95 cursor-pointer shadow-lg`}
+            >
+              Reservar
+            </button>
+            <Link
+              href={`/habitaciones?id=${habitacionActual.id}`}
+              className={`${bitter.className} bg-[#071326]/80 hover:bg-[#071326] text-white border border-white/20 py-2 sm:py-2.5 px-3.5 sm:px-4 rounded-full text-xs font-semibold uppercase tracking-wider transition-all duration-300 active:scale-95 inline-flex items-center gap-1`}
+            >
+              <span>Detalles</span>
+              <Icons.ArrowUpRight />
+            </Link>
           </div>
-
         </div>
       </section>
 
       {/* ========================================================
-          4. BANNER VIDEO MEDIO
+          4. BANNER DE VIDEO (PEGADO)
           ======================================================== */}
       <section className="relative h-[70dvh] sm:h-[90dvh] w-full overflow-hidden bg-black">
         <video
@@ -877,20 +736,22 @@ export default function HomePage() {
       </section>
 
       {/* ========================================================
-          TÍTULO: OTROS ESPACIOS
+          5. OTROS ESPACIOS DE LA CASA (FULL SCREEN + TEXTO)
           ======================================================== */}
-      <section className="bg-white py-6 px-4 text-center border-b border-slate-200">
-        <h2 className={`${montserrat.className} text-xl sm:text-2xl font-extrabold uppercase tracking-tight text-[#071326]`}>
-          Otros Espacios de la Casa
-        </h2>
+      <section className="bg-white py-8 px-4 text-center border-b border-slate-200">
+        <div className="max-w-2xl mx-auto space-y-2">
+          <h2 className={`${bitter.className} text-xl sm:text-3xl font-extrabold uppercase tracking-tight text-[#071326]`}>
+            Otros Espacios de la Casa
+          </h2>
+          <p className={`${bitter.className} text-xs sm:text-sm tracking-[0.15em] uppercase font-bold text-slate-500`}>
+            ABADIA CASA HOTEL puedes encontrar verdadero descanso
+          </p>
+        </div>
       </section>
 
-      {/* ========================================================
-          5. BANNER OTROS ESPACIOS
-          ======================================================== */}
       <section 
         id="seccion-otros-espacios" 
-        className="relative h-[80dvh] sm:h-[100dvh] w-full overflow-hidden bg-black flex flex-col justify-between"
+        className="relative h-[80dvh] sm:h-[95dvh] w-full overflow-hidden bg-black flex flex-col justify-between"
       >
         <div className="absolute inset-0 z-0">
           {espacioEsVideo ? (
@@ -919,10 +780,10 @@ export default function HomePage() {
               className="object-cover transition-transform duration-1000"
             />
           )}
-          <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" />
+          <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
         </div>
 
-        {/* SELECTOR DE PUNTOS DE ESPACIOS */}
+        {/* SELECTOR DE PUNTOS */}
         <div className="relative z-20 pt-16 sm:pt-24 px-4 sm:px-12 flex items-center justify-end">
           <div className="flex gap-2 bg-[#071326]/75 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20">
             {OTROS_ESPACIOS.map((_, i) => (
@@ -941,7 +802,7 @@ export default function HomePage() {
         {espacioEsVideo && (
           <button
             onClick={() => setEspacioSonido(!espacioSonido)}
-            className="absolute top-32 right-4 sm:right-12 z-30 bg-[#071326]/75 hover:bg-[#071326] text-white p-2.5 rounded-full backdrop-blur-xl border border-white/20 transition-all duration-300 active:scale-90 cursor-pointer flex items-center gap-1.5"
+            className="absolute top-32 right-4 sm:right-12 z-30 bg-[#071326]/75 hover:bg-[#071326] text-white p-2.5 rounded-full backdrop-blur-xl border border-white/20 transition-all duration-300 active:scale-90 cursor-pointer flex items-center gap-1.5 shadow-md"
             aria-label={espacioSonido ? "Silenciar video" : "Activar sonido"}
           >
             {espacioSonido ? <Icons.VolumeUp /> : <Icons.VolumeMute />}
@@ -951,15 +812,15 @@ export default function HomePage() {
           </button>
         )}
 
-        <div className="relative z-20 w-full px-4 sm:px-12 pb-6 sm:pb-10">
-          <div className="max-w-6xl mx-auto bg-white border border-slate-200 p-4 sm:p-6 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-left text-slate-900">
-            <h3 className={`${montserrat.className} text-xl sm:text-2xl font-bold uppercase tracking-tight text-[#071326]`}>
+        <div className="relative z-20 w-full px-4 sm:px-12 pb-8">
+          <div className="max-w-4xl mx-auto flex items-center justify-between text-white">
+            <h3 className={`${bitter.className} text-xl sm:text-2xl font-bold uppercase tracking-tight`}>
               {espacioActual.titulo}
             </h3>
 
             <Link
               href="/otros-espacios"
-              className={`${montserrat.className} w-full sm:w-auto bg-[#071326] hover:bg-[#0d2242] text-white px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-[0.15em] transition-all duration-300 active:scale-95 shrink-0 text-center`}
+              className={`${bitter.className} bg-white text-[#071326] hover:bg-slate-100 px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 active:scale-95 shadow-lg`}
             >
               Explorar Espacios →
             </Link>
@@ -968,154 +829,77 @@ export default function HomePage() {
       </section>
 
       {/* ========================================================
-          TÍTULO: QUÉ HACER
+          6. QUÉ HACER EN SAN ANTERO (CUADRÍCULA ESTÁTICA RESPONSIVE - SIN CARRUSEL)
           ======================================================== */}
-      <section className="bg-white py-6 px-4 text-center border-b border-slate-200">
-        <h2 className={`${montserrat.className} text-xl sm:text-2xl font-extrabold uppercase tracking-tight text-[#071326]`}>
-          Qué hacer en San Antero
-        </h2>
-      </section>
+      <section className="bg-white py-12 sm:py-16 px-4 sm:px-8 border-b border-slate-200">
+        <div className="max-w-6xl mx-auto space-y-8">
+          <div className="text-center space-y-2">
+            <h2 className={`${bitter.className} text-2xl sm:text-3xl font-extrabold uppercase tracking-tight text-[#071326]`}>
+              Qué hacer en San Antero
+            </h2>
+            <p className="text-sm text-slate-600 font-light max-w-xl mx-auto">
+              Descubre los mejores planes gastronómicos, diversión marina y naturaleza a pasos de nuestro hotel.
+            </p>
+          </div>
 
-      {/* ========================================================
-          6. BANNER QUÉ HACER
-          ======================================================== */}
-      <section 
-        id="seccion-que-hacer" 
-        className="relative h-[75dvh] sm:h-[90dvh] w-full overflow-hidden bg-black flex flex-col justify-between select-none"
-      >
-        <div className="absolute inset-0 z-0">
-          {experienciaEsVideo ? (
-            <video
-              key={experienciaActual.recurso}
-              autoPlay
-              muted={!experienciaSonido}
-              loop
-              playsInline
-              preload="auto"
-              onLoadedData={(e) => {
-                e.currentTarget.play().catch(() => {});
-              }}
-              className="w-full h-full object-cover transition-all duration-700"
-            >
-              <source src={experienciaActual.recurso} type="video/quicktime" />
-              <source src={experienciaActual.recurso} type="video/mp4" />
-            </video>
-          ) : (
-            <Image
-              key={experienciaActual.recurso}
-              src={experienciaActual.recurso}
-              alt={experienciaActual.titulo}
-              fill
-              unoptimized
-              className="object-cover transition-transform duration-1000"
-            />
-          )}
-          <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" />
-        </div>
-
-        {/* SELECTOR DE PUNTOS EXPERIENCIAS */}
-        <div className="relative z-30 pt-16 sm:pt-24 px-4 sm:px-12 flex items-center justify-end">
-          <div className="flex items-center gap-1.5 bg-[#071326]/75 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/15">
-            {EXPERIENCIAS_SAN_ANTERO.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => setExperienciaActivaIndex(idx)}
-                className={`transition-all duration-300 rounded-full cursor-pointer ${
-                  idx === experienciaActivaIndex
-                    ? 'w-6 h-1.5 bg-white'
-                    : 'w-1.5 h-1.5 bg-white/40 hover:bg-white'
-                }`}
-                aria-label={`Ver experiencia ${idx + 1}`}
-              />
+          {/* Cuadrícula limpia y adaptable (1 columna en cel, 2 en tablet, 3 en desktop) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {QUE_HACER_ITEMS.map((item) => (
+              <Link
+                key={item.id}
+                href="/que-hacer"
+                className="relative h-72 sm:h-80 rounded-2xl overflow-hidden group border border-slate-200 shadow-sm hover:shadow-lg transition-all duration-300 block"
+              >
+                {item.isVideo ? (
+                  <video
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                  >
+                    <source src={item.src} type="video/quicktime" />
+                    <source src={item.src} type="video/mp4" />
+                  </video>
+                ) : (
+                  <Image
+                    src={item.src}
+                    alt={item.titulo}
+                    fill
+                    unoptimized
+                    className="object-cover group-hover:scale-105 transition-transform duration-700"
+                  />
+                )}
+                
+                <div className="absolute inset-0 bg-gradient-to-t from-[#071326]/90 via-[#071326]/30 to-transparent pointer-events-none" />
+                
+                <div className="absolute bottom-4 left-4 right-4 text-white space-y-1">
+                  <h4 className={`${bitter.className} text-lg font-bold uppercase tracking-wide leading-snug`}>
+                    {item.titulo}
+                  </h4>
+                  <p className="text-xs text-slate-200 font-light line-clamp-2">
+                    {item.desc}
+                  </p>
+                  <span className={`${bitter.className} text-[10px] text-white/80 uppercase tracking-widest font-semibold pt-1 inline-flex items-center gap-1 group-hover:text-white`}>
+                    Conocer más <Icons.ArrowUpRight />
+                  </span>
+                </div>
+              </Link>
             ))}
           </div>
         </div>
-
-        <button
-          onClick={anteriorExperiencia}
-          className="absolute left-3 sm:left-10 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-16 sm:h-16 rounded-full bg-[#071326]/60 hover:bg-[#071326] text-white backdrop-blur-xl border border-white/20 flex items-center justify-center transition-all duration-300 active:scale-90 cursor-pointer"
-          aria-label="Experiencia anterior"
-        >
-          <Icons.ChevronLeft />
-        </button>
-
-        <button
-          onClick={siguienteExperiencia}
-          className="absolute right-3 sm:right-10 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-16 sm:h-16 rounded-full bg-[#071326]/60 hover:bg-[#071326] text-white backdrop-blur-xl border border-white/20 flex items-center justify-center transition-all duration-300 active:scale-90 cursor-pointer"
-          aria-label="Siguiente experiencia"
-        >
-          <Icons.ChevronRight />
-        </button>
-
-        {experienciaEsVideo && (
-          <button
-            onClick={() => setExperienciaSonido(!experienciaSonido)}
-            className="absolute bottom-4 right-4 sm:right-12 z-30 bg-[#071326]/75 hover:bg-[#071326] text-white p-2.5 rounded-full backdrop-blur-xl border border-white/20 transition-all duration-300 active:scale-90 cursor-pointer flex items-center gap-1.5"
-            aria-label={experienciaSonido ? "Silenciar video" : "Activar sonido"}
-          >
-            {experienciaSonido ? <Icons.VolumeUp /> : <Icons.VolumeMute />}
-            <span className="text-[9px] uppercase font-mono tracking-wider hidden sm:inline">
-              {experienciaSonido ? "Audio ON" : "Audio OFF"}
-            </span>
-          </button>
-        )}
-
-        <div className="relative z-20 pb-4 sm:pb-6 text-center pointer-events-none">
-          <span className="bg-[#071326]/75 backdrop-blur-md border border-white/15 px-3.5 py-1 rounded-full text-[10px] sm:text-[11px] text-white/80 font-mono">
-            {experienciaActivaIndex + 1} de {EXPERIENCIAS_SAN_ANTERO.length} • {experienciaActual.tag}
-          </span>
-        </div>
       </section>
 
       {/* ========================================================
-          7. FICHA DE DESTINO (RESUMIDA)
+          7. ATARDECERES (VISOR + MINIATURAS)
           ======================================================== */}
-      <section className="bg-white py-6 sm:py-8 px-4 sm:px-12 border-b border-slate-200">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-left">
-          
-          <div className="space-y-1.5">
-            <span className={`${montserrat.className} bg-[#071326] text-white text-[9px] sm:text-[10px] uppercase tracking-[0.2em] font-bold px-2.5 py-0.5 rounded-full`}>
-              {experienciaActual.tag}
-            </span>
-            <h3 className={`${montserrat.className} text-xl sm:text-2xl font-extrabold uppercase tracking-tight text-[#071326]`}>
-              {experienciaActual.titulo}
-            </h3>
-          </div>
-
-          <div className="flex gap-2">
-            <button
-              onClick={() => cotizarWhatsApp(`conocer más sobre ${experienciaActual.titulo} en San Antero`)}
-              className={`${montserrat.className} bg-[#071326] hover:bg-[#0d2242] text-white py-2.5 px-4 rounded-xl text-xs font-bold uppercase tracking-[0.15em] transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 cursor-pointer`}
-            >
-              <Icons.WhatsApp />
-              <span>Consultar</span>
-            </button>
-
-            <Link
-              href="/que-hacer"
-              className={`${montserrat.className} bg-white hover:bg-slate-50 text-[#071326] border border-slate-200 py-2.5 px-4 rounded-xl text-xs font-semibold uppercase tracking-[0.15em] transition-all duration-300 active:scale-95 flex items-center justify-center gap-1.5 text-center`}
-            >
-              <span>Ver Todo</span>
-              <Icons.ArrowUpRight />
-            </Link>
-          </div>
-
-        </div>
-      </section>
-
-      {/* ========================================================
-          TÍTULO: ATARDECERES
-          ======================================================== */}
-      <section id="atardeceres-san-antero" className="bg-white py-6 px-4 text-center border-b border-slate-200">
-        <h2 className={`${montserrat.className} text-xl sm:text-2xl font-extrabold uppercase tracking-tight text-[#071326]`}>
-          Los Atardeceres en San Antero
+      <section id="atardeceres-san-antero" className="bg-white py-8 px-4 text-center border-b border-slate-200">
+        <h2 className={`${bitter.className} text-xl sm:text-2xl font-extrabold uppercase tracking-tight text-[#071326]`}>
+          Atardeceres
         </h2>
       </section>
 
-      {/* ========================================================
-          8. BANNER ATARDECERES
-          ======================================================== */}
-      <section className="relative h-[75dvh] sm:h-[90dvh] w-full overflow-hidden bg-black flex flex-col justify-between select-none">
+      <section className="relative h-[70dvh] sm:h-[85dvh] w-full overflow-hidden bg-black flex flex-col justify-between select-none">
         {ATARDECERES_FOTOS.map((foto, idx) => {
           const activo = idx === atardecerActivoIndex;
           return (
@@ -1133,12 +917,12 @@ export default function HomePage() {
                 unoptimized
                 className="object-cover scale-100 hover:scale-105 transition-transform duration-1000"
               />
-              <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" />
+              <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
             </div>
           );
         })}
 
-        {/* SELECTOR DE PUNTOS ATARDECERES */}
+        {/* PUNTOS SELECTORES */}
         <div className="relative z-30 pt-16 sm:pt-24 px-4 sm:px-12 flex items-center justify-end">
           <div className="flex items-center gap-1.5 bg-[#071326]/75 backdrop-blur-3xl px-3 py-1.5 rounded-full border border-white/20">
             {ATARDECERES_FOTOS.map((_, idx) => (
@@ -1156,41 +940,24 @@ export default function HomePage() {
           </div>
         </div>
 
-        <button
-          onClick={anteriorAtardecer}
-          className="absolute left-3 sm:left-10 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-16 sm:h-16 rounded-full bg-[#071326]/60 hover:bg-[#071326] text-white backdrop-blur-3xl border border-white/20 flex items-center justify-center transition-all duration-300 active:scale-90 cursor-pointer"
-          aria-label="Atardecer anterior"
-        >
-          <Icons.ChevronLeft />
-        </button>
-
-        <button
-          onClick={siguienteAtardecer}
-          className="absolute right-3 sm:right-10 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-16 sm:h-16 rounded-full bg-[#071326]/60 hover:bg-[#071326] text-white backdrop-blur-3xl border border-white/20 flex items-center justify-center transition-all duration-300 active:scale-90 cursor-pointer"
-          aria-label="Siguiente atardecer"
-        >
-          <Icons.ChevronRight />
-        </button>
-
-        <div className="relative z-20 pb-4 sm:pb-6 text-center pointer-events-none">
-          <span className="bg-[#071326]/75 backdrop-blur-3xl border border-white/20 px-3.5 py-1 rounded-full text-[10px] sm:text-[11px] text-white font-mono">
-            {atardecerActivoIndex + 1} de {ATARDECERES_FOTOS.length} fotografías
-          </span>
+        <div className="relative z-20 pb-8 text-center text-white">
+          <h3 className={`${bitter.className} text-lg sm:text-xl font-bold uppercase tracking-wider`}>
+            {atardecerActual.titulo}
+          </h3>
         </div>
       </section>
 
-      {/* 2do CARRUSEL: TIRA INFINITA */}
+      {/* Miniaturas de atardeceres */}
       <section className="bg-white py-6 px-4 border-b border-slate-200 overflow-hidden">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center gap-3 overflow-x-auto no-scrollbar py-2">
-            {ATARDECERES_FOTOS_DUPLICADOS.map((item, i) => {
-              const originalIdx = i % ATARDECERES_FOTOS.length;
-              const activo = originalIdx === atardecerActivoIndex;
+          <div className="flex items-center justify-center gap-3 overflow-x-auto no-scrollbar py-2">
+            {ATARDECERES_FOTOS.map((item, i) => {
+              const activo = i === atardecerActivoIndex;
               return (
                 <button
-                  key={`${item.id}-${i}`}
-                  onClick={() => setAtardecerActivoIndex(originalIdx)}
-                  className={`relative w-28 sm:w-36 h-20 sm:h-24 rounded-2xl overflow-hidden shrink-0 border-2 transition-all duration-300 cursor-pointer ${
+                  key={item.id}
+                  onClick={() => setAtardecerActivoIndex(i)}
+                  className={`relative w-24 sm:w-32 h-16 sm:h-20 rounded-xl overflow-hidden shrink-0 border-2 transition-all duration-300 cursor-pointer ${
                     activo
                       ? 'border-[#071326] scale-105 ring-2 ring-slate-400'
                       : 'border-transparent opacity-60 hover:opacity-100 hover:border-slate-300'
@@ -1203,10 +970,6 @@ export default function HomePage() {
                     unoptimized
                     className="object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                  <span className="absolute bottom-1.5 left-2 text-[10px] text-white font-mono font-medium">
-                    0{(originalIdx + 1)}
-                  </span>
                 </button>
               );
             })}
