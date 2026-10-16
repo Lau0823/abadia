@@ -19,7 +19,7 @@ const outfit = Outfit({
 
 const NUMERO_WHATSAPP = "573122373415";
 
-// --- CATEGORÍAS (3 POR FILA EN MÓVIL Y DESKTOP) ---
+// --- CATEGORÍAS (3 POR FILA) ---
 interface CategoriaCircular {
   id: string;
   nombre: string;
@@ -98,6 +98,11 @@ const Icons = {
   ChevronLeft: () => (
     <svg className="w-4 h-4 stroke-current fill-none" viewBox="0 0 24 24" strokeWidth="2">
       <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+    </svg>
+  ),
+  ShoppingCart: () => (
+    <svg className="w-3.5 h-3.5 stroke-current fill-none" viewBox="0 0 24 24" strokeWidth="2.2">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
     </svg>
   ),
   VolumeUp: () => (
@@ -202,12 +207,58 @@ const HABITACIONES: Habitacion[] = [
   }
 ];
 
+// --- ITEMS PARA EL CARRUSEL CON ESQUINAS REDONDAS Y SIN BORDES ---
+interface ItemCotizarHabitacion {
+  id: string;
+  titulo: string;
+  precio: string;
+  imagen: string;
+}
+
+const CARDS_COTIZAR: ItemCotizarHabitacion[] = [
+  {
+    id: "hab-01",
+    titulo: "HABITACIÓN 01",
+    precio: "70.000 COP",
+    imagen: "/Habitaciones/habitacion1.jpeg"
+  },
+  {
+    id: "hab-02",
+    titulo: "HABITACIÓN 02",
+    precio: "70.000 COP",
+    imagen: "/Habitaciones/habitacion2.PNG"
+  },
+  {
+    id: "hab-03",
+    titulo: "HABITACIÓN 03",
+    precio: "70.000 COP",
+    imagen: "/Habitaciones/habitacion3.jpeg"
+  },
+  {
+    id: "hab-04",
+    titulo: "HABITACIÓN 04",
+    precio: "70.000 COP",
+    imagen: "/Habitaciones/habitacion4.jpeg"
+  },
+  {
+    id: "hab-05",
+    titulo: "HABITACIÓN 05",
+    precio: "80.000 COP",
+    imagen: "/Habitaciones/habitacion5/DSC05772.jpeg"
+  },
+  {
+    id: "hab-06",
+    titulo: "HABITACIÓN 06",
+    precio: "80.000 COP",
+    imagen: "/Habitaciones/habitacion6.jpeg"
+  }
+];
+
 const OTROS_ESPACIOS = [
   { id: "piscina", titulo: "Piscina Abadía", recurso: "/IMG_2254.mov" },
   { id: "parqueadero", titulo: "Entrada y Parqueadero Privado", recurso: "/IMG_2396.MOV" }
 ];
 
-// ACTIVIDADES PARA LA CUADRÍCULA ESTÁTICA RESPONSIVA (SIN CARRUSEL)
 const QUE_HACER_ITEMS = [
   { id: 1, titulo: "Vicenta Arepa de Huevo", desc: "El sabor tradicional más famoso de la región.", src: "/vicenta.MOV", isVideo: true },
   { id: 2, titulo: "Punta Bonita", desc: "Mirador con vista abierta a los colores del atardecer.", src: "/atardecer.jpg", isVideo: false },
@@ -373,15 +424,12 @@ export default function HomePage() {
   const [atardecerActivoIndex, setAtardecerActivoIndex] = useState(0);
 
   const [isMounted, setIsMounted] = useState(false);
-
-  // Detección de gestos táctiles (Swipe) en móvil para habitaciones
   const touchStartX = useRef<number | null>(null);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // Rotación del Hero
   useEffect(() => {
     if (!isMounted) return;
     const intervalHero = setInterval(() => {
@@ -390,7 +438,6 @@ export default function HomePage() {
     return () => clearInterval(intervalHero);
   }, [isMounted]);
 
-  // Rotación rápida de fotos en habitaciones (2.2s)
   useEffect(() => {
     if (!isMounted) return;
     const intervalHab = setInterval(() => {
@@ -399,7 +446,6 @@ export default function HomePage() {
     return () => clearInterval(intervalHab);
   }, [isMounted, habitacionActivaIndex]);
 
-  // Rotación espacios
   useEffect(() => {
     if (!isMounted) return;
     const intervalEsp = setInterval(() => {
@@ -408,7 +454,6 @@ export default function HomePage() {
     return () => clearInterval(intervalEsp);
   }, [isMounted]);
 
-  // Rotación atardeceres
   useEffect(() => {
     if (!isMounted) return;
     const intervalAtardeceres = setInterval(() => {
@@ -433,7 +478,6 @@ export default function HomePage() {
     setFotoHabitacionIndex((prev) => (prev === 0 ? habitacionActual.medios.length - 1 : prev - 1));
   };
 
-  // Manejadores touch para responsive
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
   };
@@ -443,7 +487,6 @@ export default function HomePage() {
     const touchEndX = e.changedTouches[0].clientX;
     const diff = touchStartX.current - touchEndX;
 
-    // Desplazamiento mínimo de 45px para cambiar de foto
     if (diff > 45) {
       siguienteFoto();
     } else if (diff < -45) {
@@ -458,7 +501,7 @@ export default function HomePage() {
   };
 
   const cotizarWhatsApp = (asunto: string) => {
-    const msj = encodeURIComponent(`Hola! Deseo cotizar reserva en Abadía Casa Hotel: ${asunto}`);
+    const msj = encodeURIComponent(`Hola! Deseo cotizar reserva en Abadía Casa Hotel para: ${asunto}`);
     window.open(`https://wa.me/${NUMERO_WHATSAPP}?text=${msj}`, '_blank');
   };
 
@@ -505,7 +548,9 @@ export default function HomePage() {
 
         {/* SELECTOR EN HERO */}
         <div className="absolute top-20 sm:top-28 z-30 flex items-center gap-2.5 bg-[#071326]/75 backdrop-blur-md px-3 sm:px-4 py-1.5 rounded-full border border-white/10">
-         
+          <span className={`${bitter.className} text-[10px] uppercase font-bold tracking-widest text-white/70`}>
+            Video
+          </span>
           <div className="flex items-center gap-1.5">
             {VIDEOS_HERO.map((_, i) => (
               <button
@@ -593,7 +638,7 @@ export default function HomePage() {
             Encuentra habitaciones privadas, áreas comunes para conectar y relajarte, wifi ilimitado, piscina, parqueadero y playa, todo en un solo lugar.
           </p>
 
-          {/* BOTONCITOS HORIZONTALES 1 AL 6: BLANCOS, LETRA AZUL Y CON SOMBRA */}
+          {/* BOTONCITOS 1 AL 6 */}
           <div className="pt-2 flex items-center justify-center gap-3 sm:gap-4 overflow-x-auto no-scrollbar py-2">
             {HABITACIONES.map((hab, idx) => {
               const activa = idx === habitacionActivaIndex;
@@ -616,7 +661,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* VISOR RESPONSIVE CON SWIPE TÁCTIL Y ROTACIÓN RÁPIDA */}
+      {/* VISOR RESPONSIVE HABITACIONES */}
       <section 
         id="seccion-habitaciones" 
         onTouchStart={handleTouchStart}
@@ -654,7 +699,6 @@ export default function HomePage() {
           <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
         </div>
 
-        {/* CONTROLES LATERALES ACCESIBLES EN MÓVIL Y DESKTOP */}
         <button
           onClick={anteriorFoto}
           className="absolute left-2 sm:left-10 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-[#071326]/65 hover:bg-[#071326] text-white backdrop-blur-3xl border border-white/20 flex items-center justify-center transition-all duration-300 active:scale-90 cursor-pointer shadow-lg"
@@ -671,7 +715,6 @@ export default function HomePage() {
           <Icons.ChevronRight />
         </button>
 
-        {/* AUDIO SI ES VIDEO */}
         {esRecursoVideo && (
           <button
             onClick={() => setHabitacionSonido(!habitacionSonido)}
@@ -685,7 +728,6 @@ export default function HomePage() {
           </button>
         )}
 
-        {/* BARRA INFERIOR DE ACCIÓN RÁPIDA */}
         <div className="relative z-20 pb-6 px-4 sm:px-6 max-w-4xl mx-auto w-full flex items-center justify-between text-white">
           <div>
             <h3 className={`${bitter.className} text-lg sm:text-2xl font-bold uppercase tracking-tight`}>
@@ -733,6 +775,80 @@ export default function HomePage() {
           <source src={VIDEO_MID.src} type="video/quicktime" />
           <source src={VIDEO_MID.src} type="video/mp4" />
         </video>
+      </section>
+
+      {/* ========================================================
+          NUEVA SECCIÓN: MINI-CARDS CON ESQUINAS REDONDAS Y SIN BORDES
+          (EN CARRUSEL HORIZONTAL RÁPIDO CON BOTÓN "COTIZAR")
+          ======================================================== */}
+      <section className="bg-white py-14 sm:py-20 px-4 border-b border-slate-200 overflow-hidden">
+        <div className="max-w-7xl mx-auto space-y-8">
+          <div className="text-center space-y-2">
+            <h2 className={`${bitter.className} text-2xl sm:text-3xl font-extrabold uppercase tracking-tight text-[#071326]`}>
+              Elige tu Habitación
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 font-light">
+              Desliza y cotiza directamente tu estancia en San Antero por WhatsApp.
+            </p>
+          </div>
+
+          {/* CINTA HORIZONTAL RÁPIDA: CARDS REDONDEADAS SIN BORDES */}
+          <div className="relative w-full overflow-hidden py-4 group">
+            <div className="flex gap-8 sm:gap-12 w-max animate-cinta group-hover:[animation-play-state:paused]">
+              {[...CARDS_COTIZAR, ...CARDS_COTIZAR].map((card, index) => (
+                <div
+                  key={`${card.id}-${index}`}
+                  className="w-48 sm:w-56 flex flex-col items-center text-center select-none"
+                >
+                  {/* Imagen de la card: Esquinas bien redondeadas y sin bordes */}
+                  <div className="relative w-44 h-40 sm:w-52 sm:h-48 rounded-3xl overflow-hidden bg-slate-50 shadow-md hover:shadow-xl transition-all duration-500 border-0">
+                    <Image
+                      src={card.imagen}
+                      alt={card.titulo}
+                      fill
+                      unoptimized
+                      className="object-cover hover:scale-108 transition-transform duration-700"
+                    />
+                  </div>
+
+                  {/* Datos del producto */}
+                  <div className="mt-4 space-y-1 w-full">
+                    <h4 className={`${bitter.className} text-xs sm:text-sm font-bold uppercase tracking-wider text-[#071326] truncate`}>
+                      {card.titulo}
+                    </h4>
+                    <p className="text-xs sm:text-sm font-mono font-semibold text-[#071326]">
+                      ${card.precio}
+                    </p>
+                  </div>
+
+                  {/* Botón COTIZAR con Carrito de compras hacia WhatsApp */}
+                  <button
+                    onClick={() => cotizarWhatsApp(`${card.titulo} - Tarifa: $${card.precio}`)}
+                    className={`${bitter.className} mt-3 bg-[#071326] hover:bg-[#0d2242] text-white py-2 px-5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all duration-300 active:scale-95 flex items-center justify-center gap-1.5 shadow-md cursor-pointer border-0`}
+                  >
+                    <Icons.ShoppingCart />
+                    <span>COTIZAR</span>
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Animación continua en CSS */}
+        <style jsx>{`
+          @keyframes cintaHorizontal {
+            0% {
+              transform: translateX(0);
+            }
+            100% {
+              transform: translateX(-50%);
+            }
+          }
+          .animate-cinta {
+            animation: cintaHorizontal 18s linear infinite;
+          }
+        `}</style>
       </section>
 
       {/* ========================================================
@@ -829,7 +945,7 @@ export default function HomePage() {
       </section>
 
       {/* ========================================================
-          6. QUÉ HACER EN SAN ANTERO (CUADRÍCULA ESTÁTICA RESPONSIVE - SIN CARRUSEL)
+          6. QUÉ HACER EN SAN ANTERO (CUADRÍCULA ESTÁTICA)
           ======================================================== */}
       <section className="bg-white py-12 sm:py-16 px-4 sm:px-8 border-b border-slate-200">
         <div className="max-w-6xl mx-auto space-y-8">
@@ -842,7 +958,6 @@ export default function HomePage() {
             </p>
           </div>
 
-          {/* Cuadrícula limpia y adaptable (1 columna en cel, 2 en tablet, 3 en desktop) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {QUE_HACER_ITEMS.map((item) => (
               <Link
@@ -922,7 +1037,6 @@ export default function HomePage() {
           );
         })}
 
-        {/* PUNTOS SELECTORES */}
         <div className="relative z-30 pt-16 sm:pt-24 px-4 sm:px-12 flex items-center justify-end">
           <div className="flex items-center gap-1.5 bg-[#071326]/75 backdrop-blur-3xl px-3 py-1.5 rounded-full border border-white/20">
             {ATARDECERES_FOTOS.map((_, idx) => (
