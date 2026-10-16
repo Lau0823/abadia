@@ -434,7 +434,7 @@ export default function PaginaQueHacer() {
       <section id="guia-planes" className="bg-[#FAF7F2] py-12 sm:py-16 px-6 text-center border-b border-[#E8DDD0]">
         <div className="max-w-2xl mx-auto space-y-1">
           <span className={`${montserrat.className} text-[9px] sm:text-[10px] uppercase tracking-[0.35em] text-[#8c7355] font-bold block`}>
-            — 5 DESTINOS INOLVIDABLES
+         
           </span>
           <div className="relative inline-block">
             <h2 className={`${montserrat.className} text-2xl sm:text-4xl font-extrabold uppercase tracking-tight text-[#2a2421]`}>
