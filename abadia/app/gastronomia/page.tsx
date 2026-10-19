@@ -155,9 +155,9 @@ const TOP_RESTAURANTES_SECTOR: LugarGastronomico[] = [
       "Filete de róbalo a la plancha en salsa de ajo criollo"
     ],
     fotos: [
-      "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=1200&q=80"
+      "https://i.pinimg.com/736x/79/bb/64/79bb6480b377724c81b99d7161239741.jpg",
+      "https://i.pinimg.com/736x/5a/70/a1/5a70a119172e57660dab3de6688203e9.jpg",
+      "https://i.pinimg.com/736x/cd/96/b2/cd96b2299ec00da49b018f2d548e17fb.jpg"
     ],
     mapUrl: "https://maps.google.com/?q=Restaurante+Pesecar+San+Antero",
     embedMapUrl: "https://www.google.com/maps?q=Restaurante+Pesecar+San+Antero&output=embed"
@@ -179,9 +179,9 @@ const TOP_RESTAURANTES_SECTOR: LugarGastronomico[] = [
       "Sopa de pescado reconfortante de la casa"
     ],
     fotos: [
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=1200&q=80"
+      "https://i.pinimg.com/736x/17/96/cf/1796cf56d2484b6b00c7a54592e5832a.jpg",
+      "https://i.pinimg.com/736x/08/73/6e/08736ea4effa9f4a02ed7895df69c291.jpg",
+      "https://i.pinimg.com/1200x/81/81/34/81813470da1d0d8015b042d8e34456f8.jpg"
     ],
     mapUrl: "https://maps.google.com/?q=Restaurante+Ranchon+Marino+San+Antero",
     embedMapUrl: "https://www.google.com/maps?q=Restaurante+Ranchon+Marino+San+Antero&output=embed"
@@ -203,61 +203,15 @@ const TOP_RESTAURANTES_SECTOR: LugarGastronomico[] = [
       "Mote de queso costeño tradicional"
     ],
     fotos: [
-      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=1200&q=80"
+      "https://i.pinimg.com/736x/eb/a8/38/eba8384f59a11cfec4c7236f1a2a355d.jpg",
+      "https://i.pinimg.com/1200x/47/98/06/479806d869bd573895bed86b2edd83fb.jpg",
+      "https://i.pinimg.com/1200x/78/7c/3e/787c3e78cddee6c828d57b683e072b92.jpg"
     ],
     mapUrl: "https://maps.google.com/?q=Restaurante+El+Mirador+San+Antero",
     embedMapUrl: "https://www.google.com/maps?q=Restaurante+El+Mirador+San+Antero&output=embed"
   },
-  {
-    id: "bahia-cispata-gourmet",
-    puesto: "04",
-    nombre: "Cocina Nativa Bahía Cispatá",
-    categoria: "Sabores del Manglar & Mar",
-    distancia: "A 12 min del hotel",
-    precioPromedio: "$40.000 — $70.000 COP",
-    calificacion: "4.7",
-    horario: "11:30 AM — 6:00 PM",
-    resumen: "Experiencia sobre muelle entre manglares, mariscos salteados y bebidas tropicales.",
-    descripcionCompleta: "Ubicado en el entorno ecológico de la Bahía de Cispatá. Brinda una experiencia gastronómica tranquila rodeada de naturaleza con recetas enfocadas en jaibas, langostinos y pesca artesanal.",
-    especialidades: [
-      "Langostinos al ajillo con patacones dorados",
-      "Ceviche de jaiba y pulpo marinado",
-      "Limonada de coco artesanal"
-    ],
-    fotos: [
-      "https://images.unsplash.com/photo-1535400255456-984241443b29?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1200&q=80"
-    ],
-    mapUrl: "https://maps.google.com/?q=Bahia+Cispata+San+Antero",
-    embedMapUrl: "https://www.google.com/maps?q=Bahia+Cispata+San+Antero&output=embed"
-  },
-  {
-    id: "asados-el-fogon",
-    puesto: "05",
-    nombre: "El Fogón de San Antero",
-    categoria: "Asados al Carbón & Comida Casera",
-    distancia: "A 8 min en el casco urbano",
-    precioPromedio: "$22.000 — $45.000 COP",
-    calificacion: "4.6",
-    horario: "12:00 PM — 9:30 PM",
-    resumen: "Opción recomendada para cenar en la noche: carnes al carbón, arepas y platos típicos.",
-    descripcionCompleta: "Para quienes desean recorrer el pueblo por la tarde o noche y probar opciones diferentes a la comida de mar. Destaca por sus cortes al carbón con bollo limpio y queso costeño.",
-    especialidades: [
-      "Punta de anca o lomo al carbón con bollo limpio",
-      "Picada criolla mixta para compartir",
-      "Arepa rellena de queso costeño y carne desmechada"
-    ],
-    fotos: [
-      "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1200&q=80"
-    ],
-    mapUrl: "https://maps.google.com/?q=San+Antero+Cordoba+Centro",
-    embedMapUrl: "https://www.google.com/maps?q=San+Antero+Cordoba+Centro&output=embed"
-  }
+
+  
 ];
 
 // --- COMPONENTE INDIVIDUAL DE CARD FULL SCREEN CON RESPALDO DESCRIPTIVO AL TAP ---

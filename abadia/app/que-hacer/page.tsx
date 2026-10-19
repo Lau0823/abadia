@@ -101,7 +101,7 @@ const PLANES_SAN_ANTERO: PlanDestino[] = [
     distancia: "Frente al hotel (paso directo)",
     descripcion:
       "Nuestra playa insignia en San Antero, caracterizada por su arena suave, oleaje sereno y aguas cálidas protegidas por el golfo. Es el espacio ideal para caminar temprano en la mañana, nadar con tranquilidad, disfrutar cocos fríos bajo la sombra de las palmeras y contemplar los atardeceres dorados más impresionantes de la región.",
-    recursoPrincipal: "/mar.mp4",
+    recursoPrincipal: "/IMG_2277.mov",
     esVideo: true,
     destacados: [
       "Aguas cristalinas y oleaje muy suave",

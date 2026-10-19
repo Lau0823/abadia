@@ -548,9 +548,7 @@ export default function HomePage() {
 
         {/* SELECTOR EN HERO */}
         <div className="absolute top-20 sm:top-28 z-30 flex items-center gap-2.5 bg-[#071326]/75 backdrop-blur-md px-3 sm:px-4 py-1.5 rounded-full border border-white/10">
-          <span className={`${bitter.className} text-[10px] uppercase font-bold tracking-widest text-white/70`}>
-            Video
-          </span>
+          
           <div className="flex items-center gap-1.5">
             {VIDEOS_HERO.map((_, i) => (
               <button

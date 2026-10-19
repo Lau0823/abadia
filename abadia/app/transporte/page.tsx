@@ -125,7 +125,7 @@ const RECOMENDACIONES_TRANSPORTE: OpcionTransporte[] = [
       "Agua mineral fría y toallas refrescantes a bordo",
       "Ruta directa por vía asfaltada costera del Golfo"
     ],
-    imagen: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=1200&q=80",
+    imagen: "https://i.pinimg.com/736x/e0/5e/0d/e05e0d330e8a237ee3b75fee2c947783.jpg",
     mapEmbedUrl: "https://www.google.com/maps?q=Aeropuerto+Golfo+de+Morrosquillo+Tolu&output=embed",
     wazeUrl: "https://www.google.com/maps/dir/?api=1&origin=Aeropuerto+Golfo+de+Morrosquillo+Tolu&destination=San+Antero+Cordoba"
   },
@@ -144,7 +144,7 @@ const RECOMENDACIONES_TRANSPORTE: OpcionTransporte[] = [
       "Seguro contractual de pasajeros incluido",
       "Parada opcional en tiendas tradicionales de la región"
     ],
-    imagen: "https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&w=1200&q=80",
+    imagen: "https://i.pinimg.com/736x/3b/bb/3f/3bbb3f34860e95500f8735cfb0a415a6.jpg",
     mapEmbedUrl: "https://www.google.com/maps?q=Aeropuerto+Los+Garzones+Monteria&output=embed",
     wazeUrl: "https://www.google.com/maps/dir/?api=1&origin=Aeropuerto+Los+Garzones+Monteria&destination=San+Antero+Cordoba"
   },
@@ -163,7 +163,7 @@ const RECOMENDACIONES_TRANSPORTE: OpcionTransporte[] = [
       "Ubicación exacta compartida en Waze y Google Maps",
       "Paso directo e inmediato hacia recepción y habitaciones"
     ],
-    imagen: "https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=1200&q=80",
+    imagen: "https://i.pinimg.com/736x/1f/37/9b/1f379b3f0bf4c0053852b0cac3d74023.jpg",
     mapEmbedUrl: "https://www.google.com/maps?q=Playa+Blanca+San+Antero+Cordoba&output=embed",
     wazeUrl: "https://www.google.com/maps?q=Playa+Blanca+San+Antero+Cordoba"
   },
@@ -182,7 +182,7 @@ const RECOMENDACIONES_TRANSPORTE: OpcionTransporte[] = [
       "Capacidad para parejas o grupos familiares completos",
       "Nevera con hielo y bebidas refrescantes a bordo"
     ],
-    imagen: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=1200&q=80",
+    imagen: "https://i.pinimg.com/736x/5d/d4/1f/5dd41f36c290ddce12ed7ea6c877b13e.jpg",
     mapEmbedUrl: "https://www.google.com/maps?q=Islas+San+Bernardo+Colombia&output=embed",
     wazeUrl: "https://www.google.com/maps?q=Islas+San+Bernardo+Colombia"
   }
@@ -452,7 +452,7 @@ export default function PaginaTransporte() {
           ======================================================== */}
       <section className="relative h-[85vh] sm:h-[92vh] w-full overflow-hidden bg-black flex flex-col justify-end pb-12 sm:pb-16 text-center text-white">
         <Image
-          src="/caimanera.png"
+          src="https://i.pinimg.com/736x/0d/2b/cd/0d2bcd84f7d2a07b827f185934bb0c5a.jpg"
           alt="Rutas y Transporte hacia Abadía Casa Hotel"
           fill
           priority
