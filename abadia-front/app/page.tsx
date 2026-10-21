@@ -1,575 +1,1129 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
+import { Bitter, Outfit } from 'next/font/google';
+import { useSettingsStore } from '../store/settingsStore';
 import { useHabitacionesStore } from '../store/habitacionesStore';
 
-// --- INTERFACES DE DATOS ---
-interface PlanHotel {
+const bitter = Bitter({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  display: 'swap',
+});
+
+const outfit = Outfit({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600'],
+  display: 'swap',
+});
+
+const NUMERO_WHATSAPP_DEFAULT = "573122373415";
+
+// --- CATEGORÍAS (3 POR FILA) ---
+interface CategoriaCircular {
+  id: string;
+  nombre: string;
+  ruta: string;
+  imagen: string;
+}
+
+const CATEGORIAS_CIRCULARES: CategoriaCircular[] = [
+  {
+    id: "habitaciones",
+    nombre: "Habitaciones",
+    ruta: "/habitaciones",
+    imagen: "/categorias/habitaciones.png"
+  },
+  {
+    id: "gastronomia",
+    nombre: "Gastronomía",
+    ruta: "/gastronomia",
+    imagen: "/categorias/gastronomia.png"
+  },
+  {
+    id: "otros-espacios",
+    nombre: "Espacios",
+    ruta: "/otros-espacios",
+    imagen: "/categorias/piscina.png"
+  },
+  {
+    id: "que-hacer",
+    nombre: "Qué Hacer",
+    ruta: "/que-hacer",
+    imagen: "/categorias/que hacer.png"
+  },
+  {
+    id: "transporte",
+    nombre: "Cómo Llegar",
+    ruta: "/transporte",
+    imagen: "/categorias/mapa.png"
+  },
+  {
+    id: "atardeceres",
+    nombre: "Atardeceres",
+    ruta: "/atardeceres",
+    imagen: "/categorias/atardecer.png"
+  }
+];
+
+const VIDEOS_HERO = [
+  {
+    id: 1,
+    src: "/BANNER QUE ES ABADIA.MOV",
+    poster: "/Habitaciones/habitacion1.jpeg"
+  },
+  {
+    id: 2,
+    src: "/videosdebanner/copy_411D7CCA-6A4F-4751-9D4E-D68E00EF3485 (1).mov",
+    poster: "/121017.jpg"
+  }
+];
+
+const VIDEO_MID = {
+  src: "/videosdebanner/copy_359F2AF5-3796-41C5-B3D0-B9AC83EF213B.mov",
+  poster: "/121017.jpg"
+};
+
+const Icons = {
+  ArrowUpRight: () => (
+    <svg className="w-3.5 h-3.5 stroke-current fill-none" viewBox="0 0 24 24" strokeWidth="2">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
+    </svg>
+  ),
+  ChevronRight: () => (
+    <svg className="w-4 h-4 stroke-current fill-none" viewBox="0 0 24 24" strokeWidth="2">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+    </svg>
+  ),
+  ChevronLeft: () => (
+    <svg className="w-4 h-4 stroke-current fill-none" viewBox="0 0 24 24" strokeWidth="2">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+    </svg>
+  ),
+  ShoppingCart: () => (
+    <svg className="w-3.5 h-3.5 stroke-current fill-none" viewBox="0 0 24 24" strokeWidth="2.2">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+    </svg>
+  ),
+  VolumeUp: () => (
+    <svg className="w-4 h-4 stroke-current fill-none" viewBox="0 0 24 24" strokeWidth="1.8">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.83 0-1.51-.68-1.51-1.51V9.75c0-.83.68-1.5 1.51-1.5h2.24z" />
+    </svg>
+  ),
+  VolumeMute: () => (
+    <svg className="w-4 h-4 stroke-current fill-none" viewBox="0 0 24 24" strokeWidth="1.8">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 9.75L19.5 12m0 0l2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25m-10.5-3.75l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.83 0-1.51-.68-1.51-1.51V9.75c0-.83.68-1.5 1.51-1.5h2.24z" />
+    </svg>
+  ),
+  Calendar: () => (
+    <svg className="w-4 h-4 stroke-current fill-none" viewBox="0 0 24 24" strokeWidth="1.8">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+    </svg>
+  )
+};
+
+const esVideo = (url?: string) => {
+  if (!url) return false;
+  const limpio = url.split('?')[0].toLowerCase();
+  const extensiones = ['.mov', '.mp4', '.webm', '.ogg', '.m4v'];
+  return extensiones.some((ext) => limpio.endsWith(ext));
+};
+
+interface HabitacionHome {
+  id: string;
+  numero: string;
+  titulo: string;
+  precio: string;
+  noches: string;
+  medios: string[];
+}
+
+const HABITACIONES: HabitacionHome[] = [
+  {
+    id: "habitacion-1",
+    numero: "1",
+    titulo: "Habitación 1",
+    precio: "$70.000",
+    noches: "/ noche por persona",
+    medios: [
+      "/Habitaciones/habitacion1.jpeg",
+      "/WhatsApp Image 2026-07-08 at 10.54.20 (1).jpeg",
+      "/Habitaciones/habitacion101.png"
+    ]
+  },
+  {
+    id: "habitacion-2",
+    numero: "2",
+    titulo: "Habitación 2",
+    precio: "$70.000",
+    noches: "/ noche por persona",
+    medios: [
+      "/Habitaciones/habitacion2.mov",
+      "/Habitaciones/habitacion2.PNG",
+      "/Habitaciones/habitacion2.2.PNG"
+    ]
+  },
+  {
+    id: "habitacion-3",
+    numero: "3",
+    titulo: "Habitación 3",
+    precio: "$70.000",
+    noches: "/ noche por persona",
+    medios: [
+      "/Habitaciones/habitacion301.png",
+      "/Habitaciones/habitacion3.jpeg",
+      "/Habitaciones/301.png"
+    ]
+  },
+  {
+    id: "habitacion-4",
+    numero: "4",
+    titulo: "Habitación 4",
+    precio: "$70.000",
+    noches: "/ noche por persona",
+    medios: [
+      "/Habitaciones/habitacion4.jpeg",
+      "/DSC05650.jpeg",
+      "/DSC05657.jpeg",
+    ]
+  },
+  {
+    id: "habitacion-5",
+    numero: "5",
+    titulo: "Habitación 5",
+    precio: "$80.000",
+    noches: "/ noche por persona",
+    medios: [
+      "/videosdebanner/copy_359F2AF5-3796-41C5-B3D0-B9AC83EF213B.mov",
+      "/Habitaciones/habitacion5/DSC05772.jpeg",
+      "/Habitaciones/habitacion5/DSC05770.jpeg",
+      "/Habitaciones/habitacion5/DSC05779.jpeg"
+    ]
+  },
+  {
+    id: "habitacion-6",
+    numero: "6",
+    titulo: "Habitación 6",
+    precio: "$80.000",
+    noches: "/ noche por persona",
+    medios: [
+      "/Habitaciones/habitacion6.jpeg",
+    ]
+  }
+];
+
+interface ItemCotizarHabitacion {
   id: string;
   titulo: string;
-  subtitulo: string;
-  descripcion: string;
   precio: string;
   imagen: string;
-  etiqueta: string;
 }
 
-interface EspacioCasa {
-  id: string;
-  titulo: string;
-  imagen: string;
-}
-
-interface ActividadLocal {
-  id: string;
-  titulo: string;
-  lugar: string;
-  imagen: string;
-  precioDesde: string;
-}
-
-interface MetodoPago {
-  id: string;
-  tipo: string;
-  detalle: string;
-  icono: string;
-}
-
-interface TerminoPolitica {
-  id: string;
-  titulo: string;
-  contenido: string;
-}
-
-// --- IMAGENES DEL CARRUSEL PRINCIPAL (HERO) - MOVIDO DENTRO DEL COMPONENTE ---
-
-
-
-
-
-const METODOS_PAGO: MetodoPago[] = [
-  { id: "pago-1", tipo: "Transferencia Directa", detalle: "Bancolombia, Nequi o Daviplata sin costos adicionales.", icono: "📱" },
-  { id: "pago-2", tipo: "Tarjetas de Crédito", detalle: "Visa, Mastercard y American Express mediante link seguro.", icono: "💳" },
-  { id: "pago-3", tipo: "Efectivo / Corresponsal", detalle: "Pagos seguros a través de puntos Efecty o Gana.", icono: "💵" }
+const CARDS_COTIZAR: ItemCotizarHabitacion[] = [
+  {
+    id: "hab-01",
+    titulo: "HABITACIÓN 01",
+    precio: "70.000 COP",
+    imagen: "/Habitaciones/habitacion1.jpeg"
+  },
+  {
+    id: "hab-02",
+    titulo: "HABITACIÓN 02",
+    precio: "70.000 COP",
+    imagen: "/Habitaciones/habitacion2.PNG"
+  },
+  {
+    id: "hab-03",
+    titulo: "HABITACIÓN 03",
+    precio: "70.000 COP",
+    imagen: "/Habitaciones/habitacion3.jpeg"
+  },
+  {
+    id: "hab-04",
+    titulo: "HABITACIÓN 04",
+    precio: "70.000 COP",
+    imagen: "/Habitaciones/habitacion4.jpeg"
+  },
+  {
+    id: "hab-05",
+    titulo: "HABITACIÓN 05",
+    precio: "80.000 COP",
+    imagen: "/Habitaciones/habitacion5/DSC05772.jpeg"
+  },
+  {
+    id: "hab-06",
+    titulo: "HABITACIÓN 06",
+    precio: "80.000 COP",
+    imagen: "/Habitaciones/habitacion6.jpeg"
+  }
 ];
 
-const TERMINOS_POLITICAS: TerminoPolitica[] = [
-  { id: "term-1", titulo: "Políticas de Check-in y Check-out", contenido: "El ingreso a las habitaciones está habilitado a partir de las 3:00 PM y la salida debe realizarse antes de la 1:00 PM para garantizar el correcto flujo de desinfección." },
-  { id: "term-2", titulo: "Cancelaciones y Modificaciones", contenido: "Puedes reprogramar o cancelar tu estadía sin penalidad hasta 48 horas antes de tu fecha de llegada. Pasado este tiempo se cobrará el valor de la primera noche." },
-  { id: "term-3", titulo: "Normas de Convivencia y Mascotas", contenido: "Somos un espacio de desconexión y calma. Se admiten mascotas de razas pequeñas bajo previa solicitud y con responsabilidad directa de sus cuidadores." }
+const OTROS_ESPACIOS = [
+  { id: "piscina", titulo: "Piscina Abadía", recurso: "/IMG_2254.mov" },
+  { id: "parqueadero", titulo: "Entrada y Parqueadero Privado", recurso: "/IMG_2396.MOV" }
 ];
 
-import { useSettingsStore } from '../store/settingsStore';
+const QUE_HACER_ITEMS = [
+  { id: 1, titulo: "Vicenta Arepa de Huevo", desc: "El sabor tradicional más famoso de la región.", src: "/vicenta.MOV", isVideo: true },
+  { id: 2, titulo: "Punta Bonita", desc: "Mirador con vista abierta a los colores del atardecer.", src: "/atardecer.jpg", isVideo: false },
+  { id: 3, titulo: "Playa Serena", desc: "Aguas calmas y arena suave para desconectar.", src: "/mar.mp4", isVideo: true },
+  { id: 4, titulo: "Moto Acuática", desc: "Recorridos guiados por las bahías de San Antero.", src: "/IMG_2277.mov", isVideo: true },
+  { id: 5, titulo: "Gastronomía Local", desc: "Restaurantes recomendados a minutos del hotel.", src: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80", isVideo: false },
+  { id: 6, titulo: "Ecoturismo & Manglares", desc: "Paseos en lancha hacia la bahía de Cispatá.", src: "/atardeceres/DSC00012.JPG", isVideo: false }
+];
+
+const ATARDECERES_FOTOS = [
+  { id: 1, titulo: "Playa Blanca", src: "/atardeceres/abe23f00-6c34-41ab-920c-449ea7f703b0.JPG" },
+  { id: 2, titulo: "Marea Baja", src: "/atardeceres/DSC00026.JPG" },
+  { id: 3, titulo: "Palmeras al Atardecer", src: "/atardeceres/DSC00012.JPG" },
+  { id: 4, titulo: "Punta Bonita", src: "/sunshine.JPG" },
+  { id: 5, titulo: "San Antero Mágico", src: "/amanecersan atnero.JPG" },
+];
+
+function GlobalHeader() {
+  const [menuAbierto, setMenuAbierto] = useState(false);
+
+  return (
+    <>
+      <header className="fixed top-0 left-0 right-0 z-40 px-4 sm:px-12 py-4 sm:py-6 flex items-center justify-between pointer-events-none">
+        <div className="w-10 sm:w-12 pointer-events-none" />
+
+        <div className="pointer-events-auto flex items-center justify-center">
+          <Link href="/" className="relative w-36 h-12 sm:w-56 sm:h-18 cursor-pointer drop-shadow-[0_4px_16px_rgba(0,0,0,0.65)] hover:scale-105 transition-transform duration-300 block">
+            <Image 
+              src="/logo.png" 
+              alt="Logo Abadía" 
+              fill 
+              priority 
+              className="object-contain filter brightness-0 invert" 
+            />
+          </Link>
+        </div>
+
+        <div className="pointer-events-auto flex items-center gap-2">
+          <Link
+            href="/reservar"
+            className={`${bitter.className} hidden sm:flex items-center gap-1.5 bg-white/90 hover:bg-white text-[#071326] px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider backdrop-blur-md shadow-md transition-all active:scale-95`}
+          >
+            <Icons.Calendar />
+            <span>Reservar</span>
+          </Link>
+          <button 
+            onClick={() => setMenuAbierto(true)}
+            className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#071326]/75 hover:bg-[#071326] text-white border border-white/20 flex items-center justify-center active:scale-90 transition-all duration-300 cursor-pointer backdrop-blur-xl shadow-md"
+            aria-label="Abrir Menú"
+          >
+            <span className="text-lg sm:text-xl">☰</span>
+          </button>
+        </div>
+      </header>
+
+      <div 
+        className={`fixed inset-0 z-50 transition-opacity duration-500 ${
+          menuAbierto ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+      >
+        <div onClick={() => setMenuAbierto(false)} className="absolute inset-0 bg-black/60 backdrop-blur-md" />
+
+        <div className={`absolute top-0 right-0 bottom-0 w-full sm:w-[420px] bg-[#071326]/95 backdrop-blur-3xl p-6 sm:p-10 flex flex-col justify-between border-l border-white/10 transition-transform duration-500 ease-out overflow-y-auto ${
+          menuAbierto ? 'translate-x-0' : 'translate-x-full'
+        }`}>
+          <div className="flex items-center justify-between border-b border-white/10 pb-5">
+            <span className={`${bitter.className} text-xs uppercase tracking-[0.25em] text-white/90 font-bold`}>
+              Abadía Casa Hotel
+            </span>
+            <button
+              onClick={() => setMenuAbierto(false)}
+              className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/10 flex items-center justify-center transition-all cursor-pointer"
+              aria-label="Cerrar menú"
+            >
+              ✕
+            </button>
+          </div>
+
+          <nav className="flex flex-col gap-4 text-left my-auto py-6">
+            <Link onClick={() => setMenuAbierto(false)} href="/" className={`${bitter.className} text-base sm:text-lg uppercase tracking-wider text-white hover:text-slate-300 transition-colors`}>
+              Inicio
+            </Link>
+            <Link onClick={() => setMenuAbierto(false)} href="/habitaciones" className={`${bitter.className} text-base sm:text-lg uppercase tracking-wider text-white hover:text-slate-300 transition-colors`}>
+              Habitaciones
+            </Link>
+            <Link onClick={() => setMenuAbierto(false)} href="/reservar" className={`${bitter.className} text-base sm:text-lg uppercase tracking-wider text-amber-200 hover:text-amber-100 transition-colors flex items-center gap-2 font-bold`}>
+              <span>Reservar en Línea</span>
+              <Icons.ArrowUpRight />
+            </Link>
+            <Link onClick={() => setMenuAbierto(false)} href="/gastronomia" className={`${bitter.className} text-base sm:text-lg uppercase tracking-wider text-white hover:text-slate-300 transition-colors`}>
+              Gastronomía 
+            </Link>
+            <Link onClick={() => setMenuAbierto(false)} href="/transporte" className={`${bitter.className} text-base sm:text-lg uppercase tracking-wider text-white hover:text-slate-300 transition-colors`}>
+              Cómo Llegar & Transporte
+            </Link>
+            <Link onClick={() => setMenuAbierto(false)} href="/otros-espacios" className={`${bitter.className} text-base sm:text-lg uppercase tracking-wider text-white hover:text-slate-300 transition-colors`}>
+              Otros Espacios de la Casa
+            </Link>
+            <Link onClick={() => setMenuAbierto(false)} href="/que-hacer" className={`${bitter.className} text-base sm:text-lg uppercase tracking-wider text-white hover:text-slate-300 transition-colors`}>
+              Qué hacer en San Antero
+            </Link>
+            <Link onClick={() => setMenuAbierto(false)} href="/atardeceres" className={`${bitter.className} text-base sm:text-lg uppercase tracking-wider text-white hover:text-slate-300 transition-colors`}>
+              Atardeceres Playa Blanca
+            </Link>
+            <Link onClick={() => setMenuAbierto(false)} href="/testimonios" className={`${bitter.className} text-base sm:text-lg uppercase tracking-wider text-white hover:text-slate-300 transition-colors`}>
+              Testimonios & Huéspedes
+            </Link>
+            <Link onClick={() => setMenuAbierto(false)} href="/reservas-y-pagos" className={`${bitter.className} text-base sm:text-lg uppercase tracking-wider text-white hover:text-slate-300 transition-colors`}>
+              Cómo Reservar & Pagos
+            </Link>
+          </nav>
+
+          <div className="pt-5 border-t border-white/10 flex items-center justify-between text-[10px] uppercase tracking-[0.25em] text-white/70">
+            <span>Playa Blanca • San Antero</span>
+            <Link href="/admin" className="text-white hover:underline font-bold">
+              Panel Admin ⚙️
+            </Link>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function GlobalFooter() {
+  return (
+    <footer className="w-full bg-[#071326] text-white py-14 px-6 text-center border-t border-white/10">
+      <div className="max-w-4xl mx-auto flex flex-col items-center gap-6">
+        <div className="relative w-40 sm:w-48 h-14 sm:h-16 filter brightness-0 invert opacity-95">
+          <Image src="/logo.png" alt="Logo Abadía Footer" fill sizes="192px" className="object-contain" />
+        </div>
+        
+        <div className="space-y-1">
+          <p className={`${bitter.className} text-sm sm:text-base font-semibold tracking-wide`}>
+            Abadía Casa Hotel • Playa Blanca, San Antero & Coveñas
+          </p>
+          <p className="text-xs sm:text-sm text-slate-300 font-light">
+            Un refugio de mar, calma y descanso auténtico frente al Golfo de Morrosquillo.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-slate-400 font-mono">
+          <span>WhatsApp: +57 312 237 3415</span>
+          <span>•</span>
+          <span>San Antero, Córdoba, Colombia</span>
+        </div>
+
+        <div className="w-16 h-[1px] bg-white/20 my-1" />
+
+        <div className="flex flex-col sm:flex-row items-center justify-between w-full pt-2 gap-3 text-[11px] text-slate-400 font-light">
+          <p>© 2026 Abadía Casa Hotel. Todos los derechos reservados.</p>
+          <p className="tracking-wide">
+            Hecho por{' '}
+            <span className={`${bitter.className} font-bold text-white hover:text-slate-200 transition-colors`}>
+              Si Forever Studio
+            </span>
+          </p>
+        </div>
+      </div>
+    </footer>
+  );
+}
 
 export default function HomePage() {
-  const { habitaciones, fetchHabitaciones, isLoading } = useHabitacionesStore();
   const { fetchSettings, getSetting } = useSettingsStore();
-  const [heroActivo, setHeroActivo] = useState<number>(0);
-  const [planActivo, setPlanActivo] = useState<string>("romantica");
-  const [logoError, setLogoError] = useState<boolean>(false);
-  const [isMounted, setIsMounted] = useState<boolean>(false);
-  
-  const [habitacionConPrecio, setHabitacionConPrecio] = useState<string | null>(null);
-  
-  const [pagoActivo, setPagoActivo] = useState<number>(0);
-  const [acordeonAbierto, setAcordeonAbierto] = useState<string | null>("term-1");
-  const [seccionReservaAbierta, setSeccionReservaAbierta] = useState<boolean>(false);
+  const { fetchHabitaciones } = useHabitacionesStore();
+
+  const [videoHeroActivo, setVideoHeroActivo] = useState(0);
+  const [heroSonido, setHeroSonido] = useState(false);
+  const [habitacionSonido, setHabitacionSonido] = useState(false);
+  const [espacioSonido, setEspacioSonido] = useState(false);
+
+  const [habitacionActivaIndex, setHabitacionActivaIndex] = useState(0);
+  const [fotoHabitacionIndex, setFotoHabitacionIndex] = useState(0);
+
+  const [espacioActivoIndex, setEspacioActivoIndex] = useState(0);
+  const [atardecerActivoIndex, setAtardecerActivoIndex] = useState(0);
+
+  const [isMounted, setIsMounted] = useState(false);
+  const touchStartX = useRef<number | null>(null);
 
   useEffect(() => {
     setIsMounted(true);
-    fetchHabitaciones();
-    fetchSettings();
-  }, [fetchHabitaciones, fetchSettings]);
+    fetchSettings().catch(() => {});
+    fetchHabitaciones().catch(() => {});
+  }, [fetchSettings, fetchHabitaciones]);
 
-  const IMAGENES_HERO = [
-    getSetting('about_img_1', '/WhatsApp Image 2026-07-08 at 10.54.20 (2).jpeg'),
-    getSetting('about_img_2', '/WhatsApp Image 2026-07-08 at 10.54.20 (1).jpeg'),
-    getSetting('login_bg', 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=1920&q=80')
-  ];
+  const numeroWhatsApp = getSetting('contact_phone', NUMERO_WHATSAPP_DEFAULT);
 
   useEffect(() => {
     if (!isMounted) return;
-    const intervaloHero = setInterval(() => {
-      setHeroActivo((prev) => (prev + 1) % IMAGENES_HERO.length);
-    }, 6000);
-    return () => clearInterval(intervaloHero);
+    const intervalHero = setInterval(() => {
+      setVideoHeroActivo((prev) => (prev + 1) % VIDEOS_HERO.length);
+    }, 9000);
+    return () => clearInterval(intervalHero);
   }, [isMounted]);
 
-  const CASA_DINAMICA: EspacioCasa[] = [
-    { id: "casa-1", titulo: getSetting('home_casa_1_title', 'El Lobby Principal'), imagen: getSetting('home_casa_1_img', 'https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=800&q=80') },
-    { id: "casa-2", titulo: getSetting('home_casa_2_title', 'La Piscina de Calma'), imagen: getSetting('home_casa_2_img', 'https://i.pinimg.com/736x/5a/27/d9/5a27d98eb8014c3754af2a16af649e6a.jpg') },
-    { id: "casa-3", titulo: getSetting('home_casa_3_title', 'Zona de parqueo'), imagen: getSetting('home_casa_3_img', 'https://i.pinimg.com/736x/00/e2/d8/00e2d88dc3d58b815f6678eccc353832.jpg') },
-  ];
+  useEffect(() => {
+    if (!isMounted) return;
+    const intervalHab = setInterval(() => {
+      setFotoHabitacionIndex((prev) => (prev + 1) % HABITACIONES[habitacionActivaIndex].medios.length);
+    }, 2200);
+    return () => clearInterval(intervalHab);
+  }, [isMounted, habitacionActivaIndex]);
 
-  const PLANES_DINAMICOS: PlanHotel[] = [
-    { 
-      id: "romantica", 
-      titulo: getSetting('plan_1_title', 'Noche Romántica'), 
-      subtitulo: getSetting('plan_1_subtitle', 'BASIC'), 
-      descripcion: getSetting('plan_1_desc', 'Cena de tres tiempos a la luz de las velas servida en nuestra cava privada, una botella de champaña premium de bienvenida y acceso exclusivo al spa.'), 
-      precio: getSetting('plan_1_price', '$250.000 COP / pareja'), 
-      imagen: getSetting('plan_1_img', 'https://i.pinimg.com/736x/6e/e5/6d/6ee56dc274682fb52d8986c70c816349.jpg'), 
-      etiqueta: getSetting('plan_1_tag', 'EXPERIENCIA EXCLUSIVA') 
-    },
-    { 
-      id: "madre", 
-      titulo: getSetting('plan_2_title', 'Mes de la Madre'), 
-      subtitulo: getSetting('plan_2_subtitle', 'CLASIC'), 
-      descripcion: getSetting('plan_2_desc', 'Un homenaje al amor incondicional. Incluye masaje terapéutico corporal de 90 minutos con aceites esenciales florales en nuestro spa y brunch dominical.'), 
-      precio: getSetting('plan_2_price', '$190.000 COP / persona'), 
-      imagen: getSetting('plan_2_img', 'https://i.pinimg.com/736x/53/0e/d7/530ed71269d7970063d8d12596cbd559.jpg'), 
-      etiqueta: getSetting('plan_2_tag', 'TEMPORADA ESPECIAL') 
-    },
-    { 
-      id: "escapada", 
-      titulo: getSetting('plan_3_title', 'Escapada de Finde'), 
-      subtitulo: getSetting('plan_3_subtitle', 'PREMIUM'), 
-      descripcion: getSetting('plan_3_desc', 'Desconéctate de la rutina urbana desde el viernes por la tarde. Disfruta de desayunos buffet artesanales a la carta y caminatas guiadas privadas.'), 
-      precio: getSetting('plan_3_price', '$320.000 COP / estancia'), 
-      imagen: getSetting('plan_3_img', 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=1200&q=80'), 
-      etiqueta: getSetting('plan_3_tag', 'DESCONEXIÓN TOTAL') 
-    }
-  ];
+  useEffect(() => {
+    if (!isMounted) return;
+    const intervalEsp = setInterval(() => {
+      setEspacioActivoIndex((prev) => (prev + 1) % OTROS_ESPACIOS.length);
+    }, 6000);
+    return () => clearInterval(intervalEsp);
+  }, [isMounted]);
 
-  const ENTRETENIMIENTO_LOCAL_DINAMICO: ActividadLocal[] = [
-    { 
-      id: "act-1", 
-      lugar: getSetting('turismo_1_lugar', 'Coveñas'), 
-      titulo: getSetting('turismo_1_title', 'Playas de la Coquerita'), 
-      imagen: getSetting('turismo_1_img', 'https://i.pinimg.com/736x/7e/49/82/7e4982b5eceb9ddd9cbb78b3be98bcf5.jpg'), 
-      precioDesde: getSetting('turismo_1_price', '$45.000 COP') 
-    },
-    { 
-      id: "act-2", 
-      lugar: getSetting('turismo_2_lugar', 'San Antero'), 
-      titulo: getSetting('turismo_2_title', 'Bahía de Cispatá y Manglares'), 
-      imagen: getSetting('turismo_2_img', 'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?auto=format&fit=crop&w=600&q=80'), 
-      precioDesde: getSetting('turismo_2_price', '$60.000 COP') 
-    },
-    { 
-      id: "act-3", 
-      lugar: getSetting('turismo_3_lugar', 'San Antero'), 
-      titulo: getSetting('turismo_3_title', 'Mirador de la Guitarra'), 
-      imagen: getSetting('turismo_3_img', 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=600&q=80'), 
-      precioDesde: getSetting('turismo_3_price', 'Entrada Libre') 
-    }
-  ];
+  useEffect(() => {
+    if (!isMounted) return;
+    const intervalAtardeceres = setInterval(() => {
+      setAtardecerActivoIndex((prev) => (prev + 1) % ATARDECERES_FOTOS.length);
+    }, 4500);
+    return () => clearInterval(intervalAtardeceres);
+  }, [isMounted]);
 
-  const activarVolteoCard = (id: string) => {
-    setHabitacionConPrecio(habitacionConPrecio === id ? null : id);
+  const habitacionActual = HABITACIONES[habitacionActivaIndex];
+  const espacioActual = OTROS_ESPACIOS[espacioActivoIndex];
+  const atardecerActual = ATARDECERES_FOTOS[atardecerActivoIndex];
+
+  const medioActual = habitacionActual.medios[fotoHabitacionIndex];
+  const esRecursoVideo = esVideo(medioActual);
+  const espacioEsVideo = esVideo(espacioActual.recurso);
+
+  const siguienteFoto = () => {
+    setFotoHabitacionIndex((prev) => (prev + 1) % habitacionActual.medios.length);
   };
 
-  const hacerScrollASeccion = (idSeccion: string) => {
-    const elem = document.getElementById(idSeccion);
-    if (elem) {
-      elem.scrollIntoView({ behavior: 'smooth' });
-    }
+  const anteriorFoto = () => {
+    setFotoHabitacionIndex((prev) => (prev === 0 ? habitacionActual.medios.length - 1 : prev - 1));
   };
 
-  const planSeleccionado = PLANES_DINAMICOS.find(p => p.id === planActivo) || PLANES_DINAMICOS[0];
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
 
-  // Cortafuegos de hidratación seguro
-  if (!isMounted) {
-    return <div className="min-h-screen bg-white" />;
-  }
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchStartX.current - touchEndX;
+
+    if (diff > 45) {
+      siguienteFoto();
+    } else if (diff < -45) {
+      anteriorFoto();
+    }
+    touchStartX.current = null;
+  };
+
+  const cambiarHabitacion = (idx: number) => {
+    setHabitacionActivaIndex(idx);
+    setFotoHabitacionIndex(0);
+  };
+
+  const cotizarWhatsApp = (asunto: string) => {
+    const msj = encodeURIComponent(`Hola! Deseo cotizar reserva en Abadía Casa Hotel para: ${asunto}`);
+    window.open(`https://wa.me/${numeroWhatsApp}?text=${msj}`, '_blank');
+  };
+
+  if (!isMounted) return <div className="min-h-screen bg-white" />;
 
   return (
-    <main className="min-h-screen bg-white text-[#3d342e] antialiased selection:bg-[#f4f1ea] style-font-override">
-      
-      {/* Inyección asincrónica optimizada para Next.js */}
-      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Playfair+Display:ital,wght@1,400;1,600&family=Raleway:wght@200;300;400;500;600&display=swap" />
-      <style>{`
-        .style-font-override, select, input, button, p, span {
-          font-family: 'Raleway', sans-serif !important;
-          font-weight: 300;
-        }
-        .font-luxury-title {
-          font-family: 'Raleway', sans-serif !important;
-          font-weight: 300 !important;
-          letter-spacing: 0.08em;
-        }
-        .font-luxury-script {
-          font-family: 'Alex Brush', cursive !important;
-          font-weight: 400 !important;
-        }
-        .font-editorial-italic {
-          font-family: 'Playfair Display', serif !important;
-          font-style: italic !important;
-        }
-      `}</style>
+    <main className={`w-full bg-white text-[#071326] antialiased selection:bg-[#071326] selection:text-white overflow-x-hidden ${outfit.className}`}>
 
+      {/* HEADER GLOBAL */}
+      <GlobalHeader />
 
-
-      {/* 1. HERO SECTION */}
-      <section className="relative h-screen w-full overflow-hidden bg-neutral-900">
-        <div className="absolute top-12 left-0 right-0 z-30 flex justify-center px-4 pointer-events-none">
-          <div className="relative w-64 h-24 md:w-80 md:h-32 flex items-center justify-center">
-            <div className={`absolute inset-0 w-full h-full transition-opacity duration-500 ${logoError ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-              <Image src={getSetting('logo_principal', '/logo.png')} alt="Logo Abadía" fill priority sizes="(max-width: 768px) 256px, 320px" className="object-contain" onError={() => setLogoError(true)} />
+      {/* ========================================================
+          1. BANNER FULL SCREEN (HERO)
+          ======================================================== */}
+      <section className="relative h-[100dvh] w-full overflow-hidden bg-black flex flex-col justify-end pb-12 sm:pb-20 items-center">
+        {VIDEOS_HERO.map((video, idx) => {
+          const activo = idx === videoHeroActivo;
+          return (
+            <div
+              key={video.id}
+              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+                activo ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
+              }`}
+            >
+              <video
+                poster={video.poster}
+                autoPlay
+                muted={!heroSonido}
+                loop
+                playsInline
+                preload="auto"
+                onLoadedData={(e) => {
+                  e.currentTarget.play().catch(() => {});
+                }}
+                className="w-full h-full object-cover scale-105"
+              >
+                <source src={video.src} type="video/quicktime" />
+                <source src={video.src} type="video/mp4" />
+              </video>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/30 pointer-events-none" />
             </div>
-            <div className={`text-center absolute inset-0 flex flex-col justify-center transition-opacity duration-500 ${logoError ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-              <span className="tracking-[0.4em] text-white text-3xl md:text-4xl uppercase block font-light">{getSetting('nombre_hotel', 'Abadía')}</span>
-              <span className="text-[9px] uppercase tracking-[0.5em] text-neutral-300 block mt-2 font-light">Hotel Boutique</span>
-            </div>
+          );
+        })}
+
+        {/* SELECTOR EN HERO */}
+        <div className="absolute top-20 sm:top-28 z-30 flex items-center gap-2.5 bg-[#071326]/75 backdrop-blur-md px-3 sm:px-4 py-1.5 rounded-full border border-white/10">
+          <div className="flex items-center gap-1.5">
+            {VIDEOS_HERO.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setVideoHeroActivo(i)}
+                className={`transition-all duration-300 rounded-full cursor-pointer ${
+                  i === videoHeroActivo
+                    ? 'w-6 sm:w-7 h-2 bg-white'
+                    : 'w-2 h-2 bg-white/40 hover:bg-white'
+                }`}
+                aria-label={`Ver video ${i + 1}`}
+              />
+            ))}
           </div>
         </div>
 
-        <div className="absolute inset-0 z-10">
-          {IMAGENES_HERO.map((imgUrl, idx) => {
-            const isHeroActive = idx === heroActivo;
-            return (
-              <div key={idx} className={`absolute inset-0 w-full h-full transition-all duration-1500 ease-in-out bg-black/40 ${isHeroActive ? 'opacity-100 scale-100' : 'opacity-0 scale-105 pointer-events-none'}`}>
-                <div className="absolute inset-0 bg-black/35 z-10" />
-                <Image src={imgUrl} alt={`Abadía Vista Principal ${idx + 1}`} fill priority={idx === 0} unoptimized sizes="100vw" className="object-cover" />
-              </div>
-            );
-          })}
-        </div>
+        {/* AUDIO HERO */}
+        <button
+          onClick={() => setHeroSonido(!heroSonido)}
+          className="absolute bottom-6 right-4 sm:right-12 z-30 bg-[#071326]/75 hover:bg-[#071326] text-white p-2.5 sm:p-3 rounded-full backdrop-blur-xl border border-white/10 transition-all duration-300 active:scale-90 cursor-pointer flex items-center gap-2 shadow-lg"
+          aria-label={heroSonido ? "Silenciar video" : "Activar sonido"}
+          title={heroSonido ? "Silenciar video" : "Activar sonido"}
+        >
+          {heroSonido ? <Icons.VolumeUp /> : <Icons.VolumeMute />}
+          <span className={`${bitter.className} text-[9px] uppercase tracking-widest hidden sm:inline`}>
+            {heroSonido ? "Sonido ON" : "Sonido OFF"}
+          </span>
+        </button>
 
-        <div className="absolute bottom-16 left-0 right-0 z-20 flex justify-center px-4">
-          <button onClick={() => hacerScrollASeccion('seccion-reservas-mid')} className="bg-white/90 backdrop-blur-sm text-neutral-900 px-10 py-4 text-[11px] uppercase tracking-[0.3em] transition-all duration-300 hover:bg-white hover:scale-[1.02] rounded-full shadow-md">
-            Reservar Ahora
+        {/* BOTONES DUALES HERO: RESERVAR EN LÍNEA + COTIZAR WHATSAPP */}
+        <div className="relative z-20 flex flex-col sm:flex-row items-center gap-3">
+          <Link
+            href="/reservar"
+            className={`${bitter.className} bg-white hover:bg-slate-100 text-[#071326] px-8 sm:px-10 py-3.5 sm:py-4 rounded-full text-xs font-bold uppercase tracking-[0.2em] transition-all duration-300 active:scale-95 cursor-pointer flex items-center gap-2.5 shadow-2xl`}
+          >
+            <Icons.Calendar />
+            <span>Reservar en Línea</span>
+          </Link>
+          <button
+            onClick={() => cotizarWhatsApp("estadía en Abadía Casa Hotel")}
+            className={`${bitter.className} bg-[#071326]/85 hover:bg-[#071326] text-white px-8 sm:px-10 py-3.5 sm:py-4 rounded-full text-xs font-bold uppercase tracking-[0.2em] transition-all duration-300 active:scale-95 cursor-pointer flex items-center gap-2.5 border border-white/30 backdrop-blur-md shadow-xl`}
+          >
+            <span>Cotizar WhatsApp</span>
+            <Icons.ArrowUpRight />
           </button>
         </div>
       </section>
 
-      {/* --- 2. CINTURÓN PROMOCIONAL --- */}
-      <section className="bg-[#f4f1ea]/60 py-14 px-4 text-center border-y border-[#e6dfd1]/30">
+      {/* ========================================================
+          2. CATEGORÍAS EN CÍRCULOS (3 POR FILA)
+          ======================================================== */}
+      <section className="bg-white py-12 sm:py-16 px-4 border-b border-slate-200">
         <div className="max-w-4xl mx-auto">
-          <h3 className="text-xl md:text-3xl font-light tracking-widest text-[#3d342e] uppercase leading-tight font-luxury-title">
-            {getSetting('hero_title', 'Desconéctate desde')} <span className="font-editorial-italic text-[#7a6e5d] font-normal lowercase tracking-normal">$70.000 cop</span> la noche
-          </h3>
-          <p className="text-neutral-400 text-[10px] mt-2 tracking-[0.3em] uppercase font-light">
-            {getSetting('hero_subtitle', 'Tu refugio de paz en la costa de San Antero y Coveñas')}
+          <div className="grid grid-cols-3 gap-y-8 gap-x-4 sm:gap-x-12 place-items-center">
+            {CATEGORIAS_CIRCULARES.map((cat) => (
+              <Link
+                key={cat.id}
+                href={cat.ruta}
+                className="flex flex-col items-center gap-3 group w-full max-w-[120px]"
+              >
+                <div className="relative w-20 h-20 sm:w-28 sm:h-28 rounded-full p-[2.5px] border-2 border-[#071326] group-hover:border-slate-400 transition-all duration-300 group-hover:scale-105 shadow-sm">
+                  <div className="relative w-full h-full rounded-full overflow-hidden bg-slate-100">
+                    <Image
+                      src={cat.imagen}
+                      alt={cat.nombre}
+                      fill
+                      unoptimized
+                      className="object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                  </div>
+                </div>
+                
+                <span className={`${bitter.className} text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-[#071326] group-hover:text-slate-600 transition-colors text-center`}>
+                  {cat.nombre}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================
+          3. NUESTRAS HABITACIONES (TEXTO + BOTONES 1 AL 6)
+          ======================================================== */}
+      <section className="bg-white pt-10 pb-6 px-4 text-center border-b border-slate-200">
+        <div className="max-w-3xl mx-auto space-y-4">
+          <h2 className={`${bitter.className} text-2xl sm:text-3xl font-extrabold uppercase tracking-tight text-[#071326]`}>
+            Nuestras Habitaciones
+          </h2>
+          
+          <p className="text-sm sm:text-base text-slate-700 leading-relaxed font-light">
+            Encuentra habitaciones privadas, áreas comunes para conectar y relajarte, wifi ilimitado, piscina, parqueadero y playa, todo en un solo lugar.
+          </p>
+
+          {/* BOTONCITOS 1 AL 6 */}
+          <div className="pt-2 flex items-center justify-center gap-3 sm:gap-4 overflow-x-auto no-scrollbar py-2">
+            {HABITACIONES.map((hab, idx) => {
+              const activa = idx === habitacionActivaIndex;
+              return (
+                <button
+                  key={hab.id}
+                  onClick={() => cambiarHabitacion(idx)}
+                  className={`${bitter.className} w-11 h-11 sm:w-13 sm:h-13 rounded-full flex items-center justify-center font-bold text-sm sm:text-base transition-all duration-300 cursor-pointer ${
+                    activa
+                      ? 'bg-white text-[#071326] border-2 border-[#071326] shadow-xl scale-110 ring-2 ring-[#071326]/20'
+                      : 'bg-white text-[#071326] border border-slate-200 shadow-md hover:shadow-lg hover:scale-105'
+                  }`}
+                  aria-label={`Ver Habitación ${hab.numero}`}
+                >
+                  {hab.numero}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* VISOR RESPONSIVE HABITACIONES */}
+      <section 
+        id="seccion-habitaciones" 
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        className="relative h-[75dvh] sm:h-[90dvh] w-full overflow-hidden bg-black flex flex-col justify-between select-none touch-pan-y"
+      >
+        <div className="absolute inset-0 z-0">
+          {esRecursoVideo ? (
+            <video
+              key={medioActual}
+              autoPlay
+              muted={!habitacionSonido}
+              loop
+              playsInline
+              preload="auto"
+              onLoadedData={(e) => {
+                e.currentTarget.play().catch(() => {});
+              }}
+              className="w-full h-full object-cover transition-all duration-500"
+            >
+              <source src={medioActual} type="video/quicktime" />
+              <source src={medioActual} type="video/mp4" />
+            </video>
+          ) : (
+            <Image
+              key={medioActual}
+              src={medioActual}
+              alt={habitacionActual.titulo}
+              fill
+              priority
+              unoptimized
+              className="object-cover transition-all duration-500"
+            />
+          )}
+          <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
+        </div>
+
+        <button
+          onClick={anteriorFoto}
+          className="absolute left-2 sm:left-10 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-[#071326]/65 hover:bg-[#071326] text-white backdrop-blur-3xl border border-white/20 flex items-center justify-center transition-all duration-300 active:scale-90 cursor-pointer shadow-lg"
+          aria-label="Foto anterior"
+        >
+          <Icons.ChevronLeft />
+        </button>
+
+        <button
+          onClick={siguienteFoto}
+          className="absolute right-2 sm:right-10 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-[#071326]/65 hover:bg-[#071326] text-white backdrop-blur-3xl border border-white/20 flex items-center justify-center transition-all duration-300 active:scale-90 cursor-pointer shadow-lg"
+          aria-label="Siguiente foto"
+        >
+          <Icons.ChevronRight />
+        </button>
+
+        {esRecursoVideo && (
+          <button
+            onClick={() => setHabitacionSonido(!habitacionSonido)}
+            className="absolute bottom-20 right-4 sm:right-12 z-30 bg-[#071326]/75 hover:bg-[#071326] text-white px-3.5 py-1.5 rounded-full backdrop-blur-3xl border border-white/20 transition-all duration-300 text-xs font-mono flex items-center gap-1.5 cursor-pointer shadow-md"
+            aria-label={habitacionSonido ? "Silenciar video" : "Activar sonido"}
+          >
+            {habitacionSonido ? <Icons.VolumeUp /> : <Icons.VolumeMute />}
+            <span className="text-[10px] uppercase hidden sm:inline">
+              {habitacionSonido ? "Audio ON" : "Audio OFF"}
+            </span>
+          </button>
+        )}
+
+        <div className="relative z-20 pb-6 px-4 sm:px-6 max-w-4xl mx-auto w-full flex items-center justify-between text-white">
+          <div>
+            <h3 className={`${bitter.className} text-lg sm:text-2xl font-bold uppercase tracking-tight`}>
+              {habitacionActual.titulo}
+            </h3>
+            <span className="text-xs text-slate-300 font-mono">
+              {habitacionActual.precio} {habitacionActual.noches}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/reservar?habitacion=${habitacionActual.id}`}
+              className={`${bitter.className} bg-white text-[#071326] hover:bg-slate-100 py-2 sm:py-2.5 px-3.5 sm:px-5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 active:scale-95 cursor-pointer shadow-lg`}
+            >
+              Reservar
+            </Link>
+            <button
+              onClick={() => cotizarWhatsApp(`reservar la ${habitacionActual.titulo}`)}
+              className={`${bitter.className} bg-[#071326]/80 hover:bg-[#071326] text-white border border-white/20 py-2 sm:py-2.5 px-3.5 sm:px-4 rounded-full text-xs font-semibold uppercase tracking-wider transition-all duration-300 active:scale-95 inline-flex items-center gap-1`}
+            >
+              <span>Cotizar</span>
+              <Icons.ArrowUpRight />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================
+          4. BANNER DE VIDEO INTERMEDIO
+          ======================================================== */}
+      <section className="relative h-[70dvh] sm:h-[90dvh] w-full overflow-hidden bg-black">
+        <video
+          poster={VIDEO_MID.poster}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          onLoadedData={(e) => {
+            e.currentTarget.play().catch(() => {});
+          }}
+          className="w-full h-full object-cover"
+        >
+          <source src={VIDEO_MID.src} type="video/quicktime" />
+          <source src={VIDEO_MID.src} type="video/mp4" />
+        </video>
+      </section>
+
+      {/* ========================================================
+          CINTA HORIZONTAL DE CARDS DE HABITACIONES CON BOTÓN COTIZAR
+          ======================================================== */}
+      <section className="bg-white py-14 sm:py-20 px-4 border-b border-slate-200 overflow-hidden">
+        <div className="max-w-7xl mx-auto space-y-8">
+          <div className="text-center space-y-2">
+            <h2 className={`${bitter.className} text-2xl sm:text-3xl font-extrabold uppercase tracking-tight text-[#071326]`}>
+              Elige tu Habitación
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 font-light">
+              Desliza y cotiza directamente tu estancia en San Antero por WhatsApp o reserva en línea.
+            </p>
+          </div>
+
+          {/* CINTA HORIZONTAL RÁPIDA: CARDS REDONDEADAS */}
+          <div className="relative w-full overflow-hidden py-4 group">
+            <div className="flex gap-8 sm:gap-12 w-max animate-cinta group-hover:[animation-play-state:paused]">
+              {[...CARDS_COTIZAR, ...CARDS_COTIZAR].map((card, index) => (
+                <div
+                  key={`${card.id}-${index}`}
+                  className="w-48 sm:w-56 flex flex-col items-center text-center select-none"
+                >
+                  <div className="relative w-44 h-40 sm:w-52 sm:h-48 rounded-3xl overflow-hidden bg-slate-50 shadow-md hover:shadow-xl transition-all duration-500 border-0">
+                    <Image
+                      src={card.imagen}
+                      alt={card.titulo}
+                      fill
+                      unoptimized
+                      className="object-cover hover:scale-108 transition-transform duration-700"
+                    />
+                  </div>
+
+                  <div className="mt-4 space-y-1 w-full">
+                    <h4 className={`${bitter.className} text-xs sm:text-sm font-bold uppercase tracking-wider text-[#071326] truncate`}>
+                      {card.titulo}
+                    </h4>
+                    <p className="text-xs sm:text-sm font-mono font-semibold text-[#071326]">
+                      ${card.precio}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 mt-3">
+                    <button
+                      onClick={() => cotizarWhatsApp(`${card.titulo} - Tarifa: $${card.precio}`)}
+                      className={`${bitter.className} bg-[#071326] hover:bg-[#0d2242] text-white py-2 px-4 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all duration-300 active:scale-95 flex items-center justify-center gap-1.5 shadow-md cursor-pointer border-0`}
+                    >
+                      <Icons.ShoppingCart />
+                      <span>COTIZAR</span>
+                    </button>
+                    <Link
+                      href="/reservar"
+                      className={`${bitter.className} bg-slate-100 hover:bg-slate-200 text-[#071326] py-2 px-3 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all duration-300 active:scale-95 flex items-center justify-center shadow-xs border border-slate-200`}
+                    >
+                      RESERVAR
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <style jsx>{`
+          @keyframes cintaHorizontal {
+            0% {
+              transform: translateX(0);
+            }
+            100% {
+              transform: translateX(-50%);
+            }
+          }
+          .animate-cinta {
+            animation: cintaHorizontal 18s linear infinite;
+          }
+        `}</style>
+      </section>
+
+      {/* ========================================================
+          5. OTROS ESPACIOS DE LA CASA
+          ======================================================== */}
+      <section className="bg-white py-8 px-4 text-center border-b border-slate-200">
+        <div className="max-w-2xl mx-auto space-y-2">
+          <h2 className={`${bitter.className} text-xl sm:text-3xl font-extrabold uppercase tracking-tight text-[#071326]`}>
+            Otros Espacios de la Casa
+          </h2>
+          <p className={`${bitter.className} text-xs sm:text-sm tracking-[0.15em] uppercase font-bold text-slate-500`}>
+            ABADÍA CASA HOTEL puedes encontrar verdadero descanso
           </p>
         </div>
       </section>
 
-      {/* --- 3. SECCIÓN HABITACIONES --- */}
-      <section id="habitaciones" className="py-24 px-4 md:px-8 bg-white">
-        <div className="max-w-7xl mx-auto">
-          
-          <div className="text-left mb-16 select-none">
-            <span className="text-[10px] uppercase tracking-[0.4em] text-[#3d342e]/40 font-medium block mb-2">{getSetting('home_rooms_subtitle', '— HABITACIONES')}</span>
-            <h2 className="text-4xl md:text-6xl text-[#3d342e] uppercase leading-none flex flex-col">
-              <span className="font-luxury-title tracking-tight">Estancias de</span>
-              <span className="font-luxury-script text-5xl md:text-8xl text-[#7a6e5d] -mt-3 md:-mt-6 normal-case tracking-normal">Ensueño</span>
+      <section 
+        id="seccion-otros-espacios" 
+        className="relative h-[80dvh] sm:h-[95dvh] w-full overflow-hidden bg-black flex flex-col justify-between"
+      >
+        <div className="absolute inset-0 z-0">
+          {espacioEsVideo ? (
+            <video
+              key={espacioActual.recurso}
+              autoPlay
+              muted={!espacioSonido}
+              loop
+              playsInline
+              preload="auto"
+              onLoadedData={(e) => {
+                e.currentTarget.play().catch(() => {});
+              }}
+              className="w-full h-full object-cover transition-all duration-700"
+            >
+              <source src={espacioActual.recurso} type="video/quicktime" />
+              <source src={espacioActual.recurso} type="video/mp4" />
+            </video>
+          ) : (
+            <Image
+              key={espacioActual.recurso}
+              src={espacioActual.recurso}
+              alt={espacioActual.titulo}
+              fill
+              unoptimized
+              className="object-cover transition-transform duration-1000"
+            />
+          )}
+          <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
+        </div>
+
+        {/* SELECTOR DE PUNTOS */}
+        <div className="relative z-20 pt-16 sm:pt-24 px-4 sm:px-12 flex items-center justify-end">
+          <div className="flex gap-2 bg-[#071326]/75 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20">
+            {OTROS_ESPACIOS.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setEspacioActivoIndex(i)}
+                className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full transition-all duration-300 cursor-pointer ${
+                  i === espacioActivoIndex ? 'bg-white scale-125' : 'bg-white/40 hover:bg-white/70'
+                }`}
+                aria-label={`Ver espacio ${i + 1}`}
+              />
+            ))}
+          </div>
+        </div>
+
+        {espacioEsVideo && (
+          <button
+            onClick={() => setEspacioSonido(!espacioSonido)}
+            className="absolute top-32 right-4 sm:right-12 z-30 bg-[#071326]/75 hover:bg-[#071326] text-white p-2.5 rounded-full backdrop-blur-xl border border-white/20 transition-all duration-300 active:scale-90 cursor-pointer flex items-center gap-1.5 shadow-md"
+            aria-label={espacioSonido ? "Silenciar video" : "Activar sonido"}
+          >
+            {espacioSonido ? <Icons.VolumeUp /> : <Icons.VolumeMute />}
+            <span className="text-[9px] uppercase font-mono tracking-wider hidden sm:inline">
+              {espacioSonido ? "Audio ON" : "Audio OFF"}
+            </span>
+          </button>
+        )}
+
+        <div className="relative z-20 w-full px-4 sm:px-12 pb-8">
+          <div className="max-w-4xl mx-auto flex items-center justify-between text-white">
+            <h3 className={`${bitter.className} text-xl sm:text-2xl font-bold uppercase tracking-tight`}>
+              {espacioActual.titulo}
+            </h3>
+
+            <Link
+              href="/otros-espacios"
+              className={`${bitter.className} bg-white text-[#071326] hover:bg-slate-100 px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 active:scale-95 shadow-lg`}
+            >
+              Explorar Espacios →
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================
+          6. QUÉ HACER EN SAN ANTERO
+          ======================================================== */}
+      <section className="bg-white py-12 sm:py-16 px-4 sm:px-8 border-b border-slate-200">
+        <div className="max-w-6xl mx-auto space-y-8">
+          <div className="text-center space-y-2">
+            <h2 className={`${bitter.className} text-2xl sm:text-3xl font-extrabold uppercase tracking-tight text-[#071326]`}>
+              Qué hacer en San Antero
             </h2>
+            <p className="text-sm text-slate-600 font-light max-w-xl mx-auto">
+              Descubre los mejores planes gastronómicos, diversión marina y naturaleza a pasos de nuestro hotel.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-            {isLoading && <p className="text-center w-full col-span-full">Cargando habitaciones...</p>}
-            {habitaciones.map((hab) => {
-              const tarjetaVolteada = habitacionConPrecio === hab.id;
-              return (
-                <div key={hab.id} className="relative aspect-4/5 w-full bg-[#f4f1ea] rounded-[2.5rem] shadow-sm overflow-hidden border border-[#f4f1ea]/30 transition-all duration-500 hover:scale-[1.01] hover:shadow-md group">
-                  
-                  {/* FRONT */}
-                  <div className={`absolute inset-0 w-full h-full p-8 flex flex-col justify-end transition-all duration-500 ease-in-out ${tarjetaVolteada ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100'}`}>
-                    <Image src={hab.imagen} alt={hab.titulo} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition-transform duration-1000 ease-out group-hover:scale-[1.02]" />
-                    <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/10 to-transparent z-10" />
-                    
-                    <div className="relative z-20 text-white text-left">
-                      <span className="text-[9px] font-medium uppercase tracking-widest bg-white/20 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">{hab.ocupacion}</span>
-                      <h3 className="text-2xl font-light tracking-wide mt-3 mb-1 uppercase font-luxury-title">{hab.titulo}</h3>
-                      <p className="text-neutral-300 text-xs font-light tracking-wider mb-4">Desde ${hab.precio?.toLocaleString('es-CO')} COP / noche</p>
-                      <button 
-                        onClick={() => activarVolteoCard(hab.id)}
-                        className="bg-white/10 backdrop-blur-sm text-white text-[10px] uppercase tracking-widest px-5 py-3 rounded-xl border border-white/20 w-full hover:bg-white hover:text-[#3d342e] transition-all duration-300 font-medium"
-                      >
-                        Descubrir Habitación
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* REVERSO EN COLOR CAFÉ */}
-                  <div className={`absolute inset-0 bg-[#3d342e] z-20 flex flex-col justify-between p-8 text-center transition-all duration-500 ease-in-out ${tarjetaVolteada ? 'opacity-100 scale-100 visible' : 'opacity-0 scale-95 pointer-events-none'}`}>
-                    
-                    <div className="w-full flex flex-col items-center border-b border-white/10 pb-3">
-                      <div className="relative w-36 h-12 flex items-center justify-center filter brightness-0 invert opacity-90">
-                        <Image src={getSetting('logo_principal', '/logo.png')} alt="Logo Abadía" fill sizes="(max-width: 768px) 150px, 150px" className="object-contain" />
-                      </div>
-                      <span className="text-[9px] uppercase tracking-widest bg-white/10 text-[#f4f1ea] px-3 py-1 rounded-full font-medium mt-2">
-                        {hab.ocupacion}
-                      </span>
-                    </div>
-
-                    <div className="flex flex-col justify-center items-center gap-3 py-2 flex-1">
-                      <p className="text-[#f4f1ea]/90 text-xs font-light leading-relaxed px-1 text-left">{hab.subtitulo}</p>
-                      <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-left w-full max-w-55 mx-auto pt-3 border-t border-white/10 text-[#f4f1ea]/70 font-light text-[11px]">
-                        {hab.comodidades && hab.comodidades.length > 0 ? (
-                          hab.comodidades.slice(0, 4).map((com: string, idx: number) => (
-                            <span key={idx}>{com}</span>
-                          ))
-                        ) : (
-                          <>
-                            <span>❄️ Nevera pequeña</span>
-                            <span>🚿 Baño privado</span>
-                            <span>📺 Smart TV</span>
-                            <span>📶 Internet WiFi</span>
-                          </>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="mb-4 bg-white/5 py-2.5 rounded-2xl border border-white/10">
-                      <span className="text-[9px] uppercase tracking-widest text-[#f4f1ea]/50 block font-medium">Reserva</span>
-                      <p className="text-xl font-light text-white font-luxury-title">{hab.precio}</p>
-                    </div>
-
-                    <div className="flex flex-col gap-2 w-full">
-                      <div className="grid grid-cols-2 gap-2">
-                        <button onClick={() => window.location.href = `/reservar?room=${hab.id}`} className="bg-white text-[#3d342e] py-3 text-[9px] uppercase tracking-widest rounded-xl hover:bg-[#f4f1ea] transition-all font-medium">Reservar</button>
-                        <button onClick={() => window.location.href = '/habitaciones'} className="bg-transparent text-white border border-white/20 py-3 text-[9px] uppercase tracking-widest rounded-xl hover:bg-white/10 transition-all font-medium">Ver Fotos</button>
-                      </div>
-                      <button onClick={() => activarVolteoCard(hab.id)} className="text-[9px] uppercase tracking-widest text-[#f4f1ea]/50 font-light underline py-1">Cerrar</button>
-                    </div>
-                  </div>
-
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {QUE_HACER_ITEMS.map((item) => (
+              <Link
+                key={item.id}
+                href="/que-hacer"
+                className="relative h-72 sm:h-80 rounded-2xl overflow-hidden group border border-slate-200 shadow-sm hover:shadow-lg transition-all duration-300 block"
+              >
+                {item.isVideo ? (
+                  <video
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                  >
+                    <source src={item.src} type="video/quicktime" />
+                    <source src={item.src} type="video/mp4" />
+                  </video>
+                ) : (
+                  <Image
+                    src={item.src}
+                    alt={item.titulo}
+                    fill
+                    unoptimized
+                    className="object-cover group-hover:scale-105 transition-transform duration-700"
+                  />
+                )}
+                
+                <div className="absolute inset-0 bg-gradient-to-t from-[#071326]/90 via-[#071326]/30 to-transparent pointer-events-none" />
+                
+                <div className="absolute bottom-4 left-4 right-4 text-white space-y-1">
+                  <h4 className={`${bitter.className} text-lg font-bold uppercase tracking-wide leading-snug`}>
+                    {item.titulo}
+                  </h4>
+                  <p className="text-xs text-slate-200 font-light line-clamp-2">
+                    {item.desc}
+                  </p>
+                  <span className={`${bitter.className} text-[10px] text-white/80 uppercase tracking-widest font-semibold pt-1 inline-flex items-center gap-1 group-hover:text-white`}>
+                    Conocer más <Icons.ArrowUpRight />
+                  </span>
                 </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================
+          7. ATARDECERES (VISOR + MINIATURAS)
+          ======================================================== */}
+      <section id="atardeceres-san-antero" className="bg-white py-8 px-4 text-center border-b border-slate-200">
+        <h2 className={`${bitter.className} text-xl sm:text-2xl font-extrabold uppercase tracking-tight text-[#071326]`}>
+          Atardeceres
+        </h2>
+      </section>
+
+      <section className="relative h-[70dvh] sm:h-[85dvh] w-full overflow-hidden bg-black flex flex-col justify-between select-none">
+        {ATARDECERES_FOTOS.map((foto, idx) => {
+          const activo = idx === atardecerActivoIndex;
+          return (
+            <div
+              key={foto.id}
+              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+                activo ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
+              }`}
+            >
+              <Image
+                src={foto.src}
+                alt={foto.titulo}
+                fill
+                priority={idx === 0}
+                unoptimized
+                className="object-cover scale-100 hover:scale-105 transition-transform duration-1000"
+              />
+              <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
+            </div>
+          );
+        })}
+
+        <div className="relative z-30 pt-16 sm:pt-24 px-4 sm:px-12 flex items-center justify-end">
+          <div className="flex items-center gap-1.5 bg-[#071326]/75 backdrop-blur-3xl px-3 py-1.5 rounded-full border border-white/20">
+            {ATARDECERES_FOTOS.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setAtardecerActivoIndex(idx)}
+                className={`transition-all duration-300 rounded-full cursor-pointer ${
+                  idx === atardecerActivoIndex
+                    ? 'w-6 h-1.5 bg-white'
+                    : 'w-1.5 h-1.5 bg-white/50 hover:bg-white'
+                }`}
+                aria-label={`Ver foto de atardecer ${idx + 1}`}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="relative z-20 pb-8 text-center text-white">
+          <h3 className={`${bitter.className} text-lg sm:text-xl font-bold uppercase tracking-wider`}>
+            {atardecerActual.titulo}
+          </h3>
+        </div>
+      </section>
+
+      {/* Miniaturas de atardeceres */}
+      <section className="bg-white py-6 px-4 border-b border-slate-200 overflow-hidden">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-center gap-3 overflow-x-auto no-scrollbar py-2">
+            {ATARDECERES_FOTOS.map((item, i) => {
+              const activo = i === atardecerActivoIndex;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setAtardecerActivoIndex(i)}
+                  className={`relative w-24 sm:w-32 h-16 sm:h-20 rounded-xl overflow-hidden shrink-0 border-2 transition-all duration-300 cursor-pointer ${
+                    activo
+                      ? 'border-[#071326] scale-105 ring-2 ring-slate-400'
+                      : 'border-transparent opacity-60 hover:opacity-100 hover:border-slate-300'
+                  }`}
+                >
+                  <Image
+                    src={item.src}
+                    alt={item.titulo}
+                    fill
+                    unoptimized
+                    className="object-cover"
+                  />
+                </button>
               );
             })}
           </div>
-
-          <div className="mt-16 flex justify-center">
-            <button onClick={() => window.location.href = '/habitaciones'} className="bg-white text-[#3d342e] border border-[#3d342e]/20 px-10 py-4 text-[11px] uppercase tracking-[0.3em] rounded-full hover:bg-[#3d342e] hover:text-white transition-all duration-300">Ver al detalle</button>
-          </div>
         </div>
       </section>
 
-      {/* --- 4. SECCIÓN RESERVAS INTEGRADA --- */}
-      <section id="seccion-reservas-mid" className="py-20 px-4 bg-[#f4f1ea]/40 border-y border-[#e6dfd1]/30">
-        <div className="max-w-4xl mx-auto bg-white rounded-[2rem] p-8 shadow-sm text-center border border-[#f4f1ea]">
-          <span className="text-[10px] uppercase tracking-[0.3em] text-[#3d342e]/40 font-medium block mb-2">— PLANIFICA TU ESTADÍA</span>
-          <h2 className="text-2xl md:text-3xl font-light text-[#3d342e] uppercase font-luxury-title">Establecer Reserva</h2>
-          <p className="text-neutral-400 text-xs max-w-sm mx-auto mb-8 font-light tracking-wide">Indícanos tus fechas ideales de descanso para comprobar la disponibilidad del hotel.</p>
-
-          <button 
-            onClick={() => setSeccionReservaAbierta(!seccionReservaAbierta)}
-            className="bg-[#3d342e] text-white px-8 py-3.5 text-[10px] uppercase tracking-[0.2em] rounded-xl hover:bg-neutral-800 shadow-sm transition-all duration-300 font-medium"
-          >
-            {seccionReservaAbierta ? 'Ocultar Panel' : 'Configurar Fechas Aquí'}
-          </button>
-
-          <div className={`transition-all duration-500 ease-in-out overflow-hidden mt-8 ${seccionReservaAbierta ? 'max-h-[500px] opacity-100 border-t border-[#f4f1ea] pt-8' : 'max-h-0 opacity-0 pointer-events-none'}`}>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
-              <div>
-                <label className="text-[10px] uppercase font-medium text-[#3d342e]/50 tracking-wider block mb-2">Check-In</label>
-                <input type="date" className="w-full bg-[#f4f1ea]/40 border border-[#e6dfd1]/50 rounded-xl px-4 py-3 text-xs text-[#3d342e] outline-none" />
-              </div>
-              <div>
-                <label className="text-[10px] uppercase font-medium text-[#3d342e]/50 tracking-wider block mb-2">Check-Out</label>
-                <input type="date" className="w-full bg-[#f4f1ea]/40 border border-[#e6dfd1]/50 rounded-xl px-4 py-3 text-xs text-[#3d342e] outline-none" />
-              </div>
-              <div>
-                <label className="text-[10px] uppercase font-medium text-[#3d342e]/50 tracking-wider block mb-2">Huéspedes</label>
-                <select className="w-full bg-[#f4f1ea]/40 border border-[#e6dfd1]/50 rounded-xl px-4 py-3 text-xs text-[#3d342e] outline-none">
-                  <option>1 Huésped</option>
-                  <option>2 Huéspedes</option>
-                  <option>3 Huéspedes</option>
-                  <option>4+ Huéspedes</option>
-                </select>
-              </div>
-            </div>
-            <button onClick={() => window.location.href = '/habitaciones'} className="w-full bg-[#3d342e] text-white py-3.5 rounded-xl text-[10px] uppercase tracking-widest mt-6 hover:bg-neutral-800 transition-colors shadow-sm font-medium">
-              Buscar Disponibilidad Inmediata
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* 5. VIDEO SECTION */}
-      <section className="relative h-[80vh] w-full overflow-hidden bg-black">
-        <div className="absolute inset-0 bg-black/10 z-10 pointer-events-none" />
-        <div className="absolute inset-0 w-full h-full z-0">
-          <video key={getSetting('hero_video', '/13597489-hd_1920_1080_30fps.mp4')} autoPlay loop muted playsInline controls={false} className="w-full h-full object-cover opacity-85">
-            <source src={getSetting('hero_video', '/13597489-hd_1920_1080_30fps.mp4')} type="video/mp4" />
-          </video>
-        </div>
-      </section>
-
-      {/* --- 6. CONOCE LA CASA --- */}
-      <section id="casa" className="py-24 px-4 md:px-8 bg-white border-b border-[#f4f1ea]">
-        <div className="max-w-7xl mx-auto">
-          
-          <div className="text-left mb-16 select-none">
-            <span className="text-[10px] uppercase tracking-[0.4em] text-[#3d342e]/40 font-medium block mb-2">— NUESTROS ESPACIOS</span>
-            <h2 className="text-4xl md:text-6xl text-[#3d342e] uppercase leading-none flex flex-col">
-              <span className="font-luxury-title tracking-tight">Conoce la</span>
-              <span className="font-luxury-script text-5xl md:text-8xl text-[#7a6e5d] capitalize -mt-3 md:-mt-6 normal-case tracking-normal">Casa hotel</span>
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
-            {CASA_DINAMICA.map((item) => (
-              <div key={item.id} className="relative aspect-[4/5] overflow-hidden rounded-[2.5rem] bg-[#f4f1ea] shadow-sm border border-[#f4f1ea]/30 transition-transform duration-500 hover:scale-[1.01] group cursor-pointer">
-                <Image src={item.imagen} alt={item.titulo} fill unoptimized sizes="(max-width: 768px) 100vw, 33vw" className="object-cover" loading="lazy" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent p-8 z-10 text-left">
-                  <p className="text-white text-xl font-light tracking-wide uppercase font-luxury-title">
-                    {item.titulo}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 7. SECCIÓN DE PLANES INTERACTIVOS */}
-      <section id="planes" className="py-24 px-4 bg-[#f4f1ea]/10 relative overflow-hidden">
-        <div className="max-w-4xl mx-auto">
-          
-          <div className="text-center mb-12 select-none">
-            <span className="text-[10px] uppercase tracking-[0.3em] text-[#3d342e]/40 font-medium block mb-2">— EXPERIENCIAS</span>
-            <h2 className="text-4xl md:text-6xl text-[#3d342e] uppercase leading-none flex flex-col items-center">
-              <span className="font-luxury-title tracking-tight">Nuestros</span>
-              <span className="font-luxury-script text-4xl md:text-7xl text-[#7a6e5d] capitalize -mt-2 md:-mt-5 normal-case tracking-normal">Planes</span>
-            </h2>
-          </div>
-
-          <div className="flex flex-wrap justify-center gap-2 mb-12 max-w-md mx-auto">
-            {PLANES_DINAMICOS.map((plan) => (
-              <button 
-                key={plan.id}
-                onClick={() => setPlanActivo(plan.id)}
-                className={`flex-1 min-w-[140px] py-3 text-[10px] tracking-widest uppercase rounded-xl transition-all duration-300 ${planActivo === plan.id ? 'bg-[#3d342e] text-white shadow-sm' : 'bg-white text-[#3d342e]/70'}`}
-              >
-                {plan.id === 'romantica' ? 'Romántica' : plan.id === 'madre' ? 'Mamá' : 'Escapada'}
-              </button>
-            ))}
-          </div>
-
-          <div className="bg-white rounded-[2.5rem] p-6 md:p-10 shadow-sm border border-[#f4f1ea] flex flex-col md:flex-row gap-8 md:gap-10 items-stretch">
-            <div className="relative w-full md:w-1/2 aspect-square md:aspect-[4/5] rounded-[2rem] overflow-hidden">
-              <Image src={planSeleccionado.imagen} alt={planSeleccionado.titulo} fill unoptimized sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
-              <div className="absolute top-4 left-4 z-20">
-                <span className="text-[9px] uppercase tracking-widest bg-white/90 backdrop-blur-md text-[#3d342e] px-3 py-1.5 rounded-full font-medium shadow-sm">{planSeleccionado.etiqueta}</span>
-              </div>
-            </div>
-
-            <div className="w-full md:w-1/2 flex flex-col justify-between py-2 text-left">
-              <div>
-                <span className="text-[9px] uppercase tracking-[0.2em] text-neutral-400 block mb-2">ABADÍA RESORT</span>
-                <h3 className="text-2xl font-light uppercase text-[#3d342e] font-luxury-title mb-1">{planSeleccionado.titulo}</h3>
-                <p className="text-[10px] tracking-widest uppercase text-neutral-300 mb-5 font-light">{planSeleccionado.subtitulo}</p>
-                <p className="text-neutral-400 text-xs leading-relaxed font-light mb-6">{planSeleccionado.descripcion}</p>
-              </div>
-
-              <div className="pt-6 border-t border-[#f4f1ea] flex flex-col sm:flex-row gap-4 items-center justify-between">
-                <div className="flex flex-col text-center sm:text-left">
-                  <span className="text-[9px] uppercase tracking-widest text-neutral-400 block mb-0.5">Tarifa</span>
-                  <span className="text-lg font-light text-neutral-900 font-luxury-title">{planSeleccionado.precio}</span>
-                </div>
-                <div className="flex gap-2 w-full sm:w-auto">
-                  <button onClick={() => window.location.href = '/planes'} className="flex-1 bg-white text-[#3d342e] border border-[#3d342e]/10 px-5 py-3 text-[9px] uppercase tracking-wider rounded-full hover:bg-[#f4f1ea] transition-all whitespace-nowrap">Detalles</button>
-                  <button className="flex-1 bg-[#3d342e] text-white px-5 py-3 text-[9px] uppercase tracking-wider rounded-full hover:bg-neutral-800 transition-all whitespace-nowrap">Reservar</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 8. SECCIÓN ALREDEDORES */}
-      <section id="turismo" className="py-24 px-4 md:px-8 bg-[#f4f1ea]/20 border-t border-[#f4f1ea]">
-        <div className="max-w-7xl mx-auto">
-          
-          <div className="text-left mb-16 select-none">
-            <span className="text-[10px] uppercase tracking-[0.4em] text-[#3d342e]/40 font-medium block mb-2">— ENTORNO NATURAL</span>
-            <h2 className="text-4xl md:text-7xl text-[#3d342e] uppercase leading-none flex flex-col">
-              <span className="font-luxury-title tracking-tight">Qué hacer en San</span>
-              <span className="font-luxury-script text-5xl md:text-8xl text-[#7a6e5d] capitalize -mt-3 md:-mt-6 normal-case tracking-normal">Antero y Coveñas</span>
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-            {ENTRETENIMIENTO_LOCAL_DINAMICO.map((item) => (
-              <div key={item.id} className="relative aspect-[4/5] overflow-hidden rounded-[2.5rem] shadow-sm border border-[#f4f1ea]/50 transition-all duration-500 hover:scale-[1.01] hover:shadow-md">
-                <Image src={item.imagen} alt={item.titulo} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent z-10" />
-                
-                <div className="absolute bottom-0 left-0 right-0 p-8 z-20 text-white flex flex-col items-start gap-1 text-left">
-                  <span className="text-[9px] uppercase tracking-widest bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full border border-white/10">{item.lugar}</span>
-                  <h3 className="text-xl font-light tracking-wide mt-2 font-luxury-title uppercase">{item.titulo}</h3>
-                  <span className="text-[11px] text-neutral-300 tracking-wider mt-1 block">
-                    Desde <span className="text-white font-normal">{item.precioDesde}</span>
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-16 flex justify-center">
-            <button 
-              onClick={() => window.location.href = '/conoce-abadia'} 
-              className="bg-[#3d342e] text-white px-10 py-4 text-[11px] uppercase tracking-[0.3em] rounded-full shadow-sm hover:bg-neutral-800 transition-all"
-            >
-              Explorar Guía Turística
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* 9. SECCIÓN DINÁMICA: MEDIOS DE PAGO & TÉRMINOS */}
-      <section id="finanzas" className="py-24 px-4 md:px-8 bg-white border-t border-[#f4f1ea]">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
-          
-          {/* MEDIOS DE PAGO */}
-          <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-[#f4f1ea] text-left">
-            <span className="text-[10px] uppercase tracking-widest text-[#3d342e]/40 font-medium block mb-1">— TRANSPARENCIA</span>
-            <h3 className="text-2xl font-light text-[#3d342e] uppercase font-luxury-title mb-6">Medios de Pago</h3>
-            
-            <div className="flex gap-2 mb-6">
-              {METODOS_PAGO.map((metodo, idx) => (
-                <button
-                  key={metodo.id}
-                  onClick={() => setPagoActivo(idx)}
-                  className={`px-4 py-2 text-[10px] uppercase tracking-wider rounded-xl transition-all ${pagoActivo === idx ? 'bg-[#3d342e] text-white' : 'bg-[#f4f1ea]/60 text-[#3d342e]/60'}`}
-                >
-                  {metodo.tipo.split(' ')[0]}
-                </button>
-              ))}
-            </div>
-
-            <div className="p-6 rounded-2xl bg-[#f4f1ea]/30 border border-[#f4f1ea]/50 min-h-[120px] flex items-start gap-4">
-              <span className="text-2xl">{METODOS_PAGO[pagoActivo].icono}</span>
-              <div>
-                <h4 className="text-sm font-medium text-[#3d342e] mb-1 uppercase tracking-wide">{METODOS_PAGO[pagoActivo].tipo}</h4>
-                <p className="text-xs text-neutral-400 leading-relaxed font-light">{METODOS_PAGO[pagoActivo].detalle}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* TÉRMINOS Y CONDICIONES */}
-          <div className="text-left">
-            <span className="text-[10px] uppercase tracking-widest text-[#3d342e]/40 font-medium block mb-1">— RESPALDO</span>
-            <h3 className="text-2xl font-light text-[#3d342e] uppercase font-luxury-title mb-6">Términos</h3>
-            
-            <div className="flex flex-col gap-3">
-              {TERMINOS_POLITICAS.map((politica) => {
-                const abierto = acordeonAbierto === politica.id;
-                return (
-                  <div key={politica.id} className="bg-white rounded-2xl shadow-sm border border-[#f4f1ea] overflow-hidden">
-                    <button
-                      onClick={() => setAcordeonAbierto(abierto ? null : politica.id)}
-                      className="w-full px-6 py-4 text-left flex justify-between items-center bg-white hover:bg-[#f4f1ea]/20 transition-colors"
-                    >
-                      <span className="text-xs md:text-sm font-medium text-[#3d342e] tracking-wide">{politica.titulo}</span>
-                      <span className={`text-[10px] text-neutral-400 transform transition-transform duration-300 ${abierto ? 'rotate-180' : ''}`}>▼</span>
-                    </button>
-                    
-                    <div className={`transition-all duration-300 ease-in-out ${abierto ? 'max-h-40 border-t border-[#f4f1ea] p-6' : 'max-h-0 pointer-events-none'}`}>
-                      <p className="text-xs text-neutral-400 leading-relaxed font-light">{politica.contenido}</p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-        </div>
-      </section>
+      {/* FOOTER AZUL ABADÍA */}
+      <GlobalFooter />
 
     </main>
   );
