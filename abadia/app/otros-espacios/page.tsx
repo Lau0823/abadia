@@ -3,17 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Montserrat, Alex_Brush, Outfit } from 'next/font/google';
+import { Bitter, Outfit } from 'next/font/google';
 
-const montserrat = Montserrat({
+const bitter = Bitter({
   subsets: ['latin'],
-  weight: ['400', '600', '700', '800'],
-  display: 'swap',
-});
-
-const alexBrush = Alex_Brush({
-  subsets: ['latin'],
-  weight: ['400'],
+  weight: ['400', '500', '600', '700', '800'],
   display: 'swap',
 });
 
@@ -25,7 +19,54 @@ const outfit = Outfit({
 
 const NUMERO_WHATSAPP = "573122373415";
 
-// --- 2 VIDEOS PARA EL BANNER SUPERIOR (HERO) ---
+// --- CATEGORÍAS EN CÍRCULOS (3 POR FILA) ---
+interface CategoriaCircular {
+  id: string;
+  nombre: string;
+  ruta: string;
+  imagen: string;
+}
+
+const CATEGORIAS_CIRCULARES: CategoriaCircular[] = [
+  {
+    id: "habitaciones",
+    nombre: "Habitaciones",
+    ruta: "/habitaciones",
+    imagen: "/categorias/habitaciones.png"
+  },
+  {
+    id: "gastronomia",
+    nombre: "Gastronomía",
+    ruta: "/gastronomia",
+    imagen: "/categorias/gastronomia.png"
+  },
+  {
+    id: "otros-espacios",
+    nombre: "Espacios",
+    ruta: "/otros-espacios",
+    imagen: "/categorias/piscina.png"
+  },
+  {
+    id: "que-hacer",
+    nombre: "Qué Hacer",
+    ruta: "/que-hacer",
+    imagen: "/categorias/que hacer.png"
+  },
+  {
+    id: "transporte",
+    nombre: "Cómo Llegar",
+    ruta: "/transporte",
+    imagen: "/categorias/mapa.png"
+  },
+  {
+    id: "atardeceres",
+    nombre: "Atardeceres",
+    ruta: "/atardeceres",
+    imagen: "/categorias/atardecer.png"
+  }
+];
+
+// --- 2 VIDEOS PARA EL BANNER HERO ---
 const VIDEOS_HERO_ESPACIOS = [
   {
     id: 1,
@@ -41,7 +82,6 @@ const VIDEOS_HERO_ESPACIOS = [
   }
 ];
 
-// --- DATA: PISCINA Y PARQUEADERO (CADA UNO CON SU VIDEO Y 2 FOTOS) ---
 interface EspacioCompleto {
   id: string;
   numero: string;
@@ -81,8 +121,7 @@ const ESPACIOS_CASA: EspacioCompleto[] = [
         src: "/piscina.png",
         titulo: "Zona de Asoleadoras & Kiosko",
         pie: "Espacio amplio para relajarse a la sombra o tomar el sol tras volver de la playa."
-      },
-     
+      }
     ]
   },
   {
@@ -107,8 +146,7 @@ const ESPACIOS_CASA: EspacioCompleto[] = [
         src: "/Code_Generated_Image.png",
         titulo: "Portón de Ingreso & Vía de Acceso",
         pie: "Entrada vehicular cómoda y directa desde la vía de Playa Blanca."
-      },
-     
+      }
     ]
   }
 ];
@@ -133,16 +171,216 @@ const Icons = {
     <svg className="w-4 h-4 stroke-current fill-none" viewBox="0 0 24 24" strokeWidth="1.8">
       <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 9.75L19.5 12m0 0l2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25m-10.5-3.75l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.83 0-1.51-.68-1.51-1.51V9.75c0-.83.68-1.5 1.51-1.5h2.24z" />
     </svg>
+  ),
+  Refresh: () => (
+    <svg className="w-4 h-4 stroke-current fill-none" viewBox="0 0 24 24" strokeWidth="2">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+    </svg>
   )
 };
+
+// --- COMPONENTE DE ESPACIO FULL SCREEN CON RESPALDO AL TAP ---
+function EspacioFullScreenCard({ espacio }: { espacio: EspacioCompleto }) {
+  const [esRespaldo, setEsRespaldo] = useState(false);
+  const [sonido, setSonido] = useState(false);
+
+  const consultarWhatsApp = () => {
+    const msj = encodeURIComponent(
+      `Hola! Deseo más información sobre el espacio ${espacio.nombre} en Abadía Casa Hotel.`
+    );
+    window.open(`https://wa.me/${NUMERO_WHATSAPP}?text=${msj}`, '_blank');
+  };
+
+  return (
+    <section className="relative h-[90vh] sm:h-screen w-full overflow-hidden bg-[#071326] select-none border-0">
+      
+      {/* ========================================================
+          VISTA FRENTE: VIDEO FULL SCREEN EN VIVO
+          ======================================================== */}
+      <div 
+        className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+          esRespaldo ? 'opacity-0 pointer-events-none' : 'opacity-100 z-10'
+        }`}
+      >
+        <video
+          key={espacio.video}
+          autoPlay
+          muted={!sonido}
+          loop
+          playsInline
+          preload="auto"
+          className="w-full h-full object-cover scale-105"
+        >
+          <source src={espacio.video} type="video/quicktime" />
+          <source src={espacio.video} type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-gradient-to-t from-[#071326]/90 via-black/25 to-black/35 pointer-events-none" />
+
+        {/* AUDIO FLOTANTE */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setSonido(!sonido);
+          }}
+          className="absolute bottom-28 right-6 z-30 bg-[#071326]/75 hover:bg-[#071326] text-white p-2.5 rounded-full backdrop-blur-xl transition-all duration-300 shadow-xl active:scale-90 cursor-pointer flex items-center gap-1.5 border-0"
+          aria-label={sonido ? "Silenciar video" : "Activar sonido"}
+        >
+          {sonido ? <Icons.VolumeUp /> : <Icons.VolumeMute />}
+          <span className={`${bitter.className} text-[9px] uppercase tracking-wider hidden sm:inline`}>
+            {sonido ? "Audio ON" : "Audio OFF"}
+          </span>
+        </button>
+
+        {/* INFORMACIÓN BASE DEL FRENTE */}
+        <div className="absolute bottom-10 left-6 right-6 z-20">
+          <div className="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-end justify-between gap-6 text-white text-left">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className={`${bitter.className} bg-white text-[#071326] px-3.5 py-1 rounded-full text-xs font-bold font-mono shadow-md`}>
+                  {espacio.numero}
+                </span>
+                <span className="text-xs text-slate-300 uppercase tracking-wider font-light">
+                  {espacio.etiqueta}
+                </span>
+              </div>
+
+              <h2 className={`${bitter.className} text-3xl sm:text-5xl font-extrabold uppercase tracking-tight text-white drop-shadow-md`}>
+                {espacio.nombre}
+              </h2>
+
+              <p className="text-xs text-slate-200 font-mono">
+                {espacio.horario}
+              </p>
+            </div>
+
+            {/* BOTÓN TAP PARA VOLTEAR AL RESPALDO */}
+            <button
+              onClick={() => setEsRespaldo(true)}
+              className={`${bitter.className} bg-white hover:bg-slate-100 text-[#071326] px-6 py-3.5 rounded-full text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-95 shadow-2xl cursor-pointer border-0 shrink-0`}
+            >
+              <Icons.Refresh />
+              <span>Ver Respaldo & Detalles</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ========================================================
+          VISTA RESPALDO (BACK): DETALLES, COMODIDADES & FOTOS
+          ======================================================== */}
+      <div 
+        className={`absolute inset-0 bg-[#071326] p-6 sm:p-12 overflow-y-auto transition-opacity duration-700 ease-in-out flex flex-col justify-between ${
+          esRespaldo ? 'opacity-100 z-20' : 'opacity-0 pointer-events-none'
+        }`}
+      >
+        <div className="max-w-5xl mx-auto w-full my-auto space-y-6 text-white text-left py-8">
+          
+          {/* Cabecera del respaldo */}
+          <div className="flex items-center justify-between border-b border-white/10 pb-4">
+            <div>
+              <span className="text-[10px] uppercase font-mono tracking-widest text-slate-400">
+                RESPALDO • {espacio.etiqueta}
+              </span>
+              <h3 className={`${bitter.className} text-2xl sm:text-4xl font-extrabold uppercase tracking-tight text-white`}>
+                {espacio.nombre}
+              </h3>
+            </div>
+
+            {/* Botón para regresar al frente */}
+            <button
+              onClick={() => setEsRespaldo(false)}
+              className={`${bitter.className} bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer border-0`}
+            >
+              <Icons.Refresh />
+              <span>Volver al Video</span>
+            </button>
+          </div>
+
+          {/* Horario y estado */}
+          <div className="flex flex-wrap items-center gap-3 text-xs text-slate-300">
+            <span className="bg-white/5 px-3 py-1.5 rounded-full font-mono">
+              {espacio.horario}
+            </span>
+            <span>•</span>
+            <span className="text-slate-400">
+              Acceso exclusivo para huéspedes de Abadía Casa Hotel
+            </span>
+          </div>
+
+          {/* Descripción completa */}
+          <p className="text-sm sm:text-base text-slate-200 font-light leading-relaxed">
+            {espacio.descripcionLarga}
+          </p>
+
+          {/* Comodidades con punticos limpios */}
+          <div className="bg-white/5 p-5 rounded-2xl space-y-3">
+            <span className={`${bitter.className} text-xs uppercase tracking-wider font-bold text-slate-300 block`}>
+              Servicios y Comodidades Incluidas:
+            </span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {espacio.caracteristicas.map((item, i) => (
+                <div key={i} className="flex items-center gap-2.5 text-xs sm:text-sm text-slate-200">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white shrink-0" />
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Fotografías complementarias del respaldo */}
+          {espacio.fotosAbajo.length > 0 && (
+            <div className="space-y-3 pt-1">
+              <span className={`${bitter.className} text-xs uppercase tracking-wider font-bold text-slate-300 block`}>
+                Fotografía Detallada:
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {espacio.fotosAbajo.map((foto, index) => (
+                  <div key={index} className="rounded-2xl overflow-hidden bg-slate-900 shadow-md">
+                    <div className="relative h-44 sm:h-52 w-full">
+                      <Image
+                        src={foto.src}
+                        alt={foto.titulo}
+                        fill
+                        unoptimized
+                        className="object-cover"
+                      />
+                    </div>
+                    <div className="p-3 bg-white/5 space-y-0.5">
+                      <p className={`${bitter.className} text-xs font-bold text-white uppercase`}>
+                        {foto.titulo}
+                      </p>
+                      <p className="text-[11px] text-slate-300 font-light">
+                        {foto.pie}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Botón WhatsApp */}
+          <div className="pt-2">
+            <button
+              onClick={consultarWhatsApp}
+              className={`${bitter.className} w-full sm:w-auto bg-white hover:bg-slate-100 text-[#071326] py-3.5 px-8 rounded-full text-xs font-bold uppercase tracking-wider transition-all active:scale-95 shadow-xl cursor-pointer border-0`}
+            >
+              Consultar Disponibilidad por WhatsApp
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+  );
+}
 
 export default function PaginaOtrosEspacios() {
   const [menuAbierto, setMenuAbierto] = useState(false);
   const [videoHeroActivo, setVideoHeroActivo] = useState(0);
   const [heroSonido, setHeroSonido] = useState(false);
-  const [espacioActivo, setEspacioActivo] = useState(0);
 
-  // Cambio automático entre los 2 videos cada 9s
   useEffect(() => {
     const interval = setInterval(() => {
       setVideoHeroActivo((prev) => (prev + 1) % VIDEOS_HERO_ESPACIOS.length);
@@ -150,24 +388,15 @@ export default function PaginaOtrosEspacios() {
     return () => clearInterval(interval);
   }, []);
 
-  const espacioSeleccionado = ESPACIOS_CASA[espacioActivo];
-
-  const consultarWhatsApp = (espacioNombre: string) => {
-    const msj = encodeURIComponent(
-      `Hola! Deseo más información sobre los espacios y comodidades de Abadía Casa Hotel (especialmente ${espacioNombre}).`
-    );
-    window.open(`https://wa.me/${NUMERO_WHATSAPP}?text=${msj}`, '_blank');
-  };
-
   return (
-    <main className={`w-full bg-[#FAF7F2] text-[#2a2421] antialiased min-h-screen ${outfit.className}`}>
+    <main className={`w-full bg-white text-[#071326] antialiased min-h-screen pb-20 ${outfit.className}`}>
 
       {/* HEADER GLOBAL */}
       <header className="fixed top-0 left-0 right-0 z-40 px-6 sm:px-12 py-6 flex items-center justify-between pointer-events-none">
-        <div className="w-12 h-12" />
+        <div className="w-10 sm:w-12" />
 
         <div className="pointer-events-auto flex items-center justify-center">
-          <Link href="/" className="relative w-44 h-14 sm:w-56 sm:h-18 cursor-pointer drop-shadow-[0_4px_16px_rgba(0,0,0,0.65)] hover:scale-105 transition-transform duration-300 block">
+          <Link href="/" className="relative w-36 h-12 sm:w-56 sm:h-18 cursor-pointer drop-shadow-[0_4px_16px_rgba(0,0,0,0.65)] hover:scale-105 transition-transform duration-300 block">
             <Image
               src="/logo.png"
               alt="Logo Abadía"
@@ -181,55 +410,57 @@ export default function PaginaOtrosEspacios() {
         <div className="pointer-events-auto">
           <button
             onClick={() => setMenuAbierto(true)}
-            className="w-12 h-12 rounded-full bg-black/35 hover:bg-[#071326] text-white border border-white/20 flex items-center justify-center shadow-xl active:scale-90 transition-all duration-300 cursor-pointer backdrop-blur-xl"
+            className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#071326]/75 hover:bg-[#071326] text-white flex items-center justify-center active:scale-90 transition-all duration-300 cursor-pointer backdrop-blur-xl shadow-md border-0"
             aria-label="Abrir Menú"
           >
-            <span className="text-xl">☰</span>
+            <span className="text-lg sm:text-xl">☰</span>
           </button>
         </div>
       </header>
 
-      {/* MENÚ LATERAL GLASS */}
+      {/* MENÚ LATERAL */}
       <div
         className={`fixed inset-0 z-50 transition-opacity duration-500 ${
           menuAbierto ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
       >
-        <div onClick={() => setMenuAbierto(false)} className="absolute inset-0 bg-black/50 backdrop-blur-md" />
+        <div onClick={() => setMenuAbierto(false)} className="absolute inset-0 bg-black/60 backdrop-blur-md" />
 
-        <div className={`absolute top-0 right-0 bottom-0 w-full sm:w-[420px] bg-[#071326]/95 backdrop-blur-3xl p-10 sm:p-12 flex flex-col justify-between border-l border-white/15 shadow-2xl transition-transform duration-500 ease-out ${
+        <div className={`absolute top-0 right-0 bottom-0 w-full sm:w-[420px] bg-[#071326]/95 backdrop-blur-3xl p-8 sm:p-12 flex flex-col justify-between shadow-2xl transition-transform duration-500 ease-out overflow-y-auto ${
           menuAbierto ? 'translate-x-0' : 'translate-x-full'
         }`}>
           <div className="flex items-center justify-between border-b border-white/10 pb-6">
-            <span className={`${montserrat.className} text-[10px] uppercase tracking-[0.3em] text-[#C5A059] font-bold`}>
+            <span className={`${bitter.className} text-xs uppercase tracking-[0.25em] text-white/90 font-bold`}>
               Abadía Casa Hotel
             </span>
             <button
               onClick={() => setMenuAbierto(false)}
-              className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/15 flex items-center justify-center transition-all cursor-pointer"
+              className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all cursor-pointer border-0"
               aria-label="Cerrar menú"
             >
               ✕
             </button>
           </div>
 
-          <nav className="flex flex-col gap-6 text-left my-auto">
-            <Link onClick={() => setMenuAbierto(false)} href="/" className={`${montserrat.className} text-lg sm:text-2xl font-medium uppercase tracking-wider text-white hover:text-[#C5A059] transition-colors`}>Inicio</Link>
-            <Link onClick={() => setMenuAbierto(false)} href="/habitaciones" className={`${montserrat.className} text-lg sm:text-2xl font-medium uppercase tracking-wider text-white hover:text-[#C5A059] transition-colors`}>Nuestras Habitaciones</Link>
-            <Link onClick={() => setMenuAbierto(false)} href="/otros-espacios" className={`${montserrat.className} text-lg sm:text-2xl font-medium uppercase tracking-wider text-white hover:text-[#C5A059] transition-colors`}>Otros Espacios de la Casa</Link>
-            <Link onClick={() => setMenuAbierto(false)} href="/que-hacer" className={`${montserrat.className} text-lg sm:text-2xl font-medium uppercase tracking-wider text-white hover:text-[#C5A059] transition-colors`}>Qué hacer en San Antero</Link>
-            <Link onClick={() => setMenuAbierto(false)} href="/reservas-y-pagos" className={`${montserrat.className} text-lg sm:text-2xl font-medium uppercase tracking-wider text-white hover:text-[#C5A059] transition-colors`}>Dashboard de Reservas & Pagos</Link>
+          <nav className="flex flex-col gap-5 text-left my-auto py-6">
+            <Link onClick={() => setMenuAbierto(false)} href="/" className={`${bitter.className} text-base sm:text-lg uppercase tracking-wider text-white hover:text-slate-300 transition-colors`}>Inicio</Link>
+            <Link onClick={() => setMenuAbierto(false)} href="/habitaciones" className={`${bitter.className} text-base sm:text-lg uppercase tracking-wider text-white hover:text-slate-300 transition-colors`}>Habitaciones</Link>
+            <Link onClick={() => setMenuAbierto(false)} href="/gastronomia" className={`${bitter.className} text-base sm:text-lg uppercase tracking-wider text-white hover:text-slate-300 transition-colors`}>Gastronomía</Link>
+            <Link onClick={() => setMenuAbierto(false)} href="/transporte" className={`${bitter.className} text-base sm:text-lg uppercase tracking-wider text-white hover:text-slate-300 transition-colors`}>Cómo Llegar & Transporte</Link>
+            <Link onClick={() => setMenuAbierto(false)} href="/otros-espacios" className={`${bitter.className} text-base sm:text-lg uppercase tracking-wider text-white hover:text-slate-300 transition-colors`}>Otros Espacios de la Casa</Link>
+            <Link onClick={() => setMenuAbierto(false)} href="/que-hacer" className={`${bitter.className} text-base sm:text-lg uppercase tracking-wider text-white hover:text-slate-300 transition-colors`}>Qué hacer en San Antero</Link>
+            <Link onClick={() => setMenuAbierto(false)} href="/reservas-y-pagos" className={`${bitter.className} text-base sm:text-lg uppercase tracking-wider text-white hover:text-slate-300 transition-colors`}>Reservas & Pagos</Link>
           </nav>
 
           <div className="pt-6 border-t border-white/10 flex items-center justify-between text-[10px] uppercase tracking-[0.25em] text-white/70">
             <span>Playa Blanca • San Antero</span>
-            <span>Caribe</span>
+            <Link href="/dashboard" className="text-white hover:underline font-bold">Dashboard 🗝️</Link>
           </div>
         </div>
       </div>
 
       {/* ========================================================
-          1. BANNER PRINCIPAL (HERO) CON 2 VIDEOS .MOV DE LAS ÁREAS
+          1. BANNER PRINCIPAL (HERO) CON 2 VIDEOS
           ======================================================== */}
       <section className="relative h-[85vh] sm:h-[92vh] w-full overflow-hidden bg-black flex flex-col justify-end pb-12 sm:pb-16 items-center">
         {VIDEOS_HERO_ESPACIOS.map((video, idx) => {
@@ -261,10 +492,10 @@ export default function PaginaOtrosEspacios() {
           );
         })}
 
-        {/* SELECTOR FLOTANTE PARA CAMBIAR ENTRE LOS 2 VIDEOS */}
-        <div className="absolute top-24 sm:top-28 z-30 flex items-center gap-2.5 bg-black/40 backdrop-blur-md px-3 sm:px-4 py-1.5 rounded-full border border-white/20">
-          <span className="text-[9px] sm:text-[10px] uppercase font-mono tracking-widest text-white/70">
-            Video {videoHeroActivo + 1}/2: {VIDEOS_HERO_ESPACIOS[videoHeroActivo].titulo}
+        {/* SELECTOR ENTRE VIDEOS */}
+        <div className="absolute top-24 sm:top-28 z-30 flex items-center gap-2.5 bg-[#071326]/75 backdrop-blur-md px-3 sm:px-4 py-1.5 rounded-full border-0 shadow-lg">
+          <span className={`${bitter.className} text-[10px] uppercase font-bold tracking-widest text-white/70`}>
+            {VIDEOS_HERO_ESPACIOS[videoHeroActivo].titulo}
           </span>
           <div className="flex items-center gap-1.5">
             {VIDEOS_HERO_ESPACIOS.map((_, i) => (
@@ -273,7 +504,7 @@ export default function PaginaOtrosEspacios() {
                 onClick={() => setVideoHeroActivo(i)}
                 className={`transition-all duration-300 rounded-full cursor-pointer ${
                   i === videoHeroActivo
-                    ? 'w-6 sm:w-7 h-2 bg-[#C5A059]'
+                    ? 'w-6 sm:w-7 h-2 bg-white'
                     : 'w-2 h-2 bg-white/40 hover:bg-white'
                 }`}
                 aria-label={`Ver video ${i + 1}`}
@@ -282,40 +513,35 @@ export default function PaginaOtrosEspacios() {
           </div>
         </div>
 
-        {/* BOTÓN FLOTANTE AUDIO HERO */}
+        {/* AUDIO HERO */}
         <button
           onClick={() => setHeroSonido(!heroSonido)}
-          className="absolute bottom-6 right-6 sm:right-12 z-30 bg-black/45 hover:bg-[#071326] text-white p-2.5 sm:p-3 rounded-full backdrop-blur-xl border border-white/20 transition-all duration-300 shadow-xl active:scale-90 cursor-pointer flex items-center gap-2"
+          className="absolute bottom-6 right-6 sm:right-12 z-30 bg-[#071326]/75 hover:bg-[#071326] text-white p-2.5 sm:p-3 rounded-full backdrop-blur-xl transition-all duration-300 active:scale-90 cursor-pointer flex items-center gap-2 shadow-xl border-0"
           aria-label={heroSonido ? "Silenciar video" : "Activar sonido"}
           title={heroSonido ? "Silenciar video" : "Activar sonido"}
         >
           {heroSonido ? <Icons.VolumeUp /> : <Icons.VolumeMute />}
-          <span className="text-[9px] uppercase font-mono tracking-widest hidden sm:inline">
+          <span className={`${bitter.className} text-[9px] uppercase tracking-widest hidden sm:inline`}>
             {heroSonido ? "Sonido ON" : "Sonido OFF"}
           </span>
         </button>
 
-        {/* TÍTULO EDITORIAL HERO */}
-        <div className="relative z-20 max-w-3xl mx-auto space-y-2 text-center px-4">
-          <span className={`${montserrat.className} text-[9px] sm:text-[10px] uppercase tracking-[0.35em] text-white/80 font-bold block`}>
+        {/* TÍTULO HERO */}
+        <div className="relative z-20 max-w-3xl mx-auto space-y-3 text-center px-4">
+          <span className={`${bitter.className} text-[10px] uppercase tracking-[0.3em] text-slate-300 font-bold block`}>
             Rincones de Calma & Comodidad
           </span>
-          <div className="relative inline-block">
-            <h1 className={`${montserrat.className} text-3xl sm:text-5xl md:text-6xl font-extrabold uppercase tracking-tight text-white drop-shadow-lg`}>
-              OTROS
-            </h1>
-            <span className={`${alexBrush.className} block text-5xl sm:text-7xl text-[#7C9D96] -mt-3 sm:-mt-6 tracking-wide drop-shadow-md`}>
-              Espacios de la Casa?
-            </span>
-          </div>
-          <p className="text-xs sm:text-sm text-stone-200 font-light max-w-lg mx-auto pt-1">
+          <h1 className={`${bitter.className} text-3xl sm:text-5xl md:text-6xl font-extrabold uppercase tracking-tight text-white drop-shadow-lg`}>
+            Otros Espacios
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-200 font-light max-w-lg mx-auto">
             Conoce nuestra piscina cristalina con kiosko y el parqueadero privado vigilado dentro del predio.
           </p>
 
           <div className="pt-2">
             <Link
-              href="#detalle-espacios"
-              className={`${montserrat.className} inline-flex items-center gap-2 bg-[#8c7355] hover:bg-[#071326] text-white px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-[0.2em] shadow-[0_15px_35px_rgba(0,0,0,0.55)] transition-all duration-300 active:scale-95`}
+              href="#seccion-espacios-fullscreen"
+              className={`${bitter.className} inline-flex items-center gap-2 bg-[#071326] hover:bg-[#0d2242] text-white px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-[0.2em] shadow-2xl transition-all duration-300 active:scale-95 border-0`}
             >
               <span>Explorar Espacios</span>
               <Icons.ArrowUpRight />
@@ -324,215 +550,96 @@ export default function PaginaOtrosEspacios() {
         </div>
       </section>
 
-      {/* TRANSICIÓN EDITORIAL: TÍTULO EN DORADO */}
-      <section id="detalle-espacios" className="bg-[#FAF7F2] py-12 sm:py-16 px-6 text-center border-b border-[#E8DDD0]">
-        <div className="max-w-2xl mx-auto space-y-1">
-          <span className={`${montserrat.className} text-[9px] sm:text-[10px] uppercase tracking-[0.35em] text-[#8c7355] font-bold block`}>
-            — AMENIDADES EXCLUSIVAS
-          </span>
-          <div className="relative inline-block">
-            <h2 className={`${montserrat.className} text-2xl sm:text-4xl font-extrabold uppercase tracking-tight text-[#2a2421]`}>
-              PISCINA &
-            </h2>
-            <span className={`${alexBrush.className} block text-4xl sm:text-6xl text-[#7C9D96] -mt-3 sm:-mt-5 tracking-wide`}>
-              Parqueadero Privado?
-            </span>
+      {/* ========================================================
+          2. CATEGORÍAS EN CÍRCULOS (3 POR FILA)
+          ======================================================== */}
+      <section className="bg-white py-12 sm:py-16 px-4 border-0">
+        <div className="max-w-4xl mx-auto">
+          <div className="grid grid-cols-3 gap-y-8 gap-x-4 sm:gap-x-12 place-items-center">
+            {CATEGORIAS_CIRCULARES.map((cat) => (
+              <Link
+                key={cat.id}
+                href={cat.ruta}
+                className="flex flex-col items-center gap-3 group w-full max-w-[120px]"
+              >
+                <div className="relative w-20 h-20 sm:w-28 sm:h-28 rounded-full p-[2.5px] border-0 shadow-[0_6px_20px_rgba(7,19,38,0.12)] group-hover:scale-105 transition-all duration-300 bg-white">
+                  <div className="relative w-full h-full rounded-full overflow-hidden bg-slate-100">
+                    <Image
+                      src={cat.imagen}
+                      alt={cat.nombre}
+                      fill
+                      unoptimized
+                      className="object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                  </div>
+                </div>
+                
+                <span className={`${bitter.className} text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-[#071326] group-hover:text-slate-600 transition-colors text-center`}>
+                  {cat.nombre}
+                </span>
+              </Link>
+            ))}
           </div>
-          <p className="text-xs sm:text-sm text-stone-600 font-light leading-relaxed pt-2">
-            Selecciona el espacio para conocer su descripción, características y fotografías detalladas.
+        </div>
+      </section>
+
+      {/* TÍTULO INTRODUCTORIO */}
+      <section id="seccion-espacios-fullscreen" className="bg-white py-10 px-6 text-center border-0">
+        <div className="max-w-2xl mx-auto space-y-2">
+          <span className={`${bitter.className} text-[10px] uppercase tracking-[0.3em] text-slate-400 font-bold block`}>
+            ÁREAS COMUNES
+          </span>
+          <h2 className={`${bitter.className} text-2xl sm:text-4xl font-extrabold uppercase tracking-tight text-[#071326]`}>
+            Piscina & Parqueadero Privado
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-600 font-light leading-relaxed">
+            Explora cada área en pantalla completa y toca el botón del respaldo para ver detalles y comodidades.
           </p>
         </div>
       </section>
 
-      {/* SELECTOR MODERNO DE LOS DOS ESPACIOS (PISCINA / PARQUEADERO) */}
-      <section className="bg-white border-b border-[#E8DDD0] py-4 px-6 sticky top-0 z-30 shadow-xs">
-        <div className="max-w-4xl mx-auto flex items-center justify-center gap-3 sm:gap-6">
-          {ESPACIOS_CASA.map((item, idx) => {
-            const activo = idx === espacioActivo;
-            return (
-              <button
-                key={item.id}
-                onClick={() => setEspacioActivo(idx)}
-                className={`px-6 sm:px-8 py-2.5 sm:py-3 rounded-full text-xs sm:text-sm font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer ${
-                  activo
-                    ? 'bg-[#8c7355] text-white shadow-md scale-105 ring-2 ring-[#8c7355]/30'
-                    : 'bg-[#FAF7F2] hover:bg-[#071326] text-stone-700 hover:text-white border border-[#E8DDD0]'
-                }`}
-              >
-                0{item.numero} • {item.nombre}
-              </button>
-            );
-          })}
-        </div>
-      </section>
-
       {/* ========================================================
-          2. DETALLE PRINCIPAL DEL ESPACIO ACTIVO (CON SU VIDEO Y FICHA)
+          3. LAS CARDS FULL SCREEN SEGUIDAS (CON RESPALDO AL TAP)
           ======================================================== */}
-      <section className="py-12 sm:py-16 px-6 sm:px-12 max-w-6xl mx-auto">
-        <div className="bg-white rounded-3xl border border-[#E8DDD0] shadow-sm overflow-hidden flex flex-col lg:flex-row">
-          
-          {/* VIDEO PRINCIPAL DEL ESPACIO */}
-          <div className="relative w-full lg:w-1/2 h-[55vh] lg:h-auto bg-black overflow-hidden">
-            <video
-              key={espacioSeleccionado.video}
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="auto"
-              className="w-full h-full object-cover scale-105"
-            >
-              <source src={espacioSeleccionado.video} type="video/quicktime" />
-              <source src={espacioSeleccionado.video} type="video/mp4" />
-            </video>
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none" />
+      <div className="w-full flex flex-col">
+        {ESPACIOS_CASA.map((espacio) => (
+          <EspacioFullScreenCard key={espacio.id} espacio={espacio} />
+        ))}
+      </div>
 
-            <div className="absolute top-4 left-4 z-20 bg-white/20 backdrop-blur-3xl border border-white/30 px-3.5 py-1 rounded-full text-white text-[10px] font-mono">
-              Video en vivo • 0{espacioSeleccionado.numero}
-            </div>
-
-            <div className="absolute bottom-4 left-4 right-4 z-20 text-white">
-              <span className="text-[10px] uppercase font-mono tracking-widest text-[#C5A059] block">
-                {espacioSeleccionado.horario}
-              </span>
-              <h3 className={`${montserrat.className} text-xl sm:text-2xl font-bold uppercase`}>
-                {espacioSeleccionado.nombre}
-              </h3>
-            </div>
+      {/* FOOTER OFICIAL ABADÍA */}
+      <footer className="w-full bg-[#071326] text-white py-14 px-6 text-center border-0">
+        <div className="max-w-4xl mx-auto flex flex-col items-center gap-6">
+          <div className="relative w-40 sm:w-48 h-14 sm:h-16 filter brightness-0 invert opacity-95">
+            <Image src="/logo.png" alt="Logo Abadía Footer" fill sizes="192px" className="object-contain" />
           </div>
-
-          {/* DESCRIPCIÓN Y ESPECIFICACIONES */}
-          <div className="w-full lg:w-1/2 p-6 sm:p-10 flex flex-col justify-between space-y-6 text-left">
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <span className={`${montserrat.className} bg-[#8c7355] text-white text-[9px] uppercase tracking-[0.2em] font-bold px-2.5 py-0.5 rounded-full`}>
-                  Área 0{espacioSeleccionado.numero}
-                </span>
-                <span className={`${montserrat.className} text-xs font-semibold uppercase text-[#C5A059]`}>
-                  {espacioSeleccionado.etiqueta}
-                </span>
-              </div>
-
-              <div className="space-y-0.5">
-                <h3 className={`${montserrat.className} text-2xl sm:text-3xl font-extrabold uppercase text-[#2a2421]`}>
-                  {espacioSeleccionado.nombre}
-                </h3>
-                <span className={`${alexBrush.className} block text-3xl sm:text-4xl text-[#7C9D96]`}>
-                  comodidad garantizada
-                </span>
-              </div>
-
-              <p className="text-sm sm:text-base text-stone-700 leading-relaxed font-normal pt-1">
-                {espacioSeleccionado.descripcionLarga}
-              </p>
-
-              {/* LISTA DE CARACTERÍSTICAS */}
-              <div className="pt-2">
-                <span className={`${montserrat.className} text-[10px] uppercase tracking-[0.2em] text-[#7d6553] font-bold block mb-2`}>
-                  Servicios y Comodidades Incluidas:
-                </span>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {espacioSeleccionado.caracteristicas.map((item, i) => (
-                    <div key={i} className="flex items-center gap-2 bg-[#FAF7F2] p-2.5 rounded-xl border border-[#071326]/10 text-xs text-stone-800">
-                      <span className="text-[#8c7355] font-bold">✓</span>
-                      <span>{item}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* BOTÓN WHATSAPP */}
-            <div className="pt-2">
-              <button
-                onClick={() => consultarWhatsApp(espacioSeleccionado.nombre)}
-                className={`${montserrat.className} w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#8c7355] hover:bg-[#071326] text-white px-7 py-3.5 rounded-xl text-xs font-bold uppercase tracking-[0.15em] shadow-md transition-all duration-300 active:scale-95 cursor-pointer`}
-              >
-                <Icons.WhatsApp />
-                <span>Consultar Disponibilidad por WhatsApp</span>
-              </button>
-            </div>
-
-          </div>
-
-        </div>
-      </section>
-
-      {/* ========================================================
-          3. SECCIÓN: 2 FOTOS ABAJO CON SU DESCRIPCIÓN INDIVIDUAL
-          ======================================================== */}
-      <section className="bg-white py-12 sm:py-16 px-6 sm:px-12 border-t border-[#E8DDD0]">
-        <div className="max-w-6xl mx-auto space-y-8">
           
-          <div className="text-center space-y-1 max-w-xl mx-auto">
-            <span className={`${montserrat.className} text-[9px] uppercase tracking-[0.3em] text-[#8c7355] font-bold block`}>
-              Fotografías del Espacio
-            </span>
-            <h3 className={`${montserrat.className} text-xl sm:text-3xl font-extrabold uppercase text-[#2a2421]`}>
-              Galería de {espacioSeleccionado.nombre}
-            </h3>
-            <p className="text-xs sm:text-sm text-stone-500 font-light">
-              Detalles visuales para que conozcas cada rincón antes de tu llegada.
+          <div className="space-y-1">
+            <p className={`${bitter.className} text-sm sm:text-base font-semibold tracking-wide`}>
+              Abadía Casa Hotel • Playa Blanca, San Antero & Coveñas
+            </p>
+            <p className="text-xs sm:text-sm text-slate-300 font-light">
+              Un refugio de mar, calma y descanso auténtico frente al Golfo de Morrosquillo.
             </p>
           </div>
 
-          {/* CUADRÍCULA CON LAS 2 FOTOS ABAJO */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {espacioSeleccionado.fotosAbajo.map((foto, index) => (
-              <div
-                key={index}
-                className="group bg-[#FAF7F2] rounded-3xl border border-[#E8DDD0] overflow-hidden shadow-xs hover:shadow-xl transition-all duration-500 flex flex-col"
-              >
-                <div className="relative h-72 sm:h-80 w-full overflow-hidden bg-black">
-                  <Image
-                    src={foto.src}
-                    alt={foto.titulo}
-                    fill
-                    unoptimized
-                    className="object-cover group-hover:scale-105 transition-transform duration-700"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
-
-                  <div className="absolute top-4 left-4 bg-white/20 backdrop-blur-2xl border border-white/30 px-3 py-1 rounded-full text-white text-[10px] font-mono">
-                    Foto 0{index + 1} de 02
-                  </div>
-                </div>
-
-                <div className="p-6 space-y-1.5 text-left flex-1 flex flex-col justify-between">
-                  <div>
-                    <h4 className={`${montserrat.className} text-base sm:text-lg font-bold uppercase text-[#2a2421]`}>
-                      {foto.titulo}
-                    </h4>
-                    <p className="text-xs sm:text-sm text-stone-600 font-light leading-relaxed pt-1">
-                      {foto.pie}
-                    </p>
-                  </div>
-                  <div className="pt-3 border-t border-stone-200 flex items-center justify-between text-[11px] text-[#8c7355] font-mono">
-                    <span>Abadía Casa Hotel</span>
-                    <span className="font-semibold">{espacioSeleccionado.nombre}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-slate-400 font-mono">
+            <span>WhatsApp: +57 312 237 3415</span>
+            <span>•</span>
+            <span>San Antero, Córdoba, Colombia</span>
           </div>
 
-        </div>
-      </section>
+          <div className="w-16 h-[1px] bg-white/20 my-1" />
 
-      {/* FOOTER AZUL ABADÍA UNIFICADO */}
-      <footer className="w-full bg-[#071326] text-white py-16 px-6 text-center border-t border-blue-950/60">
-        <div className="max-w-3xl mx-auto flex flex-col items-center gap-6">
-          <div className="relative w-44 h-16 filter brightness-0 invert opacity-90">
-            <Image src="/logo.png" alt="Logo Abadía Footer" fill sizes="176px" className="object-contain" />
+          <div className="flex flex-col sm:flex-row items-center justify-between w-full pt-2 gap-3 text-[11px] text-slate-400 font-light">
+            <p>© 2026 Abadía Casa Hotel. Todos los derechos reservados.</p>
+            <p className="tracking-wide">
+              Hecho por{' '}
+              <span className={`${bitter.className} font-bold text-white hover:text-slate-200 transition-colors`}>
+                Si Forever Studio
+              </span>
+            </p>
           </div>
-          <p className="text-xs sm:text-sm text-white/90 font-light max-w-md leading-relaxed">
-            Playa Blanca, San Antero & Coveñas — Colombia <br /> Un espacio para la desconexión total y la calma.
-          </p>
-          <div className="w-12 h-[1px] bg-white/20 my-2" />
-          <p className="text-[10px] uppercase tracking-[0.3em] text-white/50 font-semibold font-mono">
-            © 2026 Hotel Abadía. Todos los derechos reservados.
-          </p>
         </div>
       </footer>
 
