@@ -140,7 +140,7 @@ interface HabitacionHome {
   medios: string[];
 }
 
-const HABITACIONES: HabitacionHome[] = [
+const HABITACIONES_DEFAULT: HabitacionHome[] = [
   {
     id: "habitacion-1",
     numero: "1",
@@ -221,41 +221,41 @@ interface ItemCotizarHabitacion {
   imagen: string;
 }
 
-const CARDS_COTIZAR: ItemCotizarHabitacion[] = [
+const CARDS_COTIZAR_DEFAULT: ItemCotizarHabitacion[] = [
   {
     id: "hab-01",
     titulo: "HABITACIÓN 01",
-    precio: "70.000 COP",
+    precio: "$70.000 COP",
     imagen: "/Habitaciones/habitacion1.jpeg"
   },
   {
     id: "hab-02",
     titulo: "HABITACIÓN 02",
-    precio: "70.000 COP",
+    precio: "$70.000 COP",
     imagen: "/Habitaciones/habitacion2.PNG"
   },
   {
     id: "hab-03",
     titulo: "HABITACIÓN 03",
-    precio: "70.000 COP",
+    precio: "$70.000 COP",
     imagen: "/Habitaciones/habitacion3.jpeg"
   },
   {
     id: "hab-04",
     titulo: "HABITACIÓN 04",
-    precio: "70.000 COP",
+    precio: "$70.000 COP",
     imagen: "/Habitaciones/habitacion4.jpeg"
   },
   {
     id: "hab-05",
     titulo: "HABITACIÓN 05",
-    precio: "80.000 COP",
+    precio: "$80.000 COP",
     imagen: "/Habitaciones/habitacion5/DSC05772.jpeg"
   },
   {
     id: "hab-06",
     titulo: "HABITACIÓN 06",
-    precio: "80.000 COP",
+    precio: "$80.000 COP",
     imagen: "/Habitaciones/habitacion6.jpeg"
   }
 ];
@@ -430,7 +430,7 @@ function GlobalFooter() {
 
 export default function HomePage() {
   const { fetchSettings, getSetting } = useSettingsStore();
-  const { fetchHabitaciones } = useHabitacionesStore();
+  const { habitaciones, fetchHabitaciones } = useHabitacionesStore();
 
   const [videoHeroActivo, setVideoHeroActivo] = useState(0);
   const [heroSonido, setHeroSonido] = useState(false);
@@ -454,6 +454,34 @@ export default function HomePage() {
 
   const numeroWhatsApp = getSetting('contact_phone', NUMERO_WHATSAPP_DEFAULT);
 
+  // Mapeo dinámico desde la Base de Datos con respaldo a HABITACIONES_DEFAULT
+  const habitacionesLista: HabitacionHome[] = habitaciones && habitaciones.length > 0
+    ? habitaciones.map((h, idx) => ({
+        id: h.id,
+        numero: (idx + 1).toString(),
+        titulo: h.titulo,
+        precio: new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(h.precio),
+        noches: "/ noche",
+        medios: h.imagenes && h.imagenes.length > 0 
+          ? h.imagenes 
+          : (h.imagen ? [h.imagen] : ["/Habitaciones/habitacion1.jpeg"])
+      }))
+    : HABITACIONES_DEFAULT;
+
+  const cardsCotizar: ItemCotizarHabitacion[] = habitaciones && habitaciones.length > 0
+    ? habitaciones.map((h) => ({
+        id: h.id,
+        titulo: h.titulo.toUpperCase(),
+        precio: new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(h.precio),
+        imagen: h.imagen || (h.imagenes && h.imagenes.length > 0 ? h.imagenes[0] : "/Habitaciones/habitacion1.jpeg")
+      }))
+    : CARDS_COTIZAR_DEFAULT;
+
+  const habitacionActivaSegura = habitacionActivaIndex >= habitacionesLista.length ? 0 : habitacionActivaIndex;
+  const habitacionActual = habitacionesLista[habitacionActivaSegura] || habitacionesLista[0];
+  const fotoIndexSegura = fotoHabitacionIndex >= (habitacionActual?.medios?.length || 1) ? 0 : fotoHabitacionIndex;
+  const medioActual = habitacionActual?.medios?.[fotoIndexSegura] || "/Habitaciones/habitacion1.jpeg";
+
   useEffect(() => {
     if (!isMounted) return;
     const intervalHero = setInterval(() => {
@@ -463,12 +491,12 @@ export default function HomePage() {
   }, [isMounted]);
 
   useEffect(() => {
-    if (!isMounted) return;
+    if (!isMounted || !habitacionActual?.medios?.length) return;
     const intervalHab = setInterval(() => {
-      setFotoHabitacionIndex((prev) => (prev + 1) % HABITACIONES[habitacionActivaIndex].medios.length);
+      setFotoHabitacionIndex((prev) => (prev + 1) % habitacionActual.medios.length);
     }, 2200);
     return () => clearInterval(intervalHab);
-  }, [isMounted, habitacionActivaIndex]);
+  }, [isMounted, habitacionActivaSegura, habitacionActual]);
 
   useEffect(() => {
     if (!isMounted) return;
@@ -486,19 +514,19 @@ export default function HomePage() {
     return () => clearInterval(intervalAtardeceres);
   }, [isMounted]);
 
-  const habitacionActual = HABITACIONES[habitacionActivaIndex];
   const espacioActual = OTROS_ESPACIOS[espacioActivoIndex];
   const atardecerActual = ATARDECERES_FOTOS[atardecerActivoIndex];
 
-  const medioActual = habitacionActual.medios[fotoHabitacionIndex];
   const esRecursoVideo = esVideo(medioActual);
   const espacioEsVideo = esVideo(espacioActual.recurso);
 
   const siguienteFoto = () => {
+    if (!habitacionActual?.medios?.length) return;
     setFotoHabitacionIndex((prev) => (prev + 1) % habitacionActual.medios.length);
   };
 
   const anteriorFoto = () => {
+    if (!habitacionActual?.medios?.length) return;
     setFotoHabitacionIndex((prev) => (prev === 0 ? habitacionActual.medios.length - 1 : prev - 1));
   };
 
@@ -668,8 +696,8 @@ export default function HomePage() {
 
           {/* BOTONCITOS 1 AL 6 */}
           <div className="pt-2 flex items-center justify-center gap-3 sm:gap-4 overflow-x-auto no-scrollbar py-2">
-            {HABITACIONES.map((hab, idx) => {
-              const activa = idx === habitacionActivaIndex;
+            {habitacionesLista.map((hab, idx) => {
+              const activa = idx === habitacionActivaSegura;
               return (
                 <button
                   key={hab.id}
@@ -773,8 +801,15 @@ export default function HomePage() {
             >
               Reservar
             </Link>
+            <Link
+              href={`/habitaciones/${habitacionActual.id}`}
+              className={`${bitter.className} bg-white/20 hover:bg-white/30 text-white border border-white/30 py-2 sm:py-2.5 px-3 sm:px-4 rounded-full text-xs font-semibold uppercase tracking-wider transition-all duration-300 active:scale-95 inline-flex items-center gap-1 backdrop-blur-md`}
+            >
+              <span>Detalles</span>
+              <Icons.ArrowUpRight />
+            </Link>
             <button
-              onClick={() => cotizarWhatsApp(`reservar la ${habitacionActual.titulo}`)}
+              onClick={() => cotizarWhatsApp(`reservar la ${habitacionActual.titulo} - Tarifa: ${habitacionActual.precio}`)}
               className={`${bitter.className} bg-[#071326]/80 hover:bg-[#071326] text-white border border-white/20 py-2 sm:py-2.5 px-3.5 sm:px-4 rounded-full text-xs font-semibold uppercase tracking-wider transition-all duration-300 active:scale-95 inline-flex items-center gap-1`}
             >
               <span>Cotizar</span>
@@ -822,7 +857,7 @@ export default function HomePage() {
           {/* CINTA HORIZONTAL RÁPIDA: CARDS REDONDEADAS */}
           <div className="relative w-full overflow-hidden py-4 group">
             <div className="flex gap-8 sm:gap-12 w-max animate-cinta group-hover:[animation-play-state:paused]">
-              {[...CARDS_COTIZAR, ...CARDS_COTIZAR].map((card, index) => (
+              {[...cardsCotizar, ...cardsCotizar].map((card, index) => (
                 <div
                   key={`${card.id}-${index}`}
                   className="w-48 sm:w-56 flex flex-col items-center text-center select-none"
@@ -842,20 +877,20 @@ export default function HomePage() {
                       {card.titulo}
                     </h4>
                     <p className="text-xs sm:text-sm font-mono font-semibold text-[#071326]">
-                      ${card.precio}
+                      {card.precio}
                     </p>
                   </div>
 
                   <div className="flex items-center gap-2 mt-3">
                     <button
-                      onClick={() => cotizarWhatsApp(`${card.titulo} - Tarifa: $${card.precio}`)}
+                      onClick={() => cotizarWhatsApp(`${card.titulo} - Tarifa: ${card.precio}`)}
                       className={`${bitter.className} bg-[#071326] hover:bg-[#0d2242] text-white py-2 px-4 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all duration-300 active:scale-95 flex items-center justify-center gap-1.5 shadow-md cursor-pointer border-0`}
                     >
                       <Icons.ShoppingCart />
                       <span>COTIZAR</span>
                     </button>
                     <Link
-                      href="/reservar"
+                      href={`/reservar?habitacion=${card.id}`}
                       className={`${bitter.className} bg-slate-100 hover:bg-slate-200 text-[#071326] py-2 px-3 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all duration-300 active:scale-95 flex items-center justify-center shadow-xs border border-slate-200`}
                     >
                       RESERVAR
