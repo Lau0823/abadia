@@ -323,6 +323,7 @@ function EstanciaFullScreenItem({
   onAbrirServicio: (nombre: string) => void; 
 }) {
   const [fotoIndex, setFotoIndex] = useState(0);
+  const touchStartX = React.useRef<number | null>(null);
 
   const maxPersonas = obtenerCapacidadMaxima(estancia.capacidad);
   const [personas, setPersonas] = useState(2);
@@ -339,6 +340,31 @@ function EstanciaFullScreenItem({
 
   const siguiente = () => {
     setFotoIndex((prev) => (prev + 1) % estancia.imagenes.length);
+  };
+
+  // Carrusel suave automático cuando hay 2 o más fotos
+  useEffect(() => {
+    if (estancia.imagenes.length <= 1) return;
+    const interval = setInterval(() => {
+      setFotoIndex((prev) => (prev + 1) % estancia.imagenes.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [estancia.imagenes.length]);
+
+  // Soporte de deslizamiento táctil (Swipe) en móvil
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const diff = touchStartX.current - e.changedTouches[0].clientX;
+    if (diff > 45) {
+      siguiente();
+    } else if (diff < -45) {
+      anterior();
+    }
+    touchStartX.current = null;
   };
 
   const cotizarWhatsApp = async () => {
@@ -423,34 +449,68 @@ function EstanciaFullScreenItem({
 
   return (
     <article className="w-full bg-white border-0">
-      {/* FOTO FULL SCREEN */}
-      <div className="relative h-[80vh] sm:h-[88vh] md:h-[92vh] w-full overflow-hidden bg-black select-none group">
-        <Image
-          src={estancia.imagenes[fotoIndex]}
-          alt={`${estancia.categoria} foto ${fotoIndex + 1}`}
-          fill
-          unoptimized
-          priority
-          className="object-cover transition-all duration-700 group-hover:scale-105"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/35 pointer-events-none" />
+      {/* FOTO FULL SCREEN CON CARRUSEL CROSS-FADE */}
+      <div 
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        className="relative h-[80vh] sm:h-[88vh] md:h-[92vh] w-full overflow-hidden bg-black select-none group"
+      >
+        {estancia.imagenes.map((imgSrc, idx) => (
+          <div
+            key={idx}
+            className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+              idx === fotoIndex ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
+            }`}
+          >
+            <Image
+              src={imgSrc}
+              alt={`${estancia.categoria} foto ${idx + 1}`}
+              fill
+              unoptimized
+              priority={idx === 0}
+              className="object-cover transition-transform duration-1000 group-hover:scale-105"
+            />
+          </div>
+        ))}
 
-        {/* CONTROLES CARRUSEL */}
-        <button
-          onClick={anterior}
-          className="absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-[#071326]/60 hover:bg-[#071326] text-white backdrop-blur-3xl flex items-center justify-center transition-all duration-300 active:scale-90 cursor-pointer shadow-xl border-0"
-          aria-label="Foto anterior"
-        >
-          <Icons.ChevronLeft />
-        </button>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/35 pointer-events-none z-10" />
 
-        <button
-          onClick={siguiente}
-          className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-[#071326]/60 hover:bg-[#071326] text-white backdrop-blur-3xl flex items-center justify-center transition-all duration-300 active:scale-90 cursor-pointer shadow-xl border-0"
-          aria-label="Siguiente foto"
-        >
-          <Icons.ChevronRight />
-        </button>
+        {/* CONTROLES CARRUSEL (Solo si hay más de 1 imagen) */}
+        {estancia.imagenes.length > 1 && (
+          <>
+            <button
+              onClick={anterior}
+              className="absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-[#071326]/60 hover:bg-[#071326] text-white backdrop-blur-3xl flex items-center justify-center transition-all duration-300 active:scale-90 cursor-pointer shadow-xl border-0"
+              aria-label="Foto anterior"
+            >
+              <Icons.ChevronLeft />
+            </button>
+
+            <button
+              onClick={siguiente}
+              className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-[#071326]/60 hover:bg-[#071326] text-white backdrop-blur-3xl flex items-center justify-center transition-all duration-300 active:scale-90 cursor-pointer shadow-xl border-0"
+              aria-label="Siguiente foto"
+            >
+              <Icons.ChevronRight />
+            </button>
+
+            {/* PUNTOS INDICADORES DE FOTOS (DOTS) */}
+            <div className="absolute top-6 right-6 sm:right-12 z-30 flex items-center gap-1.5 bg-[#071326]/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 shadow-lg">
+              {estancia.imagenes.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setFotoIndex(idx)}
+                  className={`transition-all duration-300 rounded-full cursor-pointer ${
+                    idx === fotoIndex
+                      ? 'w-5 sm:w-6 h-1.5 bg-white'
+                      : 'w-1.5 h-1.5 bg-white/40 hover:bg-white'
+                  }`}
+                  aria-label={`Ver foto ${idx + 1}`}
+                />
+              ))}
+            </div>
+          </>
+        )}
 
         {/* INFORMACIÓN SOBRE LA BASE DE LA FOTO */}
         <div className="absolute bottom-6 left-6 right-6 z-20 pointer-events-none">
