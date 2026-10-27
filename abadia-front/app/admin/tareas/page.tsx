@@ -52,10 +52,30 @@ export default function TareasPage() {
 
   const handleChangeStatus = async (id: number, newStatus: string) => {
     try {
+      const task = tareas.find(t => t.id === id);
+
       await fetchApi(`/tareas/${id}`, {
         method: "PATCH",
         body: JSON.stringify({ estado: newStatus })
       });
+
+      // Si la tarea está vinculada a una habitación, sincronizar el estado de limpieza
+      if (task?.descripcion) {
+        const habMatch = task.descripcion.match(/\[hab_id:([^\]]+)\]/);
+        if (habMatch) {
+          const habId = habMatch[1];
+          const nuevoEstadoLimpieza = newStatus === 'COMPLETADA' ? 'LIMPIA' : 'POR_ASEAR';
+          try {
+            await fetchApi(`/habitaciones/${habId}/limpieza`, {
+              method: "PATCH",
+              body: JSON.stringify({ estadoLimpieza: nuevoEstadoLimpieza })
+            });
+          } catch (e) {
+            console.warn("Error sincronizando estado de limpieza de habitación:", e);
+          }
+        }
+      }
+
       fetchTareas();
     } catch (error) {
       alert("Error al cambiar el estado de la tarea.");
@@ -66,51 +86,69 @@ export default function TareasPage() {
   const colProgreso = tareas.filter(t => t.estado === 'EN_PROGRESO');
   const colCompletada = tareas.filter(t => t.estado === 'COMPLETADA');
 
-  const TaskCard = ({ tarea }: { tarea: any }) => (
-    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow group relative flex flex-col gap-2">
-      <div className="flex justify-between items-start">
-        <h4 className="font-semibold text-gray-800 text-sm leading-snug">{tarea.titulo}</h4>
-        <button 
-          onClick={() => handleOpenEdit(tarea)}
-          className="text-xs text-[var(--mv-blue)] opacity-0 group-hover:opacity-100 transition-opacity font-medium hover:underline shrink-0 ml-2"
-        >
-          Editar
-        </button>
-      </div>
-      <p className="text-xs text-gray-500 line-clamp-3 leading-relaxed">{tarea.descripcion || "Sin descripción"}</p>
-      
-      <div className="flex flex-col gap-1 pt-2 border-t border-slate-100 mt-auto">
-        <div className="flex justify-between items-center text-[10px] text-gray-400">
-          <span className="font-medium truncate max-w-[150px]">
-            👤 {tarea.asignado_a ? (tarea.asignado_a.nombre || tarea.asignado_a.username) : "Sin asignar"}
-          </span>
-          {tarea.fecha_limite && (
-            <span className="font-semibold text-red-400 shrink-0">
-              📅 {new Date(tarea.fecha_limite).toLocaleDateString()}
-            </span>
-          )}
-        </div>
+  const TaskCard = ({ tarea }: { tarea: any }) => {
+    // Extraer nombre de habitación si está en el título entre corchetes
+    const roomMatch = tarea.titulo.match(/^\[(.*?)\]/);
+    const roomName = roomMatch ? roomMatch[1] : null;
+    const cleanTitle = roomMatch ? tarea.titulo.replace(/^\[(.*?)\]\s*/, '') : tarea.titulo;
+    const cleanDesc = (tarea.descripcion || "").replace(/\[hab_id:[^\]]+\]\s*/g, "").trim();
 
-        {/* Selector de Cambio de Estado en Vivo */}
-        <div className="flex items-center justify-between gap-2 mt-2 pt-1">
-          <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400">Estado:</span>
-          <select 
-            value={tarea.estado}
-            onChange={(e) => handleChangeStatus(tarea.id, e.target.value)}
-            className={`text-[11px] font-bold px-2.5 py-1 rounded-lg border outline-none cursor-pointer transition-all ${
-              tarea.estado === 'PENDIENTE' ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100' :
-              tarea.estado === 'EN_PROGRESO' ? 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100' :
-              'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
-            }`}
+    return (
+      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow group relative flex flex-col gap-2">
+        <div className="flex justify-between items-start gap-2">
+          <div className="flex flex-col gap-1 min-w-0">
+            {roomName && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-50 text-[var(--mv-blue)] text-[10px] font-bold border border-blue-100 self-start">
+                🚪 {roomName}
+              </span>
+            )}
+            <h4 className="font-semibold text-gray-800 text-sm leading-snug">{cleanTitle}</h4>
+          </div>
+          <button 
+            onClick={() => handleOpenEdit(tarea)}
+            className="text-xs text-[var(--mv-blue)] opacity-0 group-hover:opacity-100 transition-opacity font-medium hover:underline shrink-0 ml-1"
           >
-            <option value="PENDIENTE">🟡 Pendiente</option>
-            <option value="EN_PROGRESO">🔵 En Progreso</option>
-            <option value="COMPLETADA">🟢 Completada</option>
-          </select>
+            Editar
+          </button>
+        </div>
+        
+        {cleanDesc && (
+          <p className="text-xs text-gray-500 line-clamp-3 leading-relaxed">{cleanDesc}</p>
+        )}
+        
+        <div className="flex flex-col gap-1 pt-2 border-t border-slate-100 mt-auto">
+          <div className="flex justify-between items-center text-[10px] text-gray-400">
+            <span className="font-medium truncate max-w-[150px]">
+              👤 {tarea.asignado_a ? (tarea.asignado_a.nombre || tarea.asignado_a.username) : "Sin asignar"}
+            </span>
+            {tarea.fecha_limite && (
+              <span className="font-semibold text-red-400 shrink-0">
+                📅 {new Date(tarea.fecha_limite).toLocaleDateString()}
+              </span>
+            )}
+          </div>
+
+          {/* Selector de Cambio de Estado en Vivo */}
+          <div className="flex items-center justify-between gap-2 mt-2 pt-1">
+            <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400">Estado:</span>
+            <select 
+              value={tarea.estado}
+              onChange={(e) => handleChangeStatus(tarea.id, e.target.value)}
+              className={`text-[11px] font-bold px-2.5 py-1 rounded-lg border outline-none cursor-pointer transition-all ${
+                tarea.estado === 'PENDIENTE' ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100' :
+                tarea.estado === 'EN_PROGRESO' ? 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100' :
+                'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+              }`}
+            >
+              <option value="PENDIENTE">🟡 Pendiente</option>
+              <option value="EN_PROGRESO">🔵 En Progreso</option>
+              <option value="COMPLETADA">🟢 Completada</option>
+            </select>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto h-full flex flex-col">

@@ -9,6 +9,7 @@ interface TareaModalProps {
   onClose: () => void;
   onSuccess: () => void;
   tarea?: any | null; // Si se pasa, es modo edición
+  habitacionPreseleccionada?: any | null; // Habitación pre-seleccionada si viene de habitaciones
 }
 
 const TAREAS_PREDEFINIDAS = [
@@ -22,10 +23,12 @@ const TAREAS_PREDEFINIDAS = [
   "👜 Objetos personales de huéspedes"
 ];
 
-export default function TareaModal({ isOpen, onClose, onSuccess, tarea }: TareaModalProps) {
+export default function TareaModal({ isOpen, onClose, onSuccess, tarea, habitacionPreseleccionada }: TareaModalProps) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [empleados, setEmpleados] = useState<any[]>([]);
+  const [habitaciones, setHabitaciones] = useState<any[]>([]);
+  const [selectedHabitacionId, setSelectedHabitacionId] = useState<string>("");
   const { user } = useAuthStore();
 
   const [formData, setFormData] = useState({
@@ -47,29 +50,41 @@ export default function TareaModal({ isOpen, onClose, onSuccess, tarea }: TareaM
   };
 
   useEffect(() => {
-    const fetchEmpleados = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetchApi("/users");
-        setEmpleados(response.data || response || []);
+        const [empRes, habRes] = await Promise.all([
+          fetchApi("/users"),
+          fetchApi("/habitaciones")
+        ]);
+        setEmpleados(empRes?.data || empRes || []);
+        setHabitaciones(Array.isArray(habRes) ? habRes : (habRes?.data || []));
       } catch (error) {
-        console.error("Error cargando empleados", error);
+        console.error("Error cargando empleados o habitaciones", error);
       }
     };
     if (isOpen) {
-      fetchEmpleados();
+      fetchData();
     }
   }, [isOpen]);
 
   useEffect(() => {
     if (isOpen) {
       if (tarea) {
+        // Extraer habitación si está etiquetada en la descripción
+        const habMatch = tarea.descripcion?.match(/\[hab_id:([^\]]+)\]/);
+        const habIdFromDesc = habMatch ? habMatch[1] : "";
+
+        // Limpiar el tag técnico de la descripción visual
+        const cleanDesc = (tarea.descripcion || "").replace(/\[hab_id:[^\]]+\]\s*/g, "").trim();
+
         setFormData({
           titulo: tarea.titulo || "",
-          descripcion: tarea.descripcion || "",
+          descripcion: cleanDesc,
           estado: tarea.estado || "PENDIENTE",
           fecha_limite: tarea.fecha_limite ? new Date(tarea.fecha_limite).toISOString().split('T')[0] : "",
           asignado_a_id: tarea.asignado_a?.id?.toString() || ""
         });
+        setSelectedHabitacionId(habIdFromDesc || habitacionPreseleccionada?.id || "");
       } else {
         setFormData({
           titulo: "",
@@ -78,10 +93,11 @@ export default function TareaModal({ isOpen, onClose, onSuccess, tarea }: TareaM
           fecha_limite: "",
           asignado_a_id: ""
         });
+        setSelectedHabitacionId(habitacionPreseleccionada?.id || "");
       }
       setError("");
     }
-  }, [isOpen, tarea]);
+  }, [isOpen, tarea, habitacionPreseleccionada]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -94,9 +110,27 @@ export default function TareaModal({ isOpen, onClose, onSuccess, tarea }: TareaM
     setSaving(true);
     
     try {
+      const selectedHab = habitaciones.find(h => h.id === selectedHabitacionId);
+      
+      // Si hay habitación asociada, prefijar el título elegantemente
+      let finalTitulo = formData.titulo.trim();
+      if (selectedHab) {
+        const prefix = `[${selectedHab.titulo}]`;
+        if (!finalTitulo.startsWith(prefix)) {
+          // Remover otros prefijos si existían
+          finalTitulo = `${prefix} ${finalTitulo.replace(/^\[[^\]]+\]\s*/, "")}`;
+        }
+      }
+
+      // Incrustar el tag de trazabilidad en la descripción
+      let finalDescripcion = formData.descripcion.trim();
+      if (selectedHab) {
+        finalDescripcion = `[hab_id:${selectedHab.id}] ${finalDescripcion}`;
+      }
+
       const payload: any = {
-        titulo: formData.titulo,
-        descripcion: formData.descripcion,
+        titulo: finalTitulo,
+        descripcion: finalDescripcion,
         estado: formData.estado
       };
 
@@ -116,12 +150,26 @@ export default function TareaModal({ isOpen, onClose, onSuccess, tarea }: TareaM
         });
       } else {
         // Create
-        payload.creado_por_id = user?.id; // asume que hay un usuario logueado
+        payload.creado_por_id = user?.id;
         await fetchApi("/tareas", {
           method: "POST",
           body: JSON.stringify(payload)
         });
       }
+
+      // Sincronizar automáticamente el estado de limpieza de la habitación
+      if (selectedHab) {
+        const nuevoEstadoLimpieza = formData.estado === 'COMPLETADA' ? 'LIMPIA' : 'POR_ASEAR';
+        try {
+          await fetchApi(`/habitaciones/${selectedHab.id}/limpieza`, {
+            method: "PATCH",
+            body: JSON.stringify({ estadoLimpieza: nuevoEstadoLimpieza })
+          });
+        } catch (e) {
+          console.warn("No se pudo sincronizar automáticamente el estado de limpieza de la habitación", e);
+        }
+      }
+
       onSuccess();
       onClose();
     } catch (err: any) {
@@ -155,6 +203,24 @@ export default function TareaModal({ isOpen, onClose, onSuccess, tarea }: TareaM
             <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm">{error}</div>
           )}
           
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">
+              Habitación / Espacio Vinculado
+            </label>
+            <select
+              value={selectedHabitacionId}
+              onChange={(e) => setSelectedHabitacionId(e.target.value)}
+              className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm font-medium focus:ring-2 focus:ring-[var(--mv-blue)] outline-none transition-all bg-white"
+            >
+              <option value="">-- General / Áreas Comunes --</option>
+              {habitaciones.map(hab => (
+                <option key={hab.id} value={hab.id}>
+                  🚪 {hab.titulo} {hab.subtitulo ? `(${hab.subtitulo})` : ''} {hab.estadoLimpieza === 'POR_ASEAR' ? '🧹 [Por Asear]' : '✨ [Limpia]'}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">Actividades Sugeridas (Clic para agregar)</label>
             <div className="flex flex-wrap gap-1.5 mb-3">
