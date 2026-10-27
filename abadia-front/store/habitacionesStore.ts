@@ -10,6 +10,7 @@ export interface Habitacion {
   ocupacion: string;
   estado: string;
   comodidades?: string[];
+  imagenes?: string[];
 }
 
 interface HabitacionesState {
