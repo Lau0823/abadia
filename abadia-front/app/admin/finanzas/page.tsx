@@ -15,7 +15,7 @@ export default function FinanzasPage() {
     setLoading(true);
     try {
       const response = await fetchApi("/finanzas");
-      const data = response.data || [];
+      const data = Array.isArray(response) ? response : (response?.data || []);
       setTransacciones(data);
       
       // Calcular resumen

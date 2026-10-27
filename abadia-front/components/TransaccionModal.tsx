@@ -13,7 +13,7 @@ export default function TransaccionModal({ isOpen, onClose, onSuccess }: Transac
   const [formData, setFormData] = useState({
     monto: "",
     tipo: "INGRESO",
-    categoria: "OTROS",
+    categoria: "RESERVACION",
     concepto: "",
     fecha: new Date().toISOString().split("T")[0],
   });
@@ -23,7 +23,7 @@ export default function TransaccionModal({ isOpen, onClose, onSuccess }: Transac
       setFormData({
         monto: "",
         tipo: "INGRESO",
-        categoria: "OTROS",
+        categoria: "RESERVACION",
         concepto: "",
         fecha: new Date().toISOString().split("T")[0],
       });
@@ -48,8 +48,8 @@ export default function TransaccionModal({ isOpen, onClose, onSuccess }: Transac
 
       onSuccess();
       onClose();
-    } catch (error) {
-      alert("Error al registrar la transacción. Verifica los datos.");
+    } catch (error: any) {
+      alert(error.message || "Error al registrar la transacción. Verifica los datos.");
     } finally {
       setLoading(false);
     }

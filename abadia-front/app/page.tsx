@@ -454,6 +454,16 @@ export default function HomePage() {
 
   const numeroWhatsApp = getSetting('contact_phone', NUMERO_WHATSAPP_DEFAULT);
 
+  // Videos dinámicos configurables desde Multimedia (Banner, Sección 1, Sección 2)
+  const heroVideo1 = getSetting('hero_video_1', VIDEOS_HERO[0].src);
+  const heroVideo2 = getSetting('hero_video_2', VIDEOS_HERO[1].src);
+  const videoMidSrc = getSetting('video_mid', VIDEO_MID.src);
+
+  const videosHeroDinamicos = [
+    { id: 1, src: heroVideo1, poster: VIDEOS_HERO[0].poster },
+    { id: 2, src: heroVideo2, poster: VIDEOS_HERO[1].poster }
+  ];
+
   // Mapeo dinámico desde la Base de Datos con respaldo a HABITACIONES_DEFAULT
   const habitacionesLista: HabitacionHome[] = habitaciones && habitaciones.length > 0
     ? habitaciones.map((h, idx) => ({
@@ -569,7 +579,7 @@ export default function HomePage() {
           1. BANNER FULL SCREEN (HERO)
           ======================================================== */}
       <section className="relative h-[100dvh] w-full overflow-hidden bg-black flex flex-col justify-end pb-12 sm:pb-20 items-center">
-        {VIDEOS_HERO.map((video, idx) => {
+        {videosHeroDinamicos.map((video, idx) => {
           const activo = idx === videoHeroActivo;
           return (
             <div
@@ -579,6 +589,7 @@ export default function HomePage() {
               }`}
             >
               <video
+                key={video.src}
                 poster={video.poster}
                 autoPlay
                 muted={!heroSonido}
@@ -601,7 +612,7 @@ export default function HomePage() {
         {/* SELECTOR EN HERO */}
         <div className="absolute top-20 sm:top-28 z-30 flex items-center gap-2.5 bg-[#071326]/75 backdrop-blur-md px-3 sm:px-4 py-1.5 rounded-full border border-white/10">
           <div className="flex items-center gap-1.5">
-            {VIDEOS_HERO.map((_, i) => (
+            {videosHeroDinamicos.map((_, i) => (
               <button
                 key={i}
                 onClick={() => setVideoHeroActivo(i)}
@@ -824,6 +835,7 @@ export default function HomePage() {
           ======================================================== */}
       <section className="relative h-[70dvh] sm:h-[90dvh] w-full overflow-hidden bg-black">
         <video
+          key={videoMidSrc}
           poster={VIDEO_MID.poster}
           autoPlay
           muted
@@ -835,8 +847,8 @@ export default function HomePage() {
           }}
           className="w-full h-full object-cover"
         >
-          <source src={VIDEO_MID.src} type="video/quicktime" />
-          <source src={VIDEO_MID.src} type="video/mp4" />
+          <source src={videoMidSrc} type="video/quicktime" />
+          <source src={videoMidSrc} type="video/mp4" />
         </video>
       </section>
 

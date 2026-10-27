@@ -232,7 +232,7 @@ export default function SuiteDetailPage() {
               
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[9px] uppercase font-bold text-neutral-400 block mb-1 px-1">Adultos ($70k/u)</label>
+                  <label className="text-[9px] uppercase font-bold text-neutral-400 block mb-1 px-1">Adultos ($70.000 COP c/u)</label>
                   <select value={adultos} onChange={(e) => setAdultos(Number(e.target.value))} className="w-full bg-[#f4f1ea]/40 border border-[#e6dfd1]/60 rounded-xl px-3 py-3 text-xs text-[#3d342e] outline-none shadow-sm">
                     <option value={1}>1 Adulto</option>
                     <option value={2}>2 Adultos</option>
@@ -240,7 +240,7 @@ export default function SuiteDetailPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="text-[9px] uppercase font-bold text-neutral-400 block mb-1 px-1">Niños ($40k/u)</label>
+                  <label className="text-[9px] uppercase font-bold text-neutral-400 block mb-1 px-1">Niños ($40.000 COP c/u)</label>
                   <select value={ninos} onChange={(e) => setNinos(Number(e.target.value))} className="w-full bg-[#f4f1ea]/40 border border-[#e6dfd1]/60 rounded-xl px-3 py-3 text-xs text-[#3d342e] outline-none shadow-sm">
                     <option value={0}>0 Niños</option>
                     <option value={1}>1 Niño</option>

@@ -25,8 +25,9 @@ export default function HabitacionesPage() {
   const fetchHabitaciones = async () => {
     setLoading(true);
     try {
-      const data = await fetchApi("/habitaciones");
-      setHabitaciones(data);
+      const res = await fetchApi("/habitaciones");
+      const list = Array.isArray(res) ? res : (res?.data || []);
+      setHabitaciones(list);
     } catch (error) {
       console.error("Error cargando habitaciones", error);
     } finally {

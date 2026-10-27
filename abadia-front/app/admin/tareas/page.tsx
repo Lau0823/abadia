@@ -14,18 +14,20 @@ export default function TareasPage() {
   const [selectedTarea, setSelectedTarea] = useState<any>(null);
   const { user } = useAuthStore();
 
-  const isAdmin = user?.rol === 'superadmin' || user?.rol === 'admin' || user?.rol === 'supervisor';
+  const userRole = (user?.rol || '').toLowerCase().replace(/_/g, '');
+  const isAdmin = userRole === 'superadmin' || userRole === 'admin' || userRole === 'supervisor' || !user?.rol;
 
   const fetchTareas = async () => {
     setLoading(true);
     try {
-      const data = await fetchApi("/tareas");
+      const response = await fetchApi("/tareas");
+      const list = Array.isArray(response) ? response : (response?.data || []);
       
-      // Si no es admin, solo ve sus propias tareas
-      if (!isAdmin) {
-        setTareas(data.filter((t: any) => t.asignado_a?.id === user?.id));
+      // Si no es admin, solo ve sus propias tareas o creadas por él
+      if (!isAdmin && user?.id) {
+        setTareas(list.filter((t: any) => t.asignado_a?.id === user?.id || t.creado_por?.id === user?.id));
       } else {
-        setTareas(data);
+        setTareas(list);
       }
     } catch (error) {
       console.error("Error cargando tareas", error);
@@ -44,10 +46,8 @@ export default function TareasPage() {
   };
 
   const handleOpenEdit = (tarea: any) => {
-    if (isAdmin) {
-      setSelectedTarea(tarea);
-      setIsModalOpen(true);
-    }
+    setSelectedTarea(tarea);
+    setIsModalOpen(true);
   };
 
   const handleChangeStatus = async (id: number, newStatus: string) => {
@@ -67,54 +67,46 @@ export default function TareasPage() {
   const colCompletada = tareas.filter(t => t.estado === 'COMPLETADA');
 
   const TaskCard = ({ tarea }: { tarea: any }) => (
-    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow group relative">
-      <div className="flex justify-between items-start mb-2">
-        <h4 className="font-semibold text-gray-800 text-sm">{tarea.titulo}</h4>
-        {isAdmin && (
-          <button 
-            onClick={() => handleOpenEdit(tarea)}
-            className="text-xs text-[var(--mv-blue)] opacity-0 group-hover:opacity-100 transition-opacity font-medium"
-          >
-            Editar
-          </button>
-        )}
+    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow group relative flex flex-col gap-2">
+      <div className="flex justify-between items-start">
+        <h4 className="font-semibold text-gray-800 text-sm leading-snug">{tarea.titulo}</h4>
+        <button 
+          onClick={() => handleOpenEdit(tarea)}
+          className="text-xs text-[var(--mv-blue)] opacity-0 group-hover:opacity-100 transition-opacity font-medium hover:underline shrink-0 ml-2"
+        >
+          Editar
+        </button>
       </div>
-      <p className="text-xs text-gray-500 mb-3 line-clamp-2">{tarea.descripcion || "Sin descripción"}</p>
+      <p className="text-xs text-gray-500 line-clamp-3 leading-relaxed">{tarea.descripcion || "Sin descripción"}</p>
       
-      <div className="flex justify-between items-end mt-auto">
-        <div className="flex flex-col gap-1">
-          <span className="text-[10px] font-medium text-gray-400">
-            Responsable: {tarea.asignado_a ? (tarea.asignado_a.nombre || tarea.asignado_a.username) : "Sin asignar"}
+      <div className="flex flex-col gap-1 pt-2 border-t border-slate-100 mt-auto">
+        <div className="flex justify-between items-center text-[10px] text-gray-400">
+          <span className="font-medium truncate max-w-[150px]">
+            👤 {tarea.asignado_a ? (tarea.asignado_a.nombre || tarea.asignado_a.username) : "Sin asignar"}
           </span>
           {tarea.fecha_limite && (
-            <span className="text-[10px] font-medium text-red-400">
-              Límite: {new Date(tarea.fecha_limite).toLocaleDateString()}
+            <span className="font-semibold text-red-400 shrink-0">
+              📅 {new Date(tarea.fecha_limite).toLocaleDateString()}
             </span>
           )}
         </div>
-        
-        {/* Controles de Estado */}
-        <div className="flex gap-1">
-          {tarea.estado === 'PENDIENTE' && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button onClick={() => handleChangeStatus(tarea.id, 'EN_PROGRESO')} className="p-1.5 bg-yellow-50 text-yellow-600 hover:bg-yellow-100 rounded-lg">
-                  <ArrowPathIcon className="w-4 h-4" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>Iniciar Tarea</TooltipContent>
-            </Tooltip>
-          )}
-          {tarea.estado === 'EN_PROGRESO' && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button onClick={() => handleChangeStatus(tarea.id, 'COMPLETADA')} className="p-1.5 bg-green-50 text-green-600 hover:bg-green-100 rounded-lg">
-                  <CheckCircleIcon className="w-4 h-4" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>Completar Tarea</TooltipContent>
-            </Tooltip>
-          )}
+
+        {/* Selector de Cambio de Estado en Vivo */}
+        <div className="flex items-center justify-between gap-2 mt-2 pt-1">
+          <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400">Estado:</span>
+          <select 
+            value={tarea.estado}
+            onChange={(e) => handleChangeStatus(tarea.id, e.target.value)}
+            className={`text-[11px] font-bold px-2.5 py-1 rounded-lg border outline-none cursor-pointer transition-all ${
+              tarea.estado === 'PENDIENTE' ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100' :
+              tarea.estado === 'EN_PROGRESO' ? 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100' :
+              'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+            }`}
+          >
+            <option value="PENDIENTE">🟡 Pendiente</option>
+            <option value="EN_PROGRESO">🔵 En Progreso</option>
+            <option value="COMPLETADA">🟢 Completada</option>
+          </select>
         </div>
       </div>
     </div>
@@ -129,15 +121,13 @@ export default function TareasPage() {
         </div>
         
         <div className="flex items-center gap-4">
-          {isAdmin && (
-            <button 
-              onClick={handleOpenNew}
-              className="flex items-center gap-2 bg-[var(--mv-blue)] hover:bg-[#0b3c66] text-white px-5 py-2.5 rounded-full text-sm font-medium transition-all shadow-md shrink-0"
-            >
-              <PlusIcon className="w-5 h-5" />
-              Nueva Tarea
-            </button>
-          )}
+          <button 
+            onClick={handleOpenNew}
+            className="flex items-center gap-2 bg-[var(--mv-blue)] hover:bg-[#0b3c66] text-white px-5 py-2.5 rounded-full text-sm font-medium transition-all shadow-md shrink-0 cursor-pointer"
+          >
+            <PlusIcon className="w-5 h-5" />
+            Nueva Tarea
+          </button>
         </div>
       </div>
 

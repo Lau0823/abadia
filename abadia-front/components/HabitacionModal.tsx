@@ -18,8 +18,7 @@ const AVAILABLE_AMENITIES = [
   "📺 Smart TV",
   "📶 Internet WiFi",
   "☕ Cafetera",
-  "🔥 Chimenea",
-  "🧊 Minibar",
+  "💧 Hidratación",
   "🌬️ Aire Acondicionado"
 ];
 
@@ -141,8 +140,8 @@ export default function HabitacionModal({ isOpen, onClose, onSuccess, habitacion
     
     try {
       const totalImages = selectedFiles.length > 0 ? selectedFiles.length : (habitacion?.imagenes?.length || 0);
-      if (totalImages < 3 || totalImages > 5) {
-        setError("La habitación debe tener entre 3 y 5 imágenes.");
+      if (totalImages < 1 || totalImages > 5) {
+        setError("La habitación debe tener entre 1 y 5 imágenes.");
         setSaving(false);
         return;
       }
@@ -173,7 +172,7 @@ export default function HabitacionModal({ isOpen, onClose, onSuccess, habitacion
           method: "POST",
           body: JSON.stringify(payload)
         });
-        roomId = created.id;
+        roomId = created?.id || created?.data?.id;
       }
 
       // Upload images if selected
@@ -183,16 +182,10 @@ export default function HabitacionModal({ isOpen, onClose, onSuccess, habitacion
           formDataUpload.append("files", file);
         });
         
-        const uploadUrl = `${API_URL}/habitaciones/${roomId}/imagenes`;
-        const uploadRes = await fetch(uploadUrl, {
+        await fetchApi(`/habitaciones/${roomId}/imagenes`, {
           method: "POST",
-          credentials: "include",
           body: formDataUpload
         });
-        
-        if (!uploadRes.ok) {
-          throw new Error("Habitación guardada, pero hubo un error al subir las imágenes.");
-        }
       }
 
       onSuccess();
@@ -240,7 +233,7 @@ export default function HabitacionModal({ isOpen, onClose, onSuccess, habitacion
                   <TooltipTrigger asChild>
                     <span className="ml-2 inline-flex items-center justify-center w-4 h-4 rounded-full bg-gray-200 text-gray-500 text-[10px] cursor-help">?</span>
                   </TooltipTrigger>
-                  <TooltipContent>Mínimo 3 y máximo 5 imágenes. Si subes nuevas, reemplazarán a las actuales.</TooltipContent>
+                  <TooltipContent>Mínimo 1 y máximo 5 imágenes. Si subes nuevas, reemplazarán a las actuales.</TooltipContent>
                 </Tooltip>
               </label>
               
@@ -262,7 +255,7 @@ export default function HabitacionModal({ isOpen, onClose, onSuccess, habitacion
                     <input ref={fileInputRef} id="file-upload" name="file-upload" type="file" className="sr-only" multiple accept="image/*" onChange={handleFileChange} />
                     <p>o arrastra y suelta aquí</p>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">PNG, JPG hasta 10MB c/u (Min 3, Max 5)</p>
+                  <p className="text-xs text-gray-500 mt-1">PNG, JPG hasta 10MB c/u (Min 1, Max 5)</p>
                 </div>
               </div>
 

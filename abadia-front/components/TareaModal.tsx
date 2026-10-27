@@ -11,6 +11,17 @@ interface TareaModalProps {
   tarea?: any | null; // Si se pasa, es modo edición
 }
 
+const TAREAS_PREDEFINIDAS = [
+  "🧺 Cambio de toallas",
+  "🚿 Aseo de baño",
+  "🛏️ Cambio de lencería habitación",
+  "🧹 Barrido",
+  "🧽 Trapeado",
+  "🌸 Aromatización",
+  "🗑️ Recolección de basura",
+  "👜 Objetos personales de huéspedes"
+];
+
 export default function TareaModal({ isOpen, onClose, onSuccess, tarea }: TareaModalProps) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -24,6 +35,16 @@ export default function TareaModal({ isOpen, onClose, onSuccess, tarea }: TareaM
     fecha_limite: "",
     asignado_a_id: ""
   });
+
+  const handleSelectPredefinida = (nombre: string) => {
+    setFormData(prev => {
+      const limpio = nombre.replace(/^[\p{Emoji}\s]+/u, '').trim();
+      return {
+        ...prev,
+        titulo: prev.titulo ? `${prev.titulo}, ${limpio}` : limpio
+      };
+    });
+  };
 
   useEffect(() => {
     const fetchEmpleados = async () => {
@@ -135,14 +156,28 @@ export default function TareaModal({ isOpen, onClose, onSuccess, tarea }: TareaM
           )}
           
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Título</label>
+            <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">Actividades Sugeridas (Clic para agregar)</label>
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {TAREAS_PREDEFINIDAS.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => handleSelectPredefinida(item)}
+                  className="px-2.5 py-1 text-xs bg-slate-100 hover:bg-blue-50 hover:text-[var(--mv-blue)] hover:border-blue-200 border border-slate-200 rounded-lg transition-all text-slate-700 font-medium"
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+            
+            <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Título de la Tarea</label>
             <input 
               type="text" 
               name="titulo"
               value={formData.titulo}
               onChange={handleChange}
               required
-              placeholder="Ej. Limpiar Suite 1"
+              placeholder="Ej. Cambio de toallas, Aseo de baño"
               className="w-full border border-gray-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[var(--mv-blue)] outline-none transition-all"
             />
           </div>

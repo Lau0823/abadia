@@ -234,12 +234,14 @@ export default function MultimediaPage() {
       {activeTab === 'home' && (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="bg-blue-50/50 border border-blue-100 rounded-2xl p-5 mb-4">
-            <h3 className="text-sm font-bold text-blue-900">Fotos de "Conoce la Casa Hotel"</h3>
-            <p className="text-xs text-blue-700 mt-1">Sube aquí las 3 fotos principales que se muestran juntas justo debajo de las habitaciones en tu página de inicio.</p>
+            <h3 className="text-sm font-bold text-blue-900">Videos del Inicio (Página Principal)</h3>
+            <p className="text-xs text-blue-700 mt-1">Configura aquí los videos de tu página principal: el banner principal, la sección 1 y la sección 2. Se admiten formatos de video como MP4 o MOV.</p>
           </div>
-          {renderExtendedCard(1, 'home_casa_1_img', 'Espacio Casa 1', [{key: 'home_casa_1_title', label: 'Título', type: 'text'}])}
-          {renderExtendedCard(2, 'home_casa_2_img', 'Espacio Casa 2', [{key: 'home_casa_2_title', label: 'Título', type: 'text'}])}
-          {renderExtendedCard(3, 'home_casa_3_img', 'Espacio Casa 3', [{key: 'home_casa_3_title', label: 'Título', type: 'text'}])}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {renderMediaUploader('hero_video_1', 'Banner Principal', 'Primer video que se reproduce a pantalla completa en el banner de inicio.', 'video')}
+            {renderMediaUploader('hero_video_2', 'Sección 1 (Segundo Video)', 'Segundo video disponible en el banner superior.', 'video')}
+            {renderMediaUploader('video_mid', 'Sección 2 (Video Intermedio)', 'Video que adorna la sección intermedia entre las habitaciones.', 'video')}
+          </div>
         </div>
       )}
 
