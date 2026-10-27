@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Bitter, Outfit } from 'next/font/google';
+import { API_URL } from '@/lib/api';
 
 const bitter = Bitter({
   subsets: ['latin'],
@@ -172,6 +173,16 @@ const INFO_SERVICIOS: Record<string, DetalleServicio> = {
       "Control ergonómico y puertos de conexión multimedia.",
       "Excelente ángulo de visión orientado hacia las camas principales."
     ]
+  },
+  "Hidratación": {
+    nombre: "Hidratación",
+    icono: "💧",
+    resumen: "Disponibilidad de agua fresca purificada e hidratación constante para tu bienestar durante la estancia frente al mar.",
+    detalles: [
+      "Agua fresca potable purificada disponible.",
+      "Estación de hidratación en la habitación.",
+      "Servicio continuo de atención y reposición."
+    ]
   }
 };
 
@@ -184,9 +195,10 @@ interface Estancia {
   capacidad: string;
   descripcion: string;
   imagenes: string[];
+  servicios?: string[];
 }
 
-const ESTANCIAS: Estancia[] = [
+const ESTANCIAS_DEFAULT: Estancia[] = [
   {
     id: "estancia-1",
     categoria: "Confort & Mar",
@@ -270,6 +282,27 @@ const ESTANCIAS: Estancia[] = [
   }
 ];
 
+const formatearHabitacionBackend = (hab: any): Estancia => {
+  const precioNum = Number(hab.precio) || 70000;
+  const precioFormateado = `$${precioNum.toLocaleString('es-CO')}`;
+
+  const fotos = (hab.imagenes && Array.isArray(hab.imagenes) && hab.imagenes.length > 0)
+    ? hab.imagenes
+    : (hab.imagen ? [hab.imagen] : ['/Habitaciones/habitacion1.jpeg']);
+
+  return {
+    id: hab.id,
+    categoria: hab.titulo || 'Estancia de Lujo',
+    ubicacion: hab.subtitulo || 'San Antero, Playa Blanca',
+    precio: precioFormateado,
+    noches: '/ noche',
+    capacidad: hab.ocupacion || '4 Personas',
+    descripcion: hab.descripcion || 'Estancia concebida para una experiencia íntima. Cuenta con balcón panorámico hacia el entorno natural, lencería fresca y acabados costeros limpios.',
+    imagenes: fotos,
+    servicios: hab.comodidades && Array.isArray(hab.comodidades) && hab.comodidades.length > 0 ? hab.comodidades : undefined,
+  };
+};
+
 const parsearPrecio = (precioStr: string): number => {
   const soloNumeros = precioStr.replace(/[^0-9]/g, '');
   const valor = parseInt(soloNumeros, 10);
@@ -308,7 +341,35 @@ function EstanciaFullScreenItem({
     setFotoIndex((prev) => (prev + 1) % estancia.imagenes.length);
   };
 
-  const cotizarWhatsApp = () => {
+  const cotizarWhatsApp = async () => {
+    // Si la estancia tiene ID real de base de datos, registramos la cotización en el backend
+    if (estancia.id && !estancia.id.startsWith('estancia-')) {
+      try {
+        await fetch(`${API_URL}/reservations/book`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            cliente: {
+              nombre: 'Interesado Web',
+              telefono: '',
+              correo: '',
+              documento: `WEB-${Date.now().toString().slice(-6)}`,
+              tipoDocumento: 'CC'
+            },
+            reserva: {
+              habitacion_id: estancia.id,
+              checkIn: fechaLlegada || new Date().toISOString().split('T')[0],
+              checkOut: fechaLlegada || new Date(Date.now() + 86400000).toISOString().split('T')[0],
+              numeroAdultos: personas,
+              numeroNinos: 0
+            }
+          })
+        });
+      } catch (err) {
+        console.error("Error registrando cotización:", err);
+      }
+    }
+
     const fechaTexto = fechaLlegada ? ` para la fecha ${fechaLlegada}` : '';
     const msj = encodeURIComponent(
       `Hola! Deseo cotizar estancia (${estancia.categoria}) en Abadía Casa Hotel.\n` +
@@ -320,7 +381,35 @@ function EstanciaFullScreenItem({
     window.open(`https://wa.me/${NUMERO_WHATSAPP}?text=${msj}`, '_blank');
   };
 
-  const reservarWhatsApp = () => {
+  const reservarWhatsApp = async () => {
+    // Registra la reserva en el backend
+    if (estancia.id && !estancia.id.startsWith('estancia-')) {
+      try {
+        await fetch(`${API_URL}/reservations/book`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            cliente: {
+              nombre: 'Reserva Directa Web',
+              telefono: '',
+              correo: '',
+              documento: `WEB-${Date.now().toString().slice(-6)}`,
+              tipoDocumento: 'CC'
+            },
+            reserva: {
+              habitacion_id: estancia.id,
+              checkIn: fechaLlegada || new Date().toISOString().split('T')[0],
+              checkOut: fechaLlegada || new Date(Date.now() + 86400000).toISOString().split('T')[0],
+              numeroAdultos: personas,
+              numeroNinos: 0
+            }
+          })
+        });
+      } catch (err) {
+        console.error("Error registrando reserva:", err);
+      }
+    }
+
     const fechaTexto = fechaLlegada ? ` con llegada el ${fechaLlegada}` : '';
     const msj = encodeURIComponent(
       `Hola! Deseo realizar la RESERVA INMEDIATA de la estancia (${estancia.categoria}) en Abadía Casa Hotel.\n` +
@@ -412,7 +501,10 @@ function EstanciaFullScreenItem({
                 Servicios Incluidos (Toca para ver detalles):
               </span>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {["Baño privado", "Nevera minibar", "Aire acondicionado", "Televisor Smart TV"].map((srv, i) => (
+                {(estancia.servicios && estancia.servicios.length > 0 
+                  ? estancia.servicios 
+                  : ["Baño privado", "Nevera minibar", "Aire acondicionado", "Televisor Smart TV"]
+                ).map((srv, i) => (
                   <button
                     key={i}
                     type="button"
@@ -561,20 +653,21 @@ function EstanciaFullScreenItem({
   );
 }
 
-function BannerMitadPageVideos() {
+function BannerMitadPageVideos({ videos = VIDEOS_MITAD_HABITACIONES }: { videos?: { id: number; src: string; poster: string }[] }) {
   const [videoActivo, setVideoActivo] = useState(0);
   const [sonido, setSonido] = useState(false);
 
   useEffect(() => {
+    if (videos.length <= 1) return;
     const interval = setInterval(() => {
-      setVideoActivo((prev) => (prev + 1) % VIDEOS_MITAD_HABITACIONES.length);
+      setVideoActivo((prev) => (prev + 1) % videos.length);
     }, 8500);
     return () => clearInterval(interval);
-  }, []);
+  }, [videos.length]);
 
   return (
     <section className="relative h-[75vh] sm:h-[90vh] w-full overflow-hidden bg-black select-none">
-      {VIDEOS_MITAD_HABITACIONES.map((video, idx) => {
+      {videos.map((video, idx) => {
         const activo = idx === videoActivo;
         return (
           <div
@@ -602,20 +695,22 @@ function BannerMitadPageVideos() {
         );
       })}
 
-      <div className="absolute bottom-6 left-6 z-30 flex items-center gap-2 bg-[#071326]/75 backdrop-blur-md px-3 py-1.5 rounded-full border-0 shadow-lg">
-        {VIDEOS_MITAD_HABITACIONES.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setVideoActivo(i)}
-            className={`transition-all duration-300 rounded-full cursor-pointer ${
-              i === videoActivo
-                ? 'w-6 h-2 bg-white'
-                : 'w-2 h-2 bg-white/40 hover:bg-white'
-            }`}
-            aria-label={`Ver video ${i + 1}`}
-          />
-        ))}
-      </div>
+      {videos.length > 1 && (
+        <div className="absolute bottom-6 left-6 z-30 flex items-center gap-2 bg-[#071326]/75 backdrop-blur-md px-3 py-1.5 rounded-full border-0 shadow-lg">
+          {videos.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setVideoActivo(i)}
+              className={`transition-all duration-300 rounded-full cursor-pointer ${
+                i === videoActivo
+                  ? 'w-6 h-2 bg-white'
+                  : 'w-2 h-2 bg-white/40 hover:bg-white'
+              }`}
+              aria-label={`Ver video ${i + 1}`}
+            />
+          ))}
+        </div>
+      )}
 
       <button
         onClick={() => setSonido(!sonido)}
@@ -637,22 +732,79 @@ export default function PaginaHabitaciones() {
   const [heroSonido, setHeroSonido] = useState(false);
   const [servicioModal, setServicioModal] = useState<DetalleServicio | null>(null);
 
+  // Estado dinámico conectado con el Backend
+  const [estancias, setEstancias] = useState<Estancia[]>(ESTANCIAS_DEFAULT);
+  const [videosHero, setVideosHero] = useState(VIDEOS_HERO_HABITACIONES);
+  const [videosMitad, setVideosMitad] = useState(VIDEOS_MITAD_HABITACIONES);
+  const [cargando, setCargando] = useState(true);
+
+  // 1. Cargar habitaciones dinámicas desde el backend
   useEffect(() => {
-    const intervalHero = setInterval(() => {
-      setVideoHeroActivo((prev) => (prev + 1) % VIDEOS_HERO_HABITACIONES.length);
-    }, 9000);
-    return () => clearInterval(intervalHero);
+    fetch(`${API_URL}/habitaciones`)
+      .then(res => res.json())
+      .then(data => {
+        const lista = Array.isArray(data) ? data : data?.data || [];
+        if (lista.length > 0) {
+          const activas = lista.filter((h: any) => h.estado !== 'MANTENIMIENTO');
+          if (activas.length > 0) {
+            setEstancias(activas.map(formatearHabitacionBackend));
+          }
+        }
+      })
+      .catch(err => {
+        console.warn("Utilizando catálogo predeterminado:", err);
+      })
+      .finally(() => setCargando(false));
   }, []);
 
+  // 2. Cargar videos configurados en multimedia desde el backend
+  useEffect(() => {
+    fetch(`${API_URL}/settings`)
+      .then(res => res.json())
+      .then(settings => {
+        if (Array.isArray(settings)) {
+          const v1 = settings.find((s: any) => s.clave === 'hero_video_1')?.valor;
+          const v2 = settings.find((s: any) => s.clave === 'hero_video_2')?.valor;
+          const vMid = settings.find((s: any) => s.clave === 'video_mid')?.valor;
+
+          const nuevosHero: { id: number; src: string; poster: string }[] = [];
+          if (v1) nuevosHero.push({ id: 1, src: v1, poster: "" });
+          if (v2) nuevosHero.push({ id: 2, src: v2, poster: "" });
+          if (nuevosHero.length > 0) setVideosHero(nuevosHero);
+
+          if (vMid) {
+            setVideosMitad([{ id: 1, src: vMid, poster: "" }]);
+          }
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (videosHero.length <= 1) return;
+    const intervalHero = setInterval(() => {
+      setVideoHeroActivo((prev) => (prev + 1) % videosHero.length);
+    }, 9000);
+    return () => clearInterval(intervalHero);
+  }, [videosHero.length]);
+
   const abrirModal = (nombreServicio: string) => {
-    const data = INFO_SERVICIOS[nombreServicio];
-    if (data) {
-      setServicioModal(data);
-    }
+    const data = INFO_SERVICIOS[nombreServicio] || {
+      nombre: nombreServicio,
+      icono: "✨",
+      resumen: `Servicio de ${nombreServicio} incluido y garantizado para tu bienestar y descanso en Abadía.`,
+      detalles: [
+        "Disponible para todos los huéspedes de la habitación.",
+        "Mantenimiento e higiene certificados.",
+        "Atención personalizada por el equipo de Abadía."
+      ]
+    };
+    setServicioModal(data);
   };
 
-  const primerGrupoHabitaciones = ESTANCIAS.slice(0, 3);
-  const segundoGrupoHabitaciones = ESTANCIAS.slice(3);
+  const puntoMedio = Math.max(1, Math.ceil(estancias.length / 2));
+  const primerGrupoHabitaciones = estancias.slice(0, puntoMedio);
+  const segundoGrupoHabitaciones = estancias.slice(puntoMedio);
 
   return (
     <main className={`w-full bg-white text-[#071326] antialiased min-h-screen ${outfit.className}`}>
@@ -729,7 +881,7 @@ export default function PaginaHabitaciones() {
           1. BANNER PRINCIPAL (HERO)
           ======================================================== */}
       <section className="relative h-[85vh] sm:h-[92vh] w-full overflow-hidden bg-black flex flex-col justify-end pb-12 sm:pb-16 items-center">
-        {VIDEOS_HERO_HABITACIONES.map((video, idx) => {
+        {videosHero.map((video, idx) => {
           const activo = idx === videoHeroActivo;
           return (
             <div
@@ -759,25 +911,27 @@ export default function PaginaHabitaciones() {
         })}
 
         {/* SELECTOR ENTRE VIDEOS */}
-        <div className="absolute top-24 sm:top-28 z-30 flex items-center gap-2.5 bg-[#071326]/75 backdrop-blur-md px-3 sm:px-4 py-1.5 rounded-full border-0 shadow-lg">
-          <span className={`${bitter.className} text-[10px] uppercase font-bold tracking-widest text-white/70`}>
-            Video
-          </span>
-          <div className="flex items-center gap-1.5">
-            {VIDEOS_HERO_HABITACIONES.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setVideoHeroActivo(i)}
-                className={`transition-all duration-300 rounded-full cursor-pointer ${
-                  i === videoHeroActivo
-                    ? 'w-6 sm:w-7 h-2 bg-white'
-                    : 'w-2 h-2 bg-white/40 hover:bg-white'
-                }`}
-                aria-label={`Ver video ${i + 1}`}
-              />
-            ))}
+        {videosHero.length > 1 && (
+          <div className="absolute top-24 sm:top-28 z-30 flex items-center gap-2.5 bg-[#071326]/75 backdrop-blur-md px-3 sm:px-4 py-1.5 rounded-full border-0 shadow-lg">
+            <span className={`${bitter.className} text-[10px] uppercase font-bold tracking-widest text-white/70`}>
+              Video
+            </span>
+            <div className="flex items-center gap-1.5">
+              {videosHero.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setVideoHeroActivo(i)}
+                  className={`transition-all duration-300 rounded-full cursor-pointer ${
+                    i === videoHeroActivo
+                      ? 'w-6 sm:w-7 h-2 bg-white'
+                      : 'w-2 h-2 bg-white/40 hover:bg-white'
+                  }`}
+                  aria-label={`Ver video ${i + 1}`}
+                />
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* AUDIO HERO */}
         <button
@@ -872,7 +1026,7 @@ export default function PaginaHabitaciones() {
       </div>
 
       {/* 4. BANNER A MITAD DE PÁGINA (VIDEOS LIMPIOS) */}
-      <BannerMitadPageVideos />
+      <BannerMitadPageVideos videos={videosMitad} />
 
       {/* 5. SIGUIENTES 3 ESTANCIAS */}
       <div className="w-full">
