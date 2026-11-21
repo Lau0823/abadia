@@ -85,7 +85,7 @@ export class Reservation {
   @Column({ type: 'enum', enum: PaymentStatus, default: PaymentStatus.PENDING })
   paymentStatus: PaymentStatus;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   googleEventId: string | null;
 
   @OneToMany(() => Huesped, (huesped) => huesped.reservation)
