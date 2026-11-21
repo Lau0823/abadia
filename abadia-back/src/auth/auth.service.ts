@@ -5,6 +5,16 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { LoginUserDto } from './dto/login-user.dto';
 
+export interface SafeUser {
+  id: number;
+  nombre: string;
+  username: string;
+  email: string;
+  rol: string;
+  foto_perfil_url: string;
+  cliente_id: number | null;
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -15,7 +25,7 @@ export class AuthService {
   /**
    * Valida las credenciales del usuario por email y contraseña.
    */
-  async validateUser(email: string, pass: string): Promise<any> {
+  async validateUser(email: string, pass: string): Promise<SafeUser | null> {
     const user = await this.usersService.findByEmail(email);
 
     if (!user) {
@@ -25,6 +35,7 @@ export class AuthService {
 
     if (isPasswordValid) {
       const { password_hash, ...result } = user;
+      void password_hash;
       return result;
     }
     return null;
@@ -33,24 +44,29 @@ export class AuthService {
   /**
    * Inicia sesión de un usuario y genera un token JWT.
    */
-  async login(loginUserDto: LoginUserDto): Promise<{ user: any; accessToken: string }> {
-    const user = await this.validateUser(loginUserDto.email, loginUserDto.password);
+  async login(
+    loginUserDto: LoginUserDto,
+  ): Promise<{ user: SafeUser; accessToken: string }> {
+    const user = await this.validateUser(
+      loginUserDto.email,
+      loginUserDto.password,
+    );
     if (!user) {
       throw new UnauthorizedException('Credenciales inválidas.');
     }
     const payload = { username: user.username, sub: user.id, rol: user.rol };
-    const signedToken = this.jwtService.sign(payload); 
+    const signedToken = this.jwtService.sign(payload);
 
     return {
-      accessToken: signedToken, 
-      user: { 
-        id: user.id, 
-        nombre: user.nombre, 
-        username: user.username, 
+      accessToken: signedToken,
+      user: {
+        id: user.id,
+        nombre: user.nombre,
+        username: user.username,
         email: user.email,
         rol: user.rol,
         foto_perfil_url: user.foto_perfil_url,
-        cliente_id: user.cliente_id 
+        cliente_id: user.cliente_id,
       },
     };
   }

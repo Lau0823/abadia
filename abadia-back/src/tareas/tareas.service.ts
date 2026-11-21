@@ -17,15 +17,19 @@ export class TareasService {
 
   async create(createTareaDto: CreateTareaDto): Promise<Tarea> {
     const tarea = this.tareaRepository.create(createTareaDto);
-    
+
     if (createTareaDto.asignado_a_id) {
-        const user = await this.userRepository.findOne({ where: { id: createTareaDto.asignado_a_id } });
-        if (user) tarea.asignado_a = user;
+      const user = await this.userRepository.findOne({
+        where: { id: createTareaDto.asignado_a_id },
+      });
+      if (user) tarea.asignado_a = user;
     }
 
     if (createTareaDto.creado_por_id) {
-        const user = await this.userRepository.findOne({ where: { id: createTareaDto.creado_por_id } });
-        if (user) tarea.creado_por = user;
+      const user = await this.userRepository.findOne({
+        where: { id: createTareaDto.creado_por_id },
+      });
+      if (user) tarea.creado_por = user;
     }
 
     return await this.tareaRepository.save(tarea);
@@ -53,15 +57,17 @@ export class TareasService {
 
   async update(id: number, updateTareaDto: UpdateTareaDto): Promise<Tarea> {
     const tarea = await this.findOne(id);
-    
+
     // Si se actualizan relaciones
     if (updateTareaDto.asignado_a_id !== undefined) {
-        if (updateTareaDto.asignado_a_id === null) {
-            tarea.asignado_a = null;
-        } else {
-            const user = await this.userRepository.findOne({ where: { id: updateTareaDto.asignado_a_id } });
-            if (user) tarea.asignado_a = user;
-        }
+      if (updateTareaDto.asignado_a_id === null) {
+        tarea.asignado_a = null;
+      } else {
+        const user = await this.userRepository.findOne({
+          where: { id: updateTareaDto.asignado_a_id },
+        });
+        if (user) tarea.asignado_a = user;
+      }
     }
 
     Object.assign(tarea, updateTareaDto);

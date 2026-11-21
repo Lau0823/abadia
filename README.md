@@ -1,36 +1,47 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Abadía
 
-## Getting Started
+Monorepo de la web pública y el panel de administración de Abadía Casa Hotel.
 
-First, run the development server:
+## Estructura
+
+| Carpeta | Contenido |
+| --- | --- |
+| `abadia-back/` | API NestJS 11 + TypeORM/PostgreSQL (auth JWT, reservas, cotizaciones, facturas, finanzas, Google Calendar, Cloudinary) |
+| `abadia-front/` | Next.js 16 (App Router) + React 19 + Tailwind 4 + Zustand |
+| `deploy/` | Configuración nginx (`/api/` → backend `:3102`, resto → frontend `:3100`) |
+| `.github/workflows/deploy.yml` | CI/CD: build en GitHub Actions → SCP al VPS → PM2 |
+
+## Desarrollo
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cd abadia-back && npm ci && npm run start:dev
+cd abadia-front && npm ci && npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+El front llama a `/api/...` (proxy de nginx en producción, o `NEXT_PUBLIC_API_URL` en local).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Base de datos
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- En **desarrollo** TypeORM mantiene el esquema con `synchronize: true`.
+- En **producción** `synchronize` está **desactivado**: los cambios de esquema se aplican con migraciones que se ejecutan automáticamente al arrancar (`migrationsRun: true`).
+- Para añadir un cambio de esquema: crea una clase en `abadia-back/src/migrations/` y regístrala en el array `migrations` de `src/app.module.ts`.
+- `DB_SYNCHRONIZE=true` fuerza una sincronización manual del esquema (usar con cuidado, puede destruir datos).
+- En una BD completamente vacía, `AppModule.onModuleInit()` ejecuta un `synchronize` único de bootstrap para crear las tablas.
 
-## Learn More
+## Verificación
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+cd abadia-back
+node node_modules/typescript/bin/tsc --noEmit -p tsconfig.json
+node node_modules/@nestjs/cli/bin/nest.js build
+node node_modules/jest/bin/jest.js --runInBand
+node node_modules/eslint/bin/eslint.js "src/**/*.ts"
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+cd ../abadia-front
+node node_modules/typescript/bin/tsc --noEmit -p tsconfig.json
+node node_modules/next/dist/bin/next build
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Despliegue
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Push a `camilo` con cambios en `abadia-back/`, `abadia-front/` o `deploy/` dispara el workflow. PM2 usa `abadia-back/ecosystem.config.cjs` con `NODE_ENV=production`.

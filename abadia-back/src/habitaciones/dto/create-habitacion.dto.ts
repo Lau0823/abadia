@@ -1,4 +1,11 @@
-import { IsString, IsNumber, IsOptional, IsEnum, Min, IsArray } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsOptional,
+  IsEnum,
+  Min,
+  IsArray,
+} from 'class-validator';
 import { EstadoHabitacion } from '../entities/habitacion.entity';
 
 export class CreateHabitacionDto {

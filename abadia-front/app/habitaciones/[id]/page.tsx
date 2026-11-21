@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { API_URL } from '@/lib/api';
+import { API_URL, fetchApi } from '@/lib/api';
 import { useParams, useRouter } from 'next/navigation';
 
 interface Suite {
@@ -28,7 +28,7 @@ export default function SuiteDetailPage() {
   // Estados del formulario y cotizador
   const [adultos, setAdultos] = useState<number>(1);
   const [ninos, setNinos] = useState<number>(0);
-  const [precioTotal, setPrecioTotal] = useState<number>(70000);
+  const precioTotal = adultos * 70000 + ninos * 40000;
   const [nombre, setNombre] = useState<string>('');
   const [telefono, setTelefono] = useState<string>('');
   const [fechaEntrada, setFechaEntrada] = useState<string>('');
@@ -54,13 +54,6 @@ export default function SuiteDetailPage() {
     }
   }, [id]);
 
-  // --- LÓGICA DE COTIZACIÓN DINÁMICA ---
-  useEffect(() => {
-    const costoAdultos = adultos * 70000;
-    const costoNinos = ninos * 40000;
-    setPrecioTotal(costoAdultos + costoNinos);
-  }, [adultos, ninos]);
-
   if (loading) return <div className="min-h-screen bg-white flex justify-center items-center"><div className="w-8 h-8 border-2 border-[#3d342e] border-t-transparent rounded-full animate-spin"></div></div>;
   if (!suite) return <div className="min-h-screen bg-white flex justify-center items-center"><p className="text-xl">Habitación no encontrada</p></div>;
 
@@ -75,14 +68,11 @@ export default function SuiteDetailPage() {
   const enviarWhatsApp = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const isProcessing = true; // Podríamos usar estado, pero como redirige rápido, basta así.
-
     // 1. Enviar silenciosamente la reserva a la Base de Datos
     if (suite) {
       try {
-        await fetch(`${API_URL}/reservations/book`, {
+        await fetchApi('/reservations/book', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             cliente: {
               nombre: nombre,
@@ -102,6 +92,7 @@ export default function SuiteDetailPage() {
         });
       } catch (error) {
         console.error("Error guardando la reserva en background:", error);
+        alert("No pudimos registrar la reserva en el sistema. Intenta nuevamente o continúa por WhatsApp.");
       }
     }
 

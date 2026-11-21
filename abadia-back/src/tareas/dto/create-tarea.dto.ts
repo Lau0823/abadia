@@ -1,4 +1,10 @@
-import { IsString, IsNotEmpty, IsOptional, IsEnum, IsNumber, IsDateString } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsNumber,
+  IsDateString,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateTareaDto {
@@ -12,7 +18,11 @@ export class CreateTareaDto {
   @IsOptional()
   descripcion?: string;
 
-  @ApiProperty({ description: 'Estado de la tarea', required: false, default: 'PENDIENTE' })
+  @ApiProperty({
+    description: 'Estado de la tarea',
+    required: false,
+    default: 'PENDIENTE',
+  })
   @IsString()
   @IsOptional()
   estado?: string;

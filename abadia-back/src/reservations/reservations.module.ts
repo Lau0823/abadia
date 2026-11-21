@@ -6,19 +6,26 @@ import { Reservation } from './entities/reservation.entity';
 import { Huesped } from './entities/huesped.entity';
 import { Cliente } from '../clientes/entities/cliente.entity';
 import { Habitacion } from '../habitaciones/entities/habitacion.entity';
+import { Transaccion } from '../finanzas/entities/transaccion.entity';
 import { MailModule } from '../common/mail/mail.module';
 import { GoogleCalendarModule } from '../google-calendar/google-calendar.module';
 import { FinanzasModule } from '../finanzas/finanzas.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Reservation, Huesped, Cliente, Habitacion]),
+    TypeOrmModule.forFeature([
+      Reservation,
+      Huesped,
+      Cliente,
+      Habitacion,
+      Transaccion,
+    ]),
     MailModule,
     GoogleCalendarModule,
-    FinanzasModule
+    FinanzasModule,
   ],
   controllers: [ReservationsController],
   providers: [ReservationsService],
-  exports: [ReservationsService]
+  exports: [ReservationsService],
 })
 export class ReservationsModule {}

@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { SettingsService } from './settings.service';
 import { Setting } from './entities/setting.entity';
 import { CloudinaryService } from '../common/cloudinary/cloudinary.service';
@@ -8,8 +7,6 @@ import { NotFoundException } from '@nestjs/common';
 
 describe('SettingsService', () => {
   let service: SettingsService;
-  let repository: Repository<Setting>;
-  let cloudinaryService: CloudinaryService;
 
   const mockSetting = {
     id: 1,
@@ -19,8 +16,10 @@ describe('SettingsService', () => {
   } as Setting;
 
   const mockRepository = {
-    create: jest.fn().mockImplementation((dto) => dto),
-    save: jest.fn().mockImplementation((setting) => Promise.resolve({ id: 1, ...setting })),
+    create: jest.fn().mockImplementation((dto: unknown) => dto),
+    save: jest
+      .fn()
+      .mockImplementation((setting) => Promise.resolve({ id: 1, ...setting })),
     find: jest.fn(),
     findOne: jest.fn(),
   };
@@ -46,8 +45,6 @@ describe('SettingsService', () => {
     }).compile();
 
     service = module.get<SettingsService>(SettingsService);
-    repository = module.get<Repository<Setting>>(getRepositoryToken(Setting));
-    cloudinaryService = module.get<CloudinaryService>(CloudinaryService);
     jest.clearAllMocks();
   });
 
@@ -64,7 +61,9 @@ describe('SettingsService', () => {
 
     it('debería lanzar NotFoundException si no existe', async () => {
       mockRepository.findOne.mockResolvedValue(null);
-      await expect(service.findOne('non_existent')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne('non_existent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -73,13 +72,13 @@ describe('SettingsService', () => {
       mockRepository.findOne.mockResolvedValue({ ...mockSetting });
       const result = await service.upsert('site_title', 'Nuevo Valor');
       expect(result.value).toBe('Nuevo Valor');
-      expect(repository.save).toHaveBeenCalled();
+      expect(mockRepository.save).toHaveBeenCalled();
     });
 
     it('debería crear un setting si no existe', async () => {
       mockRepository.findOne.mockResolvedValue(null);
       const result = await service.upsert('new_key', 'value');
-      expect(repository.create).toHaveBeenCalled();
+      expect(mockRepository.create).toHaveBeenCalled();
       expect(result.key).toBe('new_key');
     });
   });
@@ -93,17 +92,17 @@ describe('SettingsService', () => {
       ];
       const results = await service.upsertMany(settings);
       expect(results.length).toBe(2);
-      expect(repository.save).toHaveBeenCalledTimes(2);
+      expect(mockRepository.save).toHaveBeenCalledTimes(2);
     });
   });
 
   describe('uploadFile', () => {
     it('debería subir un archivo y guardarlo como setting', async () => {
       mockRepository.findOne.mockResolvedValue(null);
-      const file = { mimetype: 'image/jpeg' } as any;
+      const file = { mimetype: 'image/jpeg' } as Express.Multer.File;
       const result = await service.uploadFile('hero_image', file);
-      
-      expect(cloudinaryService.uploadImage).toHaveBeenCalledWith(file);
+
+      expect(mockCloudinaryService.uploadImage).toHaveBeenCalledWith(file);
       expect(result.value).toBe('http://img.jpg');
     });
   });

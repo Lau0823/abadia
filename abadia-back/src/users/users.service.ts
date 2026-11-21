@@ -1,4 +1,9 @@
-import { Injectable, BadRequestException, NotFoundException, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  OnModuleInit,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
@@ -7,6 +12,10 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { CloudinaryService } from '../common/cloudinary/cloudinary.service';
+
+interface CloudinaryUploadResult {
+  secure_url: string;
+}
 
 @Injectable()
 export class UsersService implements OnModuleInit {
@@ -25,8 +34,10 @@ export class UsersService implements OnModuleInit {
     const adminEmail = process.env.ADMIN_EMAIL || 'admin@abadia.com';
     const adminPassword = process.env.ADMIN_PASSWORD || 'Admin123*';
 
-    const existingAdmin = await this.usersRepository.findOne({ where: { username: adminUsername } });
-    
+    const existingAdmin = await this.usersRepository.findOne({
+      where: { username: adminUsername },
+    });
+
     if (!existingAdmin) {
       console.log('🌱 Seeding default admin user...');
       const salt = await bcrypt.genSalt();
@@ -49,8 +60,12 @@ export class UsersService implements OnModuleInit {
     }
   }
 
-  async create(createUserDto: CreateUserDto): Promise<Omit<User, 'password_hash'>> {
-    const existingUser = await this.usersRepository.findOne({ where: { username: createUserDto.username } });
+  async create(
+    createUserDto: CreateUserDto,
+  ): Promise<Omit<User, 'password_hash'>> {
+    const existingUser = await this.usersRepository.findOne({
+      where: { username: createUserDto.username },
+    });
     if (existingUser) {
       throw new BadRequestException('El nombre de usuario ya está en uso.');
     }
@@ -64,25 +79,43 @@ export class UsersService implements OnModuleInit {
       rol: createUserDto.rol || 'employee',
     });
     const savedUser = await this.usersRepository.save(newUser);
-    const { password_hash: _, ...result } = savedUser;
+    const result = { ...savedUser };
+    delete (result as Partial<User>).password_hash;
     return result;
   }
 
-  async findByUsername(username: string): Promise<User | null> { 
+  async findByUsername(username: string): Promise<User | null> {
     return this.usersRepository.findOne({ where: { username } });
   }
 
-  async findByEmail(email: string): Promise<User | null> { 
+  async findByEmail(email: string): Promise<User | null> {
     return this.usersRepository.findOne({ where: { email } });
   }
 
-  async findAll(page: number = 1, limit: number = 50): Promise<{ data: Omit<User, 'password_hash'>[], total: number, page: number, lastPage: number }> {
+  async findAll(
+    page: number = 1,
+    limit: number = 50,
+  ): Promise<{
+    data: Omit<User, 'password_hash'>[];
+    total: number;
+    page: number;
+    lastPage: number;
+  }> {
     const skip = (page - 1) * limit;
     const [result, total] = await this.usersRepository.findAndCount({
       skip: skip,
       take: limit,
       order: { created_at: 'DESC' },
-      select: ['id', 'nombre', 'username', 'email', 'rol', 'telefono', 'foto_perfil_url', 'created_at'] 
+      select: [
+        'id',
+        'nombre',
+        'username',
+        'email',
+        'rol',
+        'telefono',
+        'foto_perfil_url',
+        'created_at',
+      ],
     });
 
     const lastPage = Math.ceil(total / limit);
@@ -91,14 +124,23 @@ export class UsersService implements OnModuleInit {
       data: result,
       total,
       page,
-      lastPage
+      lastPage,
     };
   }
 
   async findOne(id: number): Promise<Omit<User, 'password_hash'>> {
     const user = await this.usersRepository.findOne({
       where: { id },
-      select: ['id', 'nombre', 'username', 'email', 'rol', 'telefono', 'foto_perfil_url', 'created_at'] 
+      select: [
+        'id',
+        'nombre',
+        'username',
+        'email',
+        'rol',
+        'telefono',
+        'foto_perfil_url',
+        'created_at',
+      ],
     });
     if (!user) {
       throw new NotFoundException(`Usuario con ID ${id} no encontrado.`);
@@ -106,16 +148,23 @@ export class UsersService implements OnModuleInit {
     return user;
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<Omit<User, 'password_hash'>> {
+  async update(
+    id: number,
+    updateUserDto: UpdateUserDto,
+  ): Promise<Omit<User, 'password_hash'>> {
     const user = await this.usersRepository.findOne({ where: { id } });
     if (!user) {
       throw new NotFoundException(`Usuario con ID ${id} no encontrado.`);
     }
 
     if (updateUserDto.username && updateUserDto.username !== user.username) {
-      const existingUserByUsername = await this.usersRepository.findOne({ where: { username: updateUserDto.username } });
+      const existingUserByUsername = await this.usersRepository.findOne({
+        where: { username: updateUserDto.username },
+      });
       if (existingUserByUsername && existingUserByUsername.id !== id) {
-        throw new BadRequestException('El nombre de usuario ya está en uso por otro usuario.');
+        throw new BadRequestException(
+          'El nombre de usuario ya está en uso por otro usuario.',
+        );
       }
     }
 
@@ -124,21 +173,29 @@ export class UsersService implements OnModuleInit {
       user.password_hash = await bcrypt.hash(updateUserDto.password, salt);
     }
 
-    const { password, ...restOfDto } = updateUserDto;
+    const restOfDto = { ...updateUserDto };
+    delete restOfDto.password;
     Object.assign(user, restOfDto);
 
     const updatedUser = await this.usersRepository.save(user);
-    const { password_hash: _, ...result } = updatedUser;
+    const result = { ...updatedUser };
+    delete (result as Partial<User>).password_hash;
     return result;
   }
 
-  async changePassword(id: number, changePasswordDto: ChangePasswordDto): Promise<{ message: string }> {
+  async changePassword(
+    id: number,
+    changePasswordDto: ChangePasswordDto,
+  ): Promise<{ message: string }> {
     const user = await this.usersRepository.findOne({ where: { id } });
     if (!user) {
       throw new NotFoundException(`Usuario con ID ${id} no encontrado.`);
     }
 
-    const isPasswordValid = await bcrypt.compare(changePasswordDto.oldPassword, user.password_hash);
+    const isPasswordValid = await bcrypt.compare(
+      changePasswordDto.oldPassword,
+      user.password_hash,
+    );
     if (!isPasswordValid) {
       throw new BadRequestException('La contraseña actual es incorrecta.');
     }
@@ -150,13 +207,18 @@ export class UsersService implements OnModuleInit {
     return { message: 'Contraseña actualizada exitosamente' };
   }
 
-  async uploadAvatar(id: number, file: Express.Multer.File): Promise<{ foto_perfil_url: string }> {
+  async uploadAvatar(
+    id: number,
+    file: Express.Multer.File,
+  ): Promise<{ foto_perfil_url: string }> {
     const user = await this.usersRepository.findOne({ where: { id } });
     if (!user) {
       throw new NotFoundException(`Usuario con ID ${id} no encontrado.`);
     }
 
-    const uploadResult = await this.cloudinaryService.uploadImage(file);
+    const uploadResult = (await this.cloudinaryService.uploadImage(
+      file,
+    )) as CloudinaryUploadResult;
     user.foto_perfil_url = uploadResult.secure_url;
     await this.usersRepository.save(user);
 
@@ -166,7 +228,9 @@ export class UsersService implements OnModuleInit {
   async remove(id: number): Promise<void> {
     const result = await this.usersRepository.delete(id);
     if (result.affected === 0) {
-      throw new NotFoundException(`Usuario con ID ${id} no encontrado para eliminar.`);
+      throw new NotFoundException(
+        `Usuario con ID ${id} no encontrado para eliminar.`,
+      );
     }
   }
 }

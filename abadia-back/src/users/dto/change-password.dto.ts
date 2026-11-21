@@ -8,6 +8,8 @@ export class ChangePasswordDto {
 
   @ApiProperty({ description: 'Nueva contraseña', example: 'new_password' })
   @IsString()
-  @MinLength(6, { message: 'La nueva contraseña debe tener al menos 6 caracteres.' })
+  @MinLength(6, {
+    message: 'La nueva contraseña debe tener al menos 6 caracteres.',
+  })
   newPassword: string;
 }

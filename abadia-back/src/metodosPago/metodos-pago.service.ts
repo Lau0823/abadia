@@ -1,5 +1,9 @@
 // src/metodos-pago/metodos-pago.service.ts
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MetodoPago } from './entities/metodo-pago.entity';
@@ -19,11 +23,16 @@ export class MetodosPagoService {
    * @returns El método de pago creado.
    */
   async create(createMetodoPagoDto: CreateMetodoPagoDto): Promise<MetodoPago> {
-    const existingMetodo = await this.metodosPagoRepository.findOne({ where: { nombre: createMetodoPagoDto.nombre } });
+    const existingMetodo = await this.metodosPagoRepository.findOne({
+      where: { nombre: createMetodoPagoDto.nombre },
+    });
     if (existingMetodo) {
-      throw new BadRequestException('Ya existe un método de pago con este nombre.');
+      throw new BadRequestException(
+        'Ya existe un método de pago con este nombre.',
+      );
     }
-    const newMetodoPago = this.metodosPagoRepository.create(createMetodoPagoDto);
+    const newMetodoPago =
+      this.metodosPagoRepository.create(createMetodoPagoDto);
     return this.metodosPagoRepository.save(newMetodoPago);
   }
 
@@ -33,12 +42,20 @@ export class MetodosPagoService {
    * @param limit Cantidad de elementos por página.
    * @returns Objeto con la lista de métodos de pago, total, página actual y última página.
    */
-  async findAll(page: number = 1, limit: number = 50): Promise<{ data: MetodoPago[], total: number, page: number, lastPage: number }> {
+  async findAll(
+    page: number = 1,
+    limit: number = 50,
+  ): Promise<{
+    data: MetodoPago[];
+    total: number;
+    page: number;
+    lastPage: number;
+  }> {
     const skip = (page - 1) * limit;
     const [result, total] = await this.metodosPagoRepository.findAndCount({
       skip: skip,
       take: limit,
-      order: { nombre: 'ASC' }
+      order: { nombre: 'ASC' },
     });
 
     const lastPage = Math.ceil(total / limit);
@@ -47,7 +64,7 @@ export class MetodosPagoService {
       data: result,
       total,
       page,
-      lastPage
+      lastPage,
     };
   }
 
@@ -57,7 +74,9 @@ export class MetodosPagoService {
    * @returns El método de pago encontrado.
    */
   async findOne(id: number): Promise<MetodoPago> {
-    const metodoPago = await this.metodosPagoRepository.findOne({ where: { id } });
+    const metodoPago = await this.metodosPagoRepository.findOne({
+      where: { id },
+    });
     if (!metodoPago) {
       throw new NotFoundException(`Método de pago con ID ${id} no encontrado.`);
     }
@@ -70,16 +89,28 @@ export class MetodosPagoService {
    * @param updateMetodoPagoDto Datos para actualizar el método de pago.
    * @returns El método de pago actualizado.
    */
-  async update(id: number, updateMetodoPagoDto: UpdateMetodoPagoDto): Promise<MetodoPago> {
-    const metodoPago = await this.metodosPagoRepository.findOne({ where: { id } });
+  async update(
+    id: number,
+    updateMetodoPagoDto: UpdateMetodoPagoDto,
+  ): Promise<MetodoPago> {
+    const metodoPago = await this.metodosPagoRepository.findOne({
+      where: { id },
+    });
     if (!metodoPago) {
       throw new NotFoundException(`Método de pago con ID ${id} no encontrado.`);
     }
 
-    if (updateMetodoPagoDto.nombre && updateMetodoPagoDto.nombre !== metodoPago.nombre) {
-      const existingMetodo = await this.metodosPagoRepository.findOne({ where: { nombre: updateMetodoPagoDto.nombre } });
+    if (
+      updateMetodoPagoDto.nombre &&
+      updateMetodoPagoDto.nombre !== metodoPago.nombre
+    ) {
+      const existingMetodo = await this.metodosPagoRepository.findOne({
+        where: { nombre: updateMetodoPagoDto.nombre },
+      });
       if (existingMetodo && existingMetodo.id !== id) {
-        throw new BadRequestException('Ya existe otro método de pago con este nombre.');
+        throw new BadRequestException(
+          'Ya existe otro método de pago con este nombre.',
+        );
       }
     }
 
@@ -94,7 +125,9 @@ export class MetodosPagoService {
   async remove(id: number): Promise<void> {
     const result = await this.metodosPagoRepository.delete(id);
     if (result.affected === 0) {
-      throw new NotFoundException(`Método de pago con ID ${id} no encontrado para eliminar.`);
+      throw new NotFoundException(
+        `Método de pago con ID ${id} no encontrado para eliminar.`,
+      );
     }
   }
 }

@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import PDFDocument = require('pdfkit');
+import PDFDocument from 'pdfkit';
 import type { Response } from 'express';
 import { CotizacionesService } from '../cotizaciones/cotizaciones.service';
 import { FacturasService } from '../facturas/facturas.service';
@@ -21,28 +21,42 @@ export class DocumentsService {
     if (!cotizacion) throw new NotFoundException('Cotizacion no encontrada');
 
     const doc = new PDFDocument({ margin: 0, size: 'A4' });
-    
+
     // Pipe to response
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename=cotizacion_${cotizacion.numero_cotizacion || id}.pdf`);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename=cotizacion_${cotizacion.numero_cotizacion || id}.pdf`,
+    );
     doc.pipe(res);
 
-    const docId = cotizacion.numero_cotizacion || `COT-${cotizacion.id.split('-')[0].toUpperCase()}`;
+    const docId =
+      cotizacion.numero_cotizacion ||
+      `COT-${cotizacion.id.split('-')[0].toUpperCase()}`;
     this.generateHeader(doc, 'COTIZACIÓN', docId);
-    this.generateCustomerInformation(doc, cotizacion.cliente, cotizacion.createdAt);
-    
+    this.generateCustomerInformation(
+      doc,
+      cotizacion.cliente,
+      cotizacion.createdAt,
+    );
+
     // Table
     const tableTop = 330;
-    this.generateTableHeader(doc, tableTop, ['Descripción', 'Habitación', 'Ocupación', 'Total Estimado']);
-    
+    this.generateTableHeader(doc, tableTop, [
+      'Descripción',
+      'Habitación',
+      'Ocupación',
+      'Total Estimado',
+    ]);
+
     const ocupacion = `${cotizacion.numeroAdultos} Ads, ${cotizacion.numeroNinos} Niñ`;
     this.generateTableRow(
-      doc, 
-      tableTop + 35, 
-      'Estadía en Hotel Boutique', 
-      cotizacion.habitacion.titulo, 
+      doc,
+      tableTop + 35,
+      'Estadía en Hotel Boutique',
+      cotizacion.habitacion.titulo,
       ocupacion,
-      `$${Number(cotizacion.total_estimado).toLocaleString('es-CO')}`
+      `$${Number(cotizacion.total_estimado).toLocaleString('es-CO')}`,
     );
 
     this.generateFooter(doc);
@@ -54,33 +68,45 @@ export class DocumentsService {
     if (!factura) throw new NotFoundException('Factura no encontrada');
 
     const doc = new PDFDocument({ margin: 0, size: 'A4' });
-    
+
     // Pipe to response
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename=factura_${factura.numero_factura}.pdf`);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename=factura_${factura.numero_factura}.pdf`,
+    );
     doc.pipe(res);
 
     this.generateHeader(doc, 'FACTURA', `${factura.numero_factura}`);
     this.generateCustomerInformation(doc, factura.cliente, factura.createdAt);
-    
+
     // Table
     const tableTop = 330;
-    this.generateTableHeader(doc, tableTop, ['Descripción', 'Concepto', 'Referencia', 'Total']);
-    
+    this.generateTableHeader(doc, tableTop, [
+      'Descripción',
+      'Concepto',
+      'Referencia',
+      'Total',
+    ]);
+
     this.generateTableRow(
-      doc, 
-      tableTop + 35, 
-      `Servicios de Alojamiento`, 
-      'Reserva Confirmada', 
-      `#${factura.reserva_id ? factura.reserva_id.toString().substring(0,8) : 'N/A'}`,
-      `$${Number(factura.total).toLocaleString('es-CO')}`
+      doc,
+      tableTop + 35,
+      `Servicios de Alojamiento`,
+      'Reserva Confirmada',
+      `#${factura.reserva_id ? factura.reserva_id.toString().substring(0, 8) : 'N/A'}`,
+      `$${Number(factura.total).toLocaleString('es-CO')}`,
     );
 
     this.generateFooter(doc);
     doc.end();
   }
 
-  private generateHeader(doc: typeof PDFDocument, docType: string, idText: string) {
+  private generateHeader(
+    doc: typeof PDFDocument,
+    docType: string,
+    idText: string,
+  ) {
     // Fondo del Header
     doc.rect(0, 0, 600, 150).fill(this.colorPrimario);
 
@@ -97,13 +123,21 @@ export class DocumentsService {
     doc
       .fillColor(this.colorFondo)
       .fontSize(20)
-      .text(docType, 350, 50, { align: 'right', width: 200, characterSpacing: 2 })
+      .text(docType, 350, 50, {
+        align: 'right',
+        width: 200,
+        characterSpacing: 2,
+      })
       .fontSize(12)
       .fillColor(this.colorSecundario)
       .text(idText, 350, 75, { align: 'right', width: 200 });
   }
 
-  private generateCustomerInformation(doc: typeof PDFDocument, cliente: any, date: Date) {
+  private generateCustomerInformation(
+    doc: typeof PDFDocument,
+    cliente: { nombre?: string; documento?: string } | null,
+    date: Date,
+  ) {
     const top = 200;
 
     // Titulo Sección
@@ -124,21 +158,25 @@ export class DocumentsService {
       .text('Fecha de Emisión:', 50, top + 35)
       .fillColor(this.colorPrimario)
       .text(date.toLocaleDateString('es-CO'), 150, top + 35)
-      
+
       .fillColor(this.colorGris)
       .text('Nombre:', 50, top + 55)
       .fillColor(this.colorPrimario)
       .text(cliente?.nombre || 'Consumidor Final', 150, top + 55)
-      
+
       .fillColor(this.colorGris)
       .text('Documento:', 50, top + 75)
       .fillColor(this.colorPrimario)
       .text(cliente?.documento || 'N/A', 150, top + 75);
   }
 
-  private generateTableHeader(doc: typeof PDFDocument, y: number, headers: string[]) {
+  private generateTableHeader(
+    doc: typeof PDFDocument,
+    y: number,
+    headers: string[],
+  ) {
     doc.rect(50, y, 500, 25).fill(this.colorFondo);
-    
+
     doc.fillColor(this.colorPrimario).fontSize(10);
     doc.text(headers[0], 60, y + 8);
     doc.text(headers[1], 200, y + 8);
@@ -146,7 +184,14 @@ export class DocumentsService {
     doc.text(headers[3], 450, y + 8, { width: 90, align: 'right' });
   }
 
-  private generateTableRow(doc: typeof PDFDocument, y: number, col1: string, col2: string, col3: string, col4: string) {
+  private generateTableRow(
+    doc: typeof PDFDocument,
+    y: number,
+    col1: string,
+    col2: string,
+    col3: string,
+    col4: string,
+  ) {
     doc.fillColor(this.colorPrimario).fontSize(10);
     doc.text(col1, 60, y);
     doc.text(col2, 200, y);
@@ -163,17 +208,24 @@ export class DocumentsService {
   }
 
   private generateFooter(doc: typeof PDFDocument) {
-    doc
-      .rect(0, 750, 600, 100)
-      .fill(this.colorFondo);
+    doc.rect(0, 750, 600, 100).fill(this.colorFondo);
 
     doc
       .fillColor(this.colorPrimario)
       .fontSize(12)
-      .text('Gracias por elegir La Abadía', 50, 770, { align: 'center', width: 500 })
+      .text('Gracias por elegir La Abadía', 50, 770, {
+        align: 'center',
+        width: 500,
+      })
       .fontSize(9)
       .fillColor(this.colorGris)
-      .text('San Antero, Córdoba, Colombia', 50, 790, { align: 'center', width: 500 })
-      .text('contacto@laabadia.com | +57 300 000 0000', 50, 805, { align: 'center', width: 500 });
+      .text('San Antero, Córdoba, Colombia', 50, 790, {
+        align: 'center',
+        width: 500,
+      })
+      .text('contacto@laabadia.com | +57 300 000 0000', 50, 805, {
+        align: 'center',
+        width: 500,
+      });
   }
 }

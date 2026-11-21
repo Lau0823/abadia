@@ -1,5 +1,10 @@
 // src/metodos-pago/entities/metodo-pago.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+} from 'typeorm';
 
 @Entity('metodos_pago')
 export class MetodoPago {
@@ -17,5 +22,4 @@ export class MetodoPago {
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
-
 }

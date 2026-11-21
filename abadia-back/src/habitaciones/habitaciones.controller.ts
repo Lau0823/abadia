@@ -1,4 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query, UseInterceptors, UploadedFiles, ParseFilePipeBuilder, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Query,
+  UseInterceptors,
+  UploadedFiles,
+  ParseFilePipeBuilder,
+  HttpStatus,
+} from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { HabitacionesService } from './habitaciones.service';
 import { CreateHabitacionDto } from './dto/create-habitacion.dto';
@@ -7,7 +21,12 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../common/enums/role.enum';
 import { Public } from '../auth/decorators/public.decorator';
-import { ApiTags, ApiBearerAuth, ApiConsumes, ApiOperation } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiConsumes,
+  ApiOperation,
+} from '@nestjs/swagger';
 
 @ApiTags('Habitaciones')
 @Controller('habitaciones')
@@ -30,7 +49,10 @@ export class HabitacionesController {
 
   @Get('disponibles')
   @Public()
-  findDisponibles(@Query('checkIn') checkIn: string, @Query('checkOut') checkOut: string) {
+  findDisponibles(
+    @Query('checkIn') checkIn: string,
+    @Query('checkOut') checkOut: string,
+  ) {
     if (!checkIn || !checkOut) {
       return this.habitacionesService.findAll();
     }
@@ -47,7 +69,10 @@ export class HabitacionesController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT-auth')
   @Roles(Role.Admin, Role.SuperAdmin)
-  update(@Param('id') id: string, @Body() updateHabitacionDto: UpdateHabitacionDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateHabitacionDto: UpdateHabitacionDto,
+  ) {
     return this.habitacionesService.update(id, updateHabitacionDto);
   }
 
@@ -55,7 +80,10 @@ export class HabitacionesController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT-auth')
   @Roles(Role.Admin, Role.SuperAdmin)
-  updateLimpieza(@Param('id') id: string, @Body('estadoLimpieza') estadoLimpieza: string) {
+  updateLimpieza(
+    @Param('id') id: string,
+    @Body('estadoLimpieza') estadoLimpieza: string,
+  ) {
     return this.habitacionesService.updateLimpieza(id, estadoLimpieza);
   }
 
@@ -78,9 +106,13 @@ export class HabitacionesController {
     @Param('id') id: string,
     @UploadedFiles(
       new ParseFilePipeBuilder()
-        .addMaxSizeValidator({ maxSize: 10485760, message: 'El archivo supera el límite de 10 MB' })
+        .addMaxSizeValidator({
+          maxSize: 10485760,
+          message: 'El archivo supera el límite de 10 MB',
+        })
         .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY }),
-    ) files: Array<Express.Multer.File>,
+    )
+    files: Array<Express.Multer.File>,
   ) {
     return this.habitacionesService.uploadImages(id, files);
   }

@@ -1,9 +1,39 @@
-import { Controller, Get, Post, Body, Patch, Put, Param, Delete, UseGuards, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Put,
+  Param,
+  Delete,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 import { ReservationsService } from './reservations.service';
-import { ReservationStatus } from './entities/reservation.entity';
+import { Reservation, ReservationStatus } from './entities/reservation.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Public } from '../auth/decorators/public.decorator';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { StatusPipe } from '../common/pipes/status.pipe';
+
+interface PublicReservationBody {
+  cliente: {
+    nombre: string;
+    correo: string;
+    telefono: string;
+    documento: string;
+    tipoDocumento: string;
+  };
+  reserva: {
+    habitacion_id: string;
+    checkIn: string;
+    checkOut: string;
+    numeroAdultos: number;
+    numeroNinos: number;
+    notas_admin?: string;
+  };
+}
 
 @ApiTags('Reservations')
 @Controller('reservations')
@@ -13,17 +43,16 @@ export class ReservationsController {
 
   @ApiBearerAuth('JWT-auth')
   @Post()
-  create(@Body() createReservationDto: any) {
+  create(@Body() createReservationDto: Partial<Reservation>) {
     return this.reservationsService.create(createReservationDto);
   }
 
   @Public()
   @Post('book')
-  createPublicReservation(@Body() data: any) {
+  createPublicReservation(@Body() data: PublicReservationBody) {
     return this.reservationsService.createPublicReservation(data);
   }
 
-  @Public()
   @Get()
   findAll(
     @Query('page') page?: string,
@@ -37,7 +66,6 @@ export class ReservationsController {
     );
   }
 
-  @Public()
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.reservationsService.findOne(+id);
@@ -45,19 +73,28 @@ export class ReservationsController {
 
   @ApiBearerAuth('JWT-auth')
   @Patch(':id/status')
-  updateStatus(@Param('id') id: string, @Body('status') status: ReservationStatus) {
+  updateStatus(
+    @Param('id') id: string,
+    @Body(new StatusPipe(ReservationStatus)) status: ReservationStatus,
+  ) {
     return this.reservationsService.updateStatus(+id, status);
   }
 
   @ApiBearerAuth('JWT-auth')
   @Put(':id/status')
-  updateStatusPut(@Param('id') id: string, @Body('status') status: ReservationStatus) {
+  updateStatusPut(
+    @Param('id') id: string,
+    @Body(new StatusPipe(ReservationStatus)) status: ReservationStatus,
+  ) {
     return this.reservationsService.updateStatus(+id, status);
   }
 
   @ApiBearerAuth('JWT-auth')
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateReservationDto: any) {
+  update(
+    @Param('id') id: string,
+    @Body() updateReservationDto: Partial<Reservation>,
+  ) {
     return this.reservationsService.update(+id, updateReservationDto);
   }
 
@@ -69,7 +106,10 @@ export class ReservationsController {
 
   @ApiBearerAuth('JWT-auth')
   @Post(':id/huespedes')
-  addHuesped(@Param('id') id: string, @Body() huespedData: { nombre: string; documento: string }) {
+  addHuesped(
+    @Param('id') id: string,
+    @Body() huespedData: { nombre: string; documento: string },
+  ) {
     return this.reservationsService.addHuesped(+id, huespedData);
   }
 

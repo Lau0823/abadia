@@ -1,4 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { Cliente } from '../../clientes/entities/cliente.entity';
 import { Habitacion } from '../../habitaciones/entities/habitacion.entity';
 
@@ -45,7 +53,11 @@ export class Cotizacion {
   @Column({ type: 'decimal', precision: 12, scale: 2 })
   total_estimado: number;
 
-  @Column({ type: 'enum', enum: CotizacionStatus, default: CotizacionStatus.PENDING })
+  @Column({
+    type: 'enum',
+    enum: CotizacionStatus,
+    default: CotizacionStatus.PENDING,
+  })
   status: CotizacionStatus;
 
   @CreateDateColumn()

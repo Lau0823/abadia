@@ -6,7 +6,10 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 export class AppController {
   @Get()
   @ApiOperation({ summary: 'Verifica el estado de salud de la API' })
-  @ApiResponse({ status: 200, description: 'La API está funcionando correctamente.' })
+  @ApiResponse({
+    status: 200,
+    description: 'La API está funcionando correctamente.',
+  })
   checkHealth() {
     return {
       status: 'ok',

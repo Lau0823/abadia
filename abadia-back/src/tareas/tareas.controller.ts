@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { TareasService } from './tareas.service';
 import { CreateTareaDto } from './dto/create-tarea.dto';
 import { UpdateTareaDto } from './dto/update-tarea.dto';
@@ -29,7 +38,10 @@ export class TareasController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Actualizar una tarea por su id' })
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateTareaDto: UpdateTareaDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateTareaDto: UpdateTareaDto,
+  ) {
     return this.tareasService.update(id, updateTareaDto);
   }
 

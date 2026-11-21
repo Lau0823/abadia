@@ -1,7 +1,11 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Habitacion } from './entities/habitacion.entity';
+import { EstadoLimpieza, Habitacion } from './entities/habitacion.entity';
 import { CreateHabitacionDto } from './dto/create-habitacion.dto';
 import { UpdateHabitacionDto } from './dto/update-habitacion.dto';
 import { CloudinaryService } from '../common/cloudinary/cloudinary.service';
@@ -21,7 +25,7 @@ export class HabitacionesService {
 
   async findAll(): Promise<Habitacion[]> {
     return this.habitacionRepository.find({
-      order: { createdAt: 'DESC' }
+      order: { createdAt: 'DESC' },
     });
   }
 
@@ -33,18 +37,25 @@ export class HabitacionesService {
     return new Date(Date.UTC(year, month, day, hour + 5, 0, 0));
   }
 
-  async findDisponibles(checkInStr: string, checkOutStr: string): Promise<Habitacion[]> {
+  async findDisponibles(
+    checkInStr: string,
+    checkOutStr: string,
+  ): Promise<Habitacion[]> {
     const checkIn = this.normalizeDate(checkInStr, 15);
     const checkOut = this.normalizeDate(checkOutStr, 11);
 
-    const qb = this.habitacionRepository.createQueryBuilder('habitacion')
+    const qb = this.habitacionRepository
+      .createQueryBuilder('habitacion')
       .where("habitacion.estado = 'DISPONIBLE'")
-      .andWhere(qb => {
-        const subQuery = qb.subQuery()
+      .andWhere((qb) => {
+        const subQuery = qb
+          .subQuery()
           .select('reservation.habitacion_id')
           .from('reservations', 'reservation')
           .where("reservation.status NOT IN ('cancelled', 'completed')")
-          .andWhere('(reservation.checkIn < :checkOut AND reservation.checkOut > :checkIn)')
+          .andWhere(
+            '(reservation.checkIn < :checkOut AND reservation.checkOut > :checkIn)',
+          )
           .getQuery();
         return 'habitacion.id NOT IN ' + subQuery;
       })
@@ -56,14 +67,19 @@ export class HabitacionesService {
   }
 
   async findOne(id: string): Promise<Habitacion> {
-    const habitacion = await this.habitacionRepository.findOne({ where: { id } });
+    const habitacion = await this.habitacionRepository.findOne({
+      where: { id },
+    });
     if (!habitacion) {
       throw new NotFoundException(`Habitación con ID ${id} no encontrada`);
     }
     return habitacion;
   }
 
-  async update(id: string, updateHabitacionDto: UpdateHabitacionDto): Promise<Habitacion> {
+  async update(
+    id: string,
+    updateHabitacionDto: UpdateHabitacionDto,
+  ): Promise<Habitacion> {
     const habitacion = await this.findOne(id);
     Object.assign(habitacion, updateHabitacionDto);
     return this.habitacionRepository.save(habitacion);
@@ -76,22 +92,33 @@ export class HabitacionesService {
 
   async updateLimpieza(id: string, estadoLimpieza: any): Promise<Habitacion> {
     const habitacion = await this.findOne(id);
-    habitacion.estadoLimpieza = estadoLimpieza;
+    habitacion.estadoLimpieza = estadoLimpieza as EstadoLimpieza;
     return this.habitacionRepository.save(habitacion);
   }
 
-  async uploadImages(id: string, files: Express.Multer.File[]): Promise<Habitacion> {
+  async uploadImages(
+    id: string,
+    files: Express.Multer.File[],
+  ): Promise<Habitacion> {
     const habitacion = await this.findOne(id);
     if (!files || files.length === 0) {
-      throw new BadRequestException('Debe proporcionar al menos un archivo de imagen');
+      throw new BadRequestException(
+        'Debe proporcionar al menos un archivo de imagen',
+      );
     }
-    
-    const uploadPromises = files.map(file => this.cloudinaryService.uploadImage(file));
+
+    const uploadPromises = files.map((file) =>
+      this.cloudinaryService.uploadImage(file),
+    );
     const results = await Promise.all(uploadPromises).catch((error) => {
-        throw new BadRequestException(`Error al subir imágenes a Cloudinary: ${error.message}`);
+      throw new BadRequestException(
+        `Error al subir imágenes a Cloudinary: ${error instanceof Error ? error.message : String(error)}`,
+      );
     });
-    
-    habitacion.imagenes = results.map(res => res.secure_url);
+
+    habitacion.imagenes = results.map(
+      (res: { secure_url: string }) => res.secure_url,
+    );
     return this.habitacionRepository.save(habitacion);
   }
 }

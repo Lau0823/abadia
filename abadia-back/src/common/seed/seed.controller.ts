@@ -11,13 +11,13 @@ export class SeedController {
       await this.seedService.runSeed();
       return {
         message: 'Base de datos poblada exitosamente',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
-    } catch (e: any) {
+    } catch (e: unknown) {
       return {
         message: 'Error al ejecutar seeder',
-        error: e.message,
-        stack: e.stack
+        error: e instanceof Error ? e.message : String(e),
+        stack: e instanceof Error ? e.stack : undefined,
       };
     }
   }

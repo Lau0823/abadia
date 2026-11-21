@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, Inject, forwardRef } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Cotizacion, CotizacionStatus } from './entities/cotizacion.entity';
@@ -32,13 +37,15 @@ export class CotizacionesService {
           checkOut: new Date(createCotizacionDto.checkOut),
         });
         return await this.cotizacionRepository.save(cotizacion);
-      } catch (error: any) {
+      } catch (error) {
         // 23505 es el código de Postgres para violación de unique constraint
-        if (error.code === '23505') {
+        if ((error as { code?: string }).code === '23505') {
           retries--;
           offset++;
           if (retries === 0) {
-            throw new Error('No se pudo generar un número de cotización único. Por favor intente nuevamente.');
+            throw new Error(
+              'No se pudo generar un número de cotización único. Por favor intente nuevamente.',
+            );
           }
         } else {
           throw error;
@@ -49,13 +56,17 @@ export class CotizacionesService {
   }
 
   async findAll(page: number = 1, limit: number = 10, search?: string) {
-    const query = this.cotizacionRepository.createQueryBuilder('cotizacion')
+    const query = this.cotizacionRepository
+      .createQueryBuilder('cotizacion')
       .leftJoinAndSelect('cotizacion.cliente', 'cliente')
       .leftJoinAndSelect('cotizacion.habitacion', 'habitacion')
       .orderBy('cotizacion.createdAt', 'DESC');
 
     if (search) {
-      query.andWhere('(cliente.nombre ILIKE :search OR cliente.correo ILIKE :search OR cotizacion.numero_cotizacion ILIKE :search OR CAST(cotizacion.id AS TEXT) ILIKE :search OR habitacion.titulo ILIKE :search)', { search: `%${search}%` });
+      query.andWhere(
+        '(cliente.nombre ILIKE :search OR cliente.correo ILIKE :search OR cotizacion.numero_cotizacion ILIKE :search OR CAST(cotizacion.id AS TEXT) ILIKE :search OR habitacion.titulo ILIKE :search)',
+        { search: `%${search}%` },
+      );
     }
 
     const skip = (page - 1) * limit;
@@ -82,7 +93,10 @@ export class CotizacionesService {
     return cotizacion;
   }
 
-  async updateStatus(id: string, status: CotizacionStatus): Promise<Cotizacion> {
+  async updateStatus(
+    id: string,
+    status: CotizacionStatus,
+  ): Promise<Cotizacion> {
     const cotizacion = await this.findOne(id);
     cotizacion.status = status;
     return await this.cotizacionRepository.save(cotizacion);
@@ -90,7 +104,7 @@ export class CotizacionesService {
 
   async convertToReservation(id: string): Promise<any> {
     const cotizacion = await this.findOne(id);
-    
+
     if (cotizacion.status !== CotizacionStatus.PENDING) {
       throw new Error('Solo se pueden convertir cotizaciones pendientes');
     }

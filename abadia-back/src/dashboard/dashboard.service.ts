@@ -2,8 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThanOrEqual } from 'typeorm';
 import { Cliente } from '../clientes/entities/cliente.entity';
-import { Reservation, ReservationStatus } from '../reservations/entities/reservation.entity';
+import {
+  Reservation,
+  ReservationStatus,
+} from '../reservations/entities/reservation.entity';
 import { Habitacion } from '../habitaciones/entities/habitacion.entity';
+
+interface IngresosMesResult {
+  total: string;
+}
 
 @Injectable()
 export class DashboardService {
@@ -26,23 +33,37 @@ export class DashboardService {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const citasHoy = await this.reservationRepository.createQueryBuilder('reservation')
-      .where('reservation.status != :status', { status: ReservationStatus.CANCELLED })
+    const citasHoy = await this.reservationRepository
+      .createQueryBuilder('reservation')
+      .where('reservation.status != :status', {
+        status: ReservationStatus.CANCELLED,
+      })
       .andWhere('reservation.checkIn < :tomorrow', { tomorrow })
       .andWhere('reservation.checkOut >= :today', { today })
       .getCount();
 
     // 3. Ingresos del Mes (Reservations created this month, or checkIn this month)
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999);
+    const endOfMonth = new Date(
+      today.getFullYear(),
+      today.getMonth() + 1,
+      0,
+      23,
+      59,
+      59,
+      999,
+    );
 
-    const result = await this.reservationRepository.createQueryBuilder('reservation')
+    const result = await this.reservationRepository
+      .createQueryBuilder('reservation')
       .select('SUM(reservation.value)', 'total')
-      .where('reservation.status != :status', { status: ReservationStatus.CANCELLED })
+      .where('reservation.status != :status', {
+        status: ReservationStatus.CANCELLED,
+      })
       .andWhere('reservation.checkIn >= :start', { start: startOfMonth })
       .andWhere('reservation.checkIn <= :end', { end: endOfMonth })
-      .getRawOne();
-      
+      .getRawOne<IngresosMesResult>();
+
     const ingresosMes = result?.total ? parseFloat(result.total) : 0;
 
     // 4. Próximas Citas (upcoming 3 reservations from today onwards)
@@ -60,51 +81,65 @@ export class DashboardService {
     // Formatting for frontend
     const proximasCitasFormatted = proximasCitas.map((res) => {
       const checkInDate = new Date(res.checkIn);
-      const timeStr = checkInDate.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+      const timeStr = checkInDate.toLocaleTimeString('es-CO', {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
       const dateStr = checkInDate.toLocaleDateString('es-CO');
-      
+
       const isToday = checkInDate.toDateString() === today.toDateString();
-      
+
       return {
         id: res.id,
         clienteNombre: res.cliente?.nombre || 'Cliente Desconocido',
         inicial: res.cliente?.nombre?.charAt(0).toUpperCase() || 'C',
         habitacionNombre: res.habitacion?.titulo || 'Habitación',
         fechaTexto: isToday ? `Hoy, ${timeStr}` : `${dateStr}, ${timeStr}`,
-        status: res.status
+        status: res.status,
       };
     });
 
     // 5. Tasa de ocupacion y Estado de Habitaciones
-    const todasLasHabitaciones = await this.habitacionRepository.find({ order: { titulo: 'ASC' } });
+    const todasLasHabitaciones = await this.habitacionRepository.find({
+      order: { titulo: 'ASC' },
+    });
     const totalHabitaciones = todasLasHabitaciones.length;
-    
+
     // We calculate occupied rooms today
-    const activeReservations = await this.reservationRepository.createQueryBuilder('reservation')
-      .where('reservation.status != :status', { status: ReservationStatus.CANCELLED })
+    const activeReservations = await this.reservationRepository
+      .createQueryBuilder('reservation')
+      .where('reservation.status != :status', {
+        status: ReservationStatus.CANCELLED,
+      })
       .andWhere('reservation.checkIn <= :todayStr', { todayStr: today })
       .andWhere('reservation.checkOut > :todayStr', { todayStr: today })
       .getMany();
-      
+
     const occupiedToday = activeReservations.length;
-    const tasaOcupacion = totalHabitaciones > 0 ? Math.round((occupiedToday / totalHabitaciones) * 100) : 0;
+    const tasaOcupacion =
+      totalHabitaciones > 0
+        ? Math.round((occupiedToday / totalHabitaciones) * 100)
+        : 0;
 
     let huespedesAdultos = 0;
     let huespedesNinos = 0;
-    
-    activeReservations.forEach(res => {
-      huespedesAdultos += (res.numeroAdultos || 0);
-      huespedesNinos += (res.numeroNinos || 0);
+
+    activeReservations.forEach((res) => {
+      huespedesAdultos += res.numeroAdultos || 0;
+      huespedesNinos += res.numeroNinos || 0;
     });
-    
+
     const huespedesTotal = huespedesAdultos + huespedesNinos;
 
-    const estadoHabitaciones = todasLasHabitaciones.map(hab => {
-      const activeRes = activeReservations.find(res => res.habitacion_id === hab.id);
+    const estadoHabitaciones = todasLasHabitaciones.map((hab) => {
+      const activeRes = activeReservations.find(
+        (res) => res.habitacion_id === hab.id,
+      );
       const isOccupied = !!activeRes;
       let huespedesActuales = 0;
       if (isOccupied) {
-        huespedesActuales = (activeRes.numeroAdultos || 0) + (activeRes.numeroNinos || 0);
+        huespedesActuales =
+          (activeRes.numeroAdultos || 0) + (activeRes.numeroNinos || 0);
       }
       return {
         id: hab.id,
@@ -112,7 +147,7 @@ export class DashboardService {
         estado: isOccupied ? 'OCUPADA' : hab.estado, // OCUPADA if currently reserved
         estadoLimpieza: hab.estadoLimpieza,
         capacidad: hab.ocupacion,
-        huespedesActuales
+        huespedesActuales,
       };
     });
 

@@ -1,9 +1,20 @@
-import { Controller, Get, Post, Body, Param, Put, Patch, UseGuards, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Put,
+  Patch,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 import { CotizacionesService } from './cotizaciones.service';
 import { CreateCotizacionDto } from './dto/create-cotizacion.dto';
 import { CotizacionStatus } from './entities/cotizacion.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { StatusPipe } from '../common/pipes/status.pipe';
 
 @ApiTags('cotizaciones')
 @ApiBearerAuth()
@@ -40,13 +51,19 @@ export class CotizacionesController {
 
   @Put(':id/status')
   @ApiOperation({ summary: 'Actualizar el estado de una cotización' })
-  updateStatus(@Param('id') id: string, @Body('status') status: CotizacionStatus) {
+  updateStatus(
+    @Param('id') id: string,
+    @Body(new StatusPipe(CotizacionStatus)) status: CotizacionStatus,
+  ) {
     return this.cotizacionesService.updateStatus(id, status);
   }
 
   @Patch(':id/status')
   @ApiOperation({ summary: 'Actualizar el estado de una cotización (PATCH)' })
-  patchStatus(@Param('id') id: string, @Body('status') status: CotizacionStatus) {
+  patchStatus(
+    @Param('id') id: string,
+    @Body(new StatusPipe(CotizacionStatus)) status: CotizacionStatus,
+  ) {
     return this.cotizacionesService.updateStatus(id, status);
   }
 

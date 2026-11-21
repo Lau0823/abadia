@@ -17,11 +17,11 @@ import { Cliente } from '../../clientes/entities/cliente.entity';
       Reservation,
       User,
       Habitacion,
-      Cliente
-    ])
+      Cliente,
+    ]),
   ],
   controllers: [SeedController],
   providers: [SeedService],
   exports: [SeedService],
 })
-export class SeedModule { }
+export class SeedModule {}

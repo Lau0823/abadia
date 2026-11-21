@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Bitter, Outfit } from 'next/font/google';
-import { API_URL } from '@/lib/api';
+import { API_URL, fetchApi } from '@/lib/api';
 
 const bitter = Bitter({
   subsets: ['latin'],
@@ -282,7 +282,25 @@ const ESTANCIAS_DEFAULT: Estancia[] = [
   }
 ];
 
-const formatearHabitacionBackend = (hab: any): Estancia => {
+interface HabitacionBackend {
+  id: string;
+  precio: number | string;
+  imagenes?: string[];
+  imagen?: string;
+  titulo?: string;
+  subtitulo?: string;
+  ocupacion?: string;
+  descripcion?: string;
+  comodidades?: string[];
+  estado?: string;
+}
+
+interface SettingBackend {
+  clave: string;
+  valor: string;
+}
+
+const formatearHabitacionBackend = (hab: HabitacionBackend): Estancia => {
   const precioNum = Number(hab.precio) || 70000;
   const precioFormateado = `$${precioNum.toLocaleString('es-CO')}`;
 
@@ -334,6 +352,13 @@ function EstanciaFullScreenItem({
   const precioTotal = tarifaBase * personas * noches;
   const precioTotalFormateado = `$${precioTotal.toLocaleString('es-CO')}`;
 
+  const obtenerFechasReserva = () => {
+    const checkIn = fechaLlegada || new Date().toISOString().split('T')[0];
+    const fechaSalida = new Date(`${checkIn}T12:00:00`);
+    fechaSalida.setDate(fechaSalida.getDate() + noches);
+    return { checkIn, checkOut: fechaSalida.toISOString().split('T')[0] };
+  };
+
   const anterior = () => {
     setFotoIndex((prev) => (prev === 0 ? estancia.imagenes.length - 1 : prev - 1));
   };
@@ -371,9 +396,9 @@ function EstanciaFullScreenItem({
     // Si la estancia tiene ID real de base de datos, registramos la cotización en el backend
     if (estancia.id && !estancia.id.startsWith('estancia-')) {
       try {
-        await fetch(`${API_URL}/reservations/book`, {
+        const { checkIn, checkOut } = obtenerFechasReserva();
+        await fetchApi('/reservations/book', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             cliente: {
               nombre: 'Interesado Web',
@@ -384,8 +409,8 @@ function EstanciaFullScreenItem({
             },
             reserva: {
               habitacion_id: estancia.id,
-              checkIn: fechaLlegada || new Date().toISOString().split('T')[0],
-              checkOut: fechaLlegada || new Date(Date.now() + 86400000).toISOString().split('T')[0],
+              checkIn,
+              checkOut,
               numeroAdultos: personas,
               numeroNinos: 0
             }
@@ -393,6 +418,7 @@ function EstanciaFullScreenItem({
         });
       } catch (err) {
         console.error("Error registrando cotización:", err);
+        alert("No pudimos registrar la cotización en el sistema, pero puedes continuar por WhatsApp.");
       }
     }
 
@@ -411,9 +437,9 @@ function EstanciaFullScreenItem({
     // Registra la reserva en el backend
     if (estancia.id && !estancia.id.startsWith('estancia-')) {
       try {
-        await fetch(`${API_URL}/reservations/book`, {
+        const { checkIn, checkOut } = obtenerFechasReserva();
+        await fetchApi('/reservations/book', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             cliente: {
               nombre: 'Reserva Directa Web',
@@ -424,8 +450,8 @@ function EstanciaFullScreenItem({
             },
             reserva: {
               habitacion_id: estancia.id,
-              checkIn: fechaLlegada || new Date().toISOString().split('T')[0],
-              checkOut: fechaLlegada || new Date(Date.now() + 86400000).toISOString().split('T')[0],
+              checkIn,
+              checkOut,
               numeroAdultos: personas,
               numeroNinos: 0
             }
@@ -433,6 +459,7 @@ function EstanciaFullScreenItem({
         });
       } catch (err) {
         console.error("Error registrando reserva:", err);
+        alert("No pudimos registrar la reserva en el sistema. Intenta nuevamente o continúa por WhatsApp.");
       }
     }
 
@@ -796,16 +823,15 @@ export default function PaginaHabitaciones() {
   const [estancias, setEstancias] = useState<Estancia[]>(ESTANCIAS_DEFAULT);
   const [videosHero, setVideosHero] = useState(VIDEOS_HERO_HABITACIONES);
   const [videosMitad, setVideosMitad] = useState(VIDEOS_MITAD_HABITACIONES);
-  const [cargando, setCargando] = useState(true);
 
   // 1. Cargar habitaciones dinámicas desde el backend
   useEffect(() => {
     fetch(`${API_URL}/habitaciones`)
       .then(res => res.json())
       .then(data => {
-        const lista = Array.isArray(data) ? data : data?.data || [];
+        const lista = (Array.isArray(data) ? data : data?.data || []) as HabitacionBackend[];
         if (lista.length > 0) {
-          const activas = lista.filter((h: any) => h.estado !== 'MANTENIMIENTO');
+          const activas = lista.filter((h: HabitacionBackend) => h.estado !== 'MANTENIMIENTO');
           if (activas.length > 0) {
             setEstancias(activas.map(formatearHabitacionBackend));
           }
@@ -813,19 +839,19 @@ export default function PaginaHabitaciones() {
       })
       .catch(err => {
         console.warn("Utilizando catálogo predeterminado:", err);
-      })
-      .finally(() => setCargando(false));
+      });
   }, []);
 
   // 2. Cargar videos configurados en multimedia desde el backend
   useEffect(() => {
     fetch(`${API_URL}/settings`)
       .then(res => res.json())
-      .then(settings => {
-        if (Array.isArray(settings)) {
-          const v1 = settings.find((s: any) => s.clave === 'hero_video_1')?.valor;
-          const v2 = settings.find((s: any) => s.clave === 'hero_video_2')?.valor;
-          const vMid = settings.find((s: any) => s.clave === 'video_mid')?.valor;
+      .then(settingsData => {
+        const settings = (Array.isArray(settingsData) ? settingsData : []) as SettingBackend[];
+        if (settings.length > 0) {
+          const v1 = settings.find((s: SettingBackend) => s.clave === 'hero_video_1')?.valor;
+          const v2 = settings.find((s: SettingBackend) => s.clave === 'hero_video_2')?.valor;
+          const vMid = settings.find((s: SettingBackend) => s.clave === 'video_mid')?.valor;
 
           const nuevosHero: { id: number; src: string; poster: string }[] = [];
           if (v1) nuevosHero.push({ id: 1, src: v1, poster: "" });

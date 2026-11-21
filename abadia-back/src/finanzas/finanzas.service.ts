@@ -11,7 +11,9 @@ export class FinanzasService {
     private transaccionRepository: Repository<Transaccion>,
   ) {}
 
-  async create(createTransaccionDto: CreateTransaccionDto): Promise<Transaccion> {
+  async create(
+    createTransaccionDto: CreateTransaccionDto,
+  ): Promise<Transaccion> {
     const transaccion = this.transaccionRepository.create({
       ...createTransaccionDto,
       fecha: new Date(createTransaccionDto.fecha),

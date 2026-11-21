@@ -1,5 +1,8 @@
-import { IsEnum, IsNumber, IsOptional, IsString, IsUUID } from 'class-validator';
-import { TipoTransaccion, CategoriaTransaccion } from '../entities/transaccion.entity';
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  TipoTransaccion,
+  CategoriaTransaccion,
+} from '../entities/transaccion.entity';
 
 export class CreateTransaccionDto {
   @IsNumber()

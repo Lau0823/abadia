@@ -1,9 +1,26 @@
-import { Controller, Get, Post, Body, Param, UseGuards, UseInterceptors, UploadedFile, Header, ParseFilePipeBuilder, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  UseGuards,
+  UseInterceptors,
+  UploadedFile,
+  Header,
+  ParseFilePipeBuilder,
+  HttpStatus,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { SettingsService } from './settings.service';
 import { Public } from '../auth/decorators/public.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiConsumes,
+} from '@nestjs/swagger';
 
 @ApiTags('Settings')
 @Controller('settings')
@@ -29,7 +46,12 @@ export class SettingsController {
   @ApiBearerAuth('JWT-auth')
   @Post('batch')
   @ApiOperation({ summary: 'Actualiza múltiples ajustes (Requiere Auth)' })
-  upsertMany(@Body() body: { settings: { key: string; value: string; description?: string }[] }) {
+  upsertMany(
+    @Body()
+    body: {
+      settings: { key: string; value: string; description?: string }[];
+    },
+  ) {
     return this.settingsService.upsertMany(body.settings);
   }
 
@@ -44,14 +66,21 @@ export class SettingsController {
   @Post('upload-image/:key')
   @UseInterceptors(FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
-  @ApiOperation({ summary: 'Sube un archivo (imagen o video) para un ajuste específico (Requiere Auth)' })
+  @ApiOperation({
+    summary:
+      'Sube un archivo (imagen o video) para un ajuste específico (Requiere Auth)',
+  })
   uploadFile(
     @Param('key') key: string,
     @UploadedFile(
       new ParseFilePipeBuilder()
-        .addMaxSizeValidator({ maxSize: 10485760, message: 'El archivo supera el límite de 10 MB' })
+        .addMaxSizeValidator({
+          maxSize: 10485760,
+          message: 'El archivo supera el límite de 10 MB',
+        })
         .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY }),
-    ) file: Express.Multer.File,
+    )
+    file: Express.Multer.File,
   ) {
     return this.settingsService.uploadFile(key, file);
   }

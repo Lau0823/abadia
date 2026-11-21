@@ -1,5 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany, OneToOne, Index } from 'typeorm';
-import { User } from '../../users/entities/user.entity'; 
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  OneToOne,
+  Index,
+} from 'typeorm';
+import { User } from '../../users/entities/user.entity';
 @Entity('clientes')
 export class Cliente {
   @PrimaryGeneratedColumn()
@@ -21,7 +28,6 @@ export class Cliente {
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
 
-  @OneToOne(() => User, user => user.cliente, { nullable: true }) 
+  @OneToOne(() => User, (user) => user.cliente, { nullable: true })
   user: User;
-
 }

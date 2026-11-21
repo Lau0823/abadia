@@ -6,22 +6,30 @@ import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../../users/users.service';
 import { Request } from 'express';
 
+interface JwtPayload {
+  sub: number;
+  username: string;
+  rol: string;
+}
+
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   private readonly logger = new Logger(JwtStrategy.name);
 
   constructor(
     private configService: ConfigService,
-    private usersService: UsersService
+    private usersService: UsersService,
   ) {
     const secret = configService.get<string>('JWT_SECRET');
     if (!secret) {
-      throw new Error('JWT_SECRET no está definido en las variables de entorno.');
+      throw new Error(
+        'JWT_SECRET no está definido en las variables de entorno.',
+      );
     }
     super({
       // Soportar tanto cookie como header Authorization: Bearer
       jwtFromRequest: ExtractJwt.fromExtractors([
-        (req: Request) => req?.cookies?.['jwt'] || null,
+        (req: Request) => (req?.cookies?.['jwt'] || null) as string | null,
         ExtractJwt.fromAuthHeaderAsBearerToken(),
       ]),
       ignoreExpiration: false,
@@ -33,7 +41,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
    * Valida el payload (contenido) del JWT.
    * Se ejecuta si el token es válido y no ha expirado.
    */
-  async validate(payload: any) {
+  async validate(payload: JwtPayload) {
     const user = await this.usersService.findOne(payload.sub);
 
     if (!user) {
@@ -42,10 +50,19 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     }
 
     if (user.rol !== payload.rol) {
-      this.logger.warn(`Inconsistencia de rol para "${(user as any).username}". DB: "${user.rol}", Token: "${payload.rol}"`);
-      throw new UnauthorizedException('Token desactualizado. Vuelve a iniciar sesión.');
+      this.logger.warn(
+        `Inconsistencia de rol para "${user.username}". DB: "${user.rol}", Token: "${payload.rol}"`,
+      );
+      throw new UnauthorizedException(
+        'Token desactualizado. Vuelve a iniciar sesión.',
+      );
     }
 
-    return { id: user.id, username: (user as any).username, rol: user.rol, cliente_id: (user as any).cliente_id };
+    return {
+      id: user.id,
+      username: user.username,
+      rol: user.rol,
+      cliente_id: user.cliente_id,
+    };
   }
-}
+}

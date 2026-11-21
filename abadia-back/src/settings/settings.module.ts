@@ -7,10 +7,7 @@ import { Setting } from './entities/setting.entity';
 import { CloudinaryModule } from '../common/cloudinary/cloudinary.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Setting]),
-    CloudinaryModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Setting]), CloudinaryModule],
   controllers: [SettingsController],
   providers: [SettingsService],
   exports: [SettingsService],

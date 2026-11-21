@@ -1,6 +1,14 @@
 // src/users/entities/user.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany, OneToOne, JoinColumn, Index } from 'typeorm';
-import { Cliente } from '../../clientes/entities/cliente.entity'; 
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  OneToOne,
+  JoinColumn,
+  Index,
+} from 'typeorm';
+import { Cliente } from '../../clientes/entities/cliente.entity';
 
 @Entity('users')
 export class User {
@@ -23,7 +31,7 @@ export class User {
   @Column({ length: 500, nullable: true })
   foto_perfil_url: string;
 
-  @Column({ length: 50, default: 'employee' }) 
+  @Column({ length: 50, default: 'employee' })
   rol: string;
 
   @Column({ length: 20, nullable: true })
@@ -32,11 +40,10 @@ export class User {
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
 
-  @OneToOne(() => Cliente, cliente => cliente.user, { nullable: true }) 
-  @JoinColumn({ name: 'cliente_id' }) 
+  @OneToOne(() => Cliente, (cliente) => cliente.user, { nullable: true })
+  @JoinColumn({ name: 'cliente_id' })
   cliente: Cliente;
 
-  @Column({ type: 'int', nullable: true }) 
-  cliente_id: number | null; 
-
+  @Column({ type: 'int', nullable: true })
+  cliente_id: number | null;
 }

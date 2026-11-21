@@ -26,12 +26,14 @@ export class FacturasService {
           numero_factura,
         });
         return await this.facturaRepository.save(factura);
-      } catch (error: any) {
-        if (error.code === '23505') {
+      } catch (error) {
+        if ((error as { code?: string }).code === '23505') {
           retries--;
           offset++;
           if (retries === 0) {
-            throw new Error('No se pudo generar un número de factura único. Por favor intente nuevamente.');
+            throw new Error(
+              'No se pudo generar un número de factura único. Por favor intente nuevamente.',
+            );
           }
         } else {
           throw error;
@@ -42,13 +44,17 @@ export class FacturasService {
   }
 
   async findAll(page: number = 1, limit: number = 10, search?: string) {
-    const query = this.facturaRepository.createQueryBuilder('factura')
+    const query = this.facturaRepository
+      .createQueryBuilder('factura')
       .leftJoinAndSelect('factura.reserva', 'reserva')
       .leftJoinAndSelect('factura.cliente', 'cliente')
       .orderBy('factura.createdAt', 'DESC');
 
     if (search) {
-      query.andWhere('(cliente.nombre ILIKE :search OR cliente.correo ILIKE :search OR factura.numero_factura ILIKE :search OR CAST(factura.id AS TEXT) ILIKE :search)', { search: `%${search}%` });
+      query.andWhere(
+        '(cliente.nombre ILIKE :search OR cliente.correo ILIKE :search OR factura.numero_factura ILIKE :search OR CAST(factura.id AS TEXT) ILIKE :search)',
+        { search: `%${search}%` },
+      );
     }
 
     const skip = (page - 1) * limit;

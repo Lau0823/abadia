@@ -1,10 +1,22 @@
 // src/auth/guards/jwt-auth.guard.ts
-import { Injectable, ExecutionContext, UnauthorizedException, ForbiddenException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  ExecutionContext,
+  UnauthorizedException,
+  ForbiddenException,
+  Logger,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 import { ROLES_KEY } from '../decorators/roles.decorator';
 import { Role } from '../../common/enums/role.enum';
+
+interface AuthenticatedRequest {
+  user?: {
+    rol: Role;
+  };
+}
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -24,7 +36,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     }
 
     try {
-      const authResult = await super.canActivate(context) as boolean;
+      const authResult = (await super.canActivate(context)) as boolean;
 
       if (!authResult) {
         throw new UnauthorizedException('Token de autenticación inválido.');
@@ -32,10 +44,14 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
       return this.checkRoles(context);
     } catch (err) {
-      if (err instanceof UnauthorizedException || err instanceof ForbiddenException) {
+      if (
+        err instanceof UnauthorizedException ||
+        err instanceof ForbiddenException
+      ) {
         throw err;
       }
-      throw new UnauthorizedException('Error de autenticación: ' + err.message);
+      const message = err instanceof Error ? err.message : String(err);
+      throw new UnauthorizedException('Error de autenticación: ' + message);
     }
   }
 
@@ -49,7 +65,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       return true;
     }
 
-    const { user } = context.switchToHttp().getRequest();
+    const { user } = context.switchToHttp().getRequest<AuthenticatedRequest>();
 
     if (!user || !user.rol) {
       throw new ForbiddenException('Rol de usuario no definido.');
@@ -58,7 +74,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const hasRole = requiredRoles.some((role) => user.rol === role);
 
     if (!hasRole) {
-      throw new ForbiddenException(`Rol requerido: ${requiredRoles.join(', ')}. Tu rol: ${user.rol}.`);
+      throw new ForbiddenException(
+        `Rol requerido: ${requiredRoles.join(', ')}. Tu rol: ${user.rol}.`,
+      );
     }
 
     return true;

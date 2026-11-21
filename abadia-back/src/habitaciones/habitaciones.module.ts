@@ -6,10 +6,7 @@ import { Habitacion } from './entities/habitacion.entity';
 import { CloudinaryModule } from '../common/cloudinary/cloudinary.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Habitacion]),
-    CloudinaryModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Habitacion]), CloudinaryModule],
   controllers: [HabitacionesController],
   providers: [HabitacionesService],
   exports: [HabitacionesService],

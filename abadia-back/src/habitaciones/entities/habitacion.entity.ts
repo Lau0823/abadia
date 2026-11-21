@@ -1,14 +1,20 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 export enum EstadoHabitacion {
   DISPONIBLE = 'DISPONIBLE',
   MANTENIMIENTO = 'MANTENIMIENTO',
-  FUERA_DE_SERVICIO = 'FUERA_DE_SERVICIO'
+  FUERA_DE_SERVICIO = 'FUERA_DE_SERVICIO',
 }
 
 export enum EstadoLimpieza {
   LIMPIA = 'LIMPIA',
-  POR_ASEAR = 'POR_ASEAR'
+  POR_ASEAR = 'POR_ASEAR',
 }
 
 @Entity('habitaciones')
@@ -37,10 +43,18 @@ export class Habitacion {
   @Column('simple-array', { nullable: true })
   comodidades: string[]; // Ej. ["Nevera", "WiFi"]
 
-  @Column({ type: 'enum', enum: EstadoHabitacion, default: EstadoHabitacion.DISPONIBLE })
+  @Column({
+    type: 'enum',
+    enum: EstadoHabitacion,
+    default: EstadoHabitacion.DISPONIBLE,
+  })
   estado: EstadoHabitacion;
 
-  @Column({ type: 'enum', enum: EstadoLimpieza, default: EstadoLimpieza.LIMPIA })
+  @Column({
+    type: 'enum',
+    enum: EstadoLimpieza,
+    default: EstadoLimpieza.LIMPIA,
+  })
   estadoLimpieza: EstadoLimpieza;
 
   @CreateDateColumn()

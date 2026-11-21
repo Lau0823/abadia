@@ -22,11 +22,19 @@ export class MailService {
     });
 
     if (!this.mailUser) {
-      this.logger.warn('MAIL_USER no está configurado. Los emails no se enviarán.');
+      this.logger.warn(
+        'MAIL_USER no está configurado. Los emails no se enviarán.',
+      );
     }
   }
 
-  async sendReservationConfirmation(to: string, clientName: string, serviceType: string, date: string, time: string) {
+  async sendReservationConfirmation(
+    to: string,
+    clientName: string,
+    serviceType: string,
+    date: string,
+    time: string,
+  ) {
     if (!to) {
       this.logger.warn('No se pudo enviar email: Destinatario vacío');
       return;
@@ -73,7 +81,10 @@ export class MailService {
       });
       this.logger.log(`Email enviado a ${to}`);
     } catch (error) {
-      this.logger.error(`Error enviando email a ${to}:`, error.message);
+      this.logger.error(
+        `Error enviando email a ${to}:`,
+        error instanceof Error ? error.message : String(error),
+      );
     }
   }
 }
