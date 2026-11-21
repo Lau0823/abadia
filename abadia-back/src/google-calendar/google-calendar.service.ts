@@ -86,4 +86,25 @@ export class GoogleCalendarService {
       throw error;
     }
   }
+
+  async deleteEvent(eventId: string) {
+    const hasTokens = await this.loadTokensFromDb();
+    if (!hasTokens) {
+      this.logger.warn('Google Calendar no está vinculado (no hay tokens en la BD).');
+      return false;
+    }
+
+    const calendar = google.calendar({ version: 'v3', auth: this.oauth2Client });
+
+    try {
+      await calendar.events.delete({
+        calendarId: 'primary',
+        eventId,
+      });
+      return true;
+    } catch (error) {
+      this.logger.warn(`No se pudo eliminar el evento ${eventId} en Google Calendar: ${error.message}`);
+      return false;
+    }
+  }
 }

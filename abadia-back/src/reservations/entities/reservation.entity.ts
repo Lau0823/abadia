@@ -6,6 +6,7 @@ import { Huesped } from './huesped.entity';
 export enum ReservationStatus {
     PENDING = 'pending',
     CONFIRMED = 'confirmed',
+    IN_HOUSE = 'in_house',
     CANCELLED = 'cancelled',
     COMPLETED = 'completed',
 }

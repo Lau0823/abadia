@@ -1,5 +1,6 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Put, Param, Delete, UseGuards, Query } from '@nestjs/common';
 import { ReservationsService } from './reservations.service';
+import { ReservationStatus } from './entities/reservation.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Public } from '../auth/decorators/public.decorator';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
@@ -40,6 +41,18 @@ export class ReservationsController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.reservationsService.findOne(+id);
+  }
+
+  @ApiBearerAuth('JWT-auth')
+  @Patch(':id/status')
+  updateStatus(@Param('id') id: string, @Body('status') status: ReservationStatus) {
+    return this.reservationsService.updateStatus(+id, status);
+  }
+
+  @ApiBearerAuth('JWT-auth')
+  @Put(':id/status')
+  updateStatusPut(@Param('id') id: string, @Body('status') status: ReservationStatus) {
+    return this.reservationsService.updateStatus(+id, status);
   }
 
   @ApiBearerAuth('JWT-auth')

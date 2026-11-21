@@ -221,7 +221,30 @@ export class ReservationsService {
       }
     }
 
+    // Si el estado cambió a 'cancelled' (Anular reserva)
+    if (oldReservation.status !== ReservationStatus.CANCELLED && updated.status === ReservationStatus.CANCELLED) {
+      if (oldReservation.googleEventId) {
+        try {
+          await this.googleCalendarService.deleteEvent(oldReservation.googleEventId);
+          await this.reservationRepository.createQueryBuilder()
+            .update(Reservation)
+            .set({ googleEventId: () => 'NULL' })
+            .where('id = :id', { id: updated.id })
+            .execute();
+        } catch (calError) {
+          this.logger.warn(`No se pudo eliminar evento de Google Calendar al anular reserva: ${calError.message}`);
+        }
+      }
+    }
+
     return updated;
+  }
+
+  async updateStatus(id: number, status: ReservationStatus) {
+    if (!status || !Object.values(ReservationStatus).includes(status)) {
+      throw new BadRequestException(`Estado inválido: ${status}`);
+    }
+    return this.update(id, { status });
   }
 
   async remove(id: number) {
