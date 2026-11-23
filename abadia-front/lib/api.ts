@@ -1,11 +1,20 @@
+import { mockFetchApi } from './mockApi';
+
 const isServer = typeof window === 'undefined';
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || (isServer ? 'http://127.0.0.1:3102' : '/api');
+
+// En la rama front-admin-mock usamos datos harcodeados por defecto para no requerir backend ni PostgreSQL.
+const USE_MOCK_API = process.env.NEXT_PUBLIC_USE_REAL_API !== 'true';
 
 export interface FetchApiOptions extends RequestInit {
   isFormData?: boolean;
 }
 
 export async function fetchApi(endpoint: string, options: FetchApiOptions = {}) {
+  if (USE_MOCK_API) {
+    return mockFetchApi(endpoint, options);
+  }
+
   const url = `${API_URL}${endpoint}`;
   const { isFormData, headers: customHeaders, ...fetchOptions } = options;
 

@@ -36,8 +36,7 @@ export default function SuiteDetailPage() {
 
   useEffect(() => {
     if (id) {
-      fetch(`${API_URL}/habitaciones/${id}`)
-        .then(res => res.json())
+      fetchApi(`/habitaciones/${id}`)
         .then(data => {
           if (data && !data.error) {
             setSuite({

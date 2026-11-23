@@ -826,8 +826,7 @@ export default function PaginaHabitaciones() {
 
   // 1. Cargar habitaciones dinámicas desde el backend
   useEffect(() => {
-    fetch(`${API_URL}/habitaciones`)
-      .then(res => res.json())
+    fetchApi(`/habitaciones`)
       .then(data => {
         const lista = (Array.isArray(data) ? data : data?.data || []) as HabitacionBackend[];
         if (lista.length > 0) {
@@ -844,8 +843,7 @@ export default function PaginaHabitaciones() {
 
   // 2. Cargar videos configurados en multimedia desde el backend
   useEffect(() => {
-    fetch(`${API_URL}/settings`)
-      .then(res => res.json())
+    fetchApi(`/settings`)
       .then(settingsData => {
         const settings = (Array.isArray(settingsData) ? settingsData : []) as SettingBackend[];
         if (settings.length > 0) {
