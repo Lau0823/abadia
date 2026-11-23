@@ -1,11 +1,9 @@
 import React from 'react';
-import './globals.css'; // Importa tus estilos globales
-import Navigation from '../components/ui/Navigation';
-import BottomFloatingGlassNav from '../components/BottomFloatingMenu';
+import './globals.css';
 
 export const metadata = {
-  title: 'Abadía Hotel Boutique',
-  description: 'Un espacio exclusivo diseñado para la calma.',
+  title: 'Dashboard | Abadía',
+  description: 'Panel de administración de Abadía (solo frontend)',
 };
 
 export default function RootLayout({
@@ -15,11 +13,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es" data-scroll-behavior="smooth" suppressHydrationWarning>
-      <body suppressHydrationWarning>
-        <Navigation />
-        {children}
-        <BottomFloatingGlassNav />
-      </body>
+      <body suppressHydrationWarning>{children}</body>
     </html>
   );
 }

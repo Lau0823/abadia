@@ -80,26 +80,9 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
     });
   };
 
-  useEffect(() => {
-    if (!loading && !isAuthenticated) {
-      router.push("/login");
-    }
-  }, [loading, isAuthenticated, router]);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get("google") === "success") {
-        setToastMessage("¡Google Calendar conectado exitosamente!");
-        window.history.replaceState({}, document.title, pathname);
-        setTimeout(() => setToastMessage(null), 5000);
-      }
-    }
-  }, [pathname]);
-
   const handleLogout = async () => {
-    await logout();
-    router.push("/login");
+    setToastMessage("Modo demo: sesión de administrador fija (sin login).");
+    setTimeout(() => setToastMessage(null), 3000);
   };
 
   if (loading) {
