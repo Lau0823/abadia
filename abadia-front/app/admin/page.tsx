@@ -131,7 +131,7 @@ export default function AdminDashboard() {
             </Link>
 
             <Link
-              href="/admin/reservas"
+              href="/admin/cotizaciones-reservas"
               className="flex items-center gap-2 bg-[#A5C5E2] hover:bg-white text-[#1A2458] px-5 py-3 rounded-2xl text-xs font-bold transition-all shadow-md hover:scale-[1.02]"
             >
               <span>Gestionar Reservas</span>
@@ -363,7 +363,7 @@ export default function AdminDashboard() {
               ) : (
                 data.proximasCitas.map((cita: any, idx: number) => (
                   <Link
-                    href="/admin/reservas"
+                    href="/admin/cotizaciones-reservas"
                     key={cita.id}
                     className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-[#F4F6FB]/75 hover:bg-[#A5C5E2]/30 transition-all border border-transparent hover:border-[#A5C5E2] group"
                   >
@@ -389,7 +389,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <Link href="/admin/reservas" className="block mt-6">
+          <Link href="/admin/cotizaciones-reservas" className="block mt-6">
             <button
               type="button"
               className="w-full py-3.5 rounded-full bg-[#1A2458] hover:bg-[#473C8F] text-white text-xs font-bold tracking-wide transition-colors shadow-sm cursor-pointer"
