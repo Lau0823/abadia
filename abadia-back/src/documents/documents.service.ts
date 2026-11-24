@@ -136,7 +136,7 @@ export class DocumentsService {
     // Logo oficial de Abadía
     const logoPath = this.resolveLogoPath();
     if (logoPath) {
-      doc.image(logoPath, 46, 16, { fit: [120, 106], align: 'left', valign: 'center' });
+      doc.image(logoPath, 46, 16, { fit: [120, 106], valign: 'center' });
     } else {
       doc
         .fillColor(this.colorBlanco)

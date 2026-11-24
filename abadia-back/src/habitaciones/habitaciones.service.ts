@@ -95,9 +95,6 @@ export class HabitacionesService {
           removedImages.map((url) => this.cloudinaryService.deleteByUrl(url)),
         );
       }
-      if (habitacion.imagen && !nextImages.includes(habitacion.imagen)) {
-        habitacion.imagen = nextImages[0] ?? (null as any);
-      }
     }
 
     Object.assign(habitacion, updateHabitacionDto);
@@ -106,18 +103,15 @@ export class HabitacionesService {
 
   async remove(id: string): Promise<void> {
     const habitacion = await this.findOne(id);
-    const urlsToDelete = new Set<string>(habitacion.imagenes || []);
-    if (habitacion.imagen) {
-      urlsToDelete.add(habitacion.imagen);
-    }
+    const urlsToDelete = Array.isArray(habitacion.imagenes)
+      ? [...habitacion.imagenes]
+      : [];
 
     await this.habitacionRepository.remove(habitacion);
 
-    if (urlsToDelete.size > 0) {
+    if (urlsToDelete.length > 0) {
       await Promise.allSettled(
-        Array.from(urlsToDelete).map((url) =>
-          this.cloudinaryService.deleteByUrl(url),
-        ),
+        urlsToDelete.map((url) => this.cloudinaryService.deleteByUrl(url)),
       );
     }
   }
@@ -163,9 +157,6 @@ export class HabitacionesService {
       (res: { secure_url: string }) => res.secure_url,
     );
     habitacion.imagenes = [...existingImages, ...newUrls];
-    if (!habitacion.imagen && habitacion.imagenes.length > 0) {
-      habitacion.imagen = habitacion.imagenes[0];
-    }
     return this.habitacionRepository.save(habitacion);
   }
 }
