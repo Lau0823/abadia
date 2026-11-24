@@ -26,8 +26,8 @@ export default function HabitacionModal({ isOpen, onClose, onSuccess, habitacion
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [previews, setPreviews] = useState<string[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [newFiles, setNewFiles] = useState<{ file: File; previewUrl: string }[]>([]);
   const [isDragging, setIsDragging] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -62,7 +62,7 @@ export default function HabitacionModal({ isOpen, onClose, onSuccess, habitacion
           descripcion: habitacion.descripcion || "",
           estado: habitacion.estado || "DISPONIBLE"
         });
-        setPreviews(habitacion.imagenes || []);
+        setExistingImages(Array.isArray(habitacion.imagenes) ? [...habitacion.imagenes] : []);
         setComodidades(habitacion.comodidades || []);
       } else {
         setFormData({
@@ -74,10 +74,10 @@ export default function HabitacionModal({ isOpen, onClose, onSuccess, habitacion
           descripcion: "",
           estado: "DISPONIBLE"
         });
-        setPreviews([]);
+        setExistingImages([]);
         setComodidades([]);
       }
-      setSelectedFiles([]);
+      setNewFiles([]);
       setError("");
     }
   }, [isOpen, habitacion]);
@@ -96,16 +96,37 @@ export default function HabitacionModal({ isOpen, onClose, onSuccess, habitacion
   };
 
   const processFiles = (files: File[]) => {
-    const combined = [...selectedFiles, ...files].slice(0, 5); // Límite de 5 imágenes
-    setSelectedFiles(combined);
-    // Mostrar las existentes más las nuevas
-    const existingPreviews = habitacion && selectedFiles.length === 0 ? (habitacion.imagenes || []) : [];
-    setPreviews([...existingPreviews, ...combined.map(f => URL.createObjectURL(f))].slice(0, 5));
+    const availableSlots = Math.max(0, 5 - existingImages.length - newFiles.length);
+    if (availableSlots === 0) {
+      setError("Máximo 5 imágenes por habitación. Elimina alguna para agregar nuevas.");
+      return;
+    }
+    const added = files.slice(0, availableSlots).map((file) => ({
+      file,
+      previewUrl: URL.createObjectURL(file),
+    }));
+    setNewFiles((prev) => [...prev, ...added]);
+    setError("");
+  };
+
+  const handleRemoveExistingImage = (idx: number) => {
+    setExistingImages((prev) => prev.filter((_, i) => i !== idx));
+    setError("");
+  };
+
+  const handleRemoveNewFile = (idx: number) => {
+    setNewFiles((prev) => {
+      const target = prev[idx];
+      if (target) URL.revokeObjectURL(target.previewUrl);
+      return prev.filter((_, i) => i !== idx);
+    });
+    setError("");
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       processFiles(Array.from(e.target.files));
+      e.target.value = "";
     }
   };
 
@@ -139,7 +160,7 @@ export default function HabitacionModal({ isOpen, onClose, onSuccess, habitacion
     setSaving(true);
     
     try {
-      const totalImages = selectedFiles.length > 0 ? selectedFiles.length : (habitacion?.imagenes?.length || 0);
+      const totalImages = existingImages.length + newFiles.length;
       if (totalImages < 1 || totalImages > 5) {
         setError("La habitación debe tener entre 1 y 5 imágenes.");
         setSaving(false);
@@ -148,7 +169,7 @@ export default function HabitacionModal({ isOpen, onClose, onSuccess, habitacion
 
       const ocupacionStr = `Máx. ${formData.capacidadAdultos} Adultos${formData.capacidadNinos > 0 ? ` + ${formData.capacidadNinos} Niño${formData.capacidadNinos > 1 ? 's' : ''}` : ''}`;
 
-      const payload = {
+      const payload: Record<string, any> = {
         titulo: formData.titulo,
         subtitulo: formData.subtitulo,
         precio: Number(formData.precio),
@@ -160,8 +181,9 @@ export default function HabitacionModal({ isOpen, onClose, onSuccess, habitacion
 
       let roomId = "";
       if (habitacion && habitacion.id) {
-        // Edit
+        // Edit: enviamos las imágenes existentes que se conservaron para eliminar de Cloudinary las quitadas
         roomId = habitacion.id;
+        payload.imagenes = existingImages;
         await fetchApi(`/habitaciones/${roomId}`, {
           method: "PATCH",
           body: JSON.stringify(payload)
@@ -175,10 +197,10 @@ export default function HabitacionModal({ isOpen, onClose, onSuccess, habitacion
         roomId = created?.id || created?.data?.id;
       }
 
-      // Upload images if selected
-      if (selectedFiles.length > 0 && roomId) {
+      // Upload new images (se agregan a las que quedaron)
+      if (newFiles.length > 0 && roomId) {
         const formDataUpload = new FormData();
-        selectedFiles.forEach(file => {
+        newFiles.forEach(({ file }) => {
           formDataUpload.append("files", file);
         });
         
@@ -233,7 +255,7 @@ export default function HabitacionModal({ isOpen, onClose, onSuccess, habitacion
                   <TooltipTrigger asChild>
                     <span className="ml-2 inline-flex items-center justify-center w-4 h-4 rounded-full bg-gray-200 text-gray-500 text-[10px] cursor-help">?</span>
                   </TooltipTrigger>
-                  <TooltipContent>Mínimo 1 y máximo 5 imágenes. Si subes nuevas, reemplazarán a las actuales.</TooltipContent>
+                  <TooltipContent>Mínimo 1 y máximo 5 imágenes. Puedes eliminar fotos existentes o agregar nuevas sin perder las demás.</TooltipContent>
                 </Tooltip>
               </label>
               
@@ -255,15 +277,45 @@ export default function HabitacionModal({ isOpen, onClose, onSuccess, habitacion
                     <input ref={fileInputRef} id="file-upload" name="file-upload" type="file" className="sr-only" multiple accept="image/*" onChange={handleFileChange} />
                     <p>o arrastra y suelta aquí</p>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">PNG, JPG hasta 10MB c/u (Min 1, Max 5)</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    PNG, JPG hasta 10MB c/u ({existingImages.length + newFiles.length}/5)
+                  </p>
                 </div>
               </div>
 
-              {previews.length > 0 && (
-                <div className="mt-3 grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-40 overflow-y-auto p-1">
-                  {previews.map((src, idx) => (
-                    <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 shadow-sm">
-                      <img src={src} alt={`Preview ${idx + 1}`} className="w-full h-full object-cover" />
+              {(existingImages.length > 0 || newFiles.length > 0) && (
+                <div className="mt-3 grid grid-cols-3 sm:grid-cols-5 gap-2 max-h-44 overflow-y-auto p-1">
+                  {existingImages.map((src, idx) => (
+                    <div key={`existing-${idx}`} className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 shadow-sm group/img">
+                      <img src={src} alt={`Imagen ${idx + 1}`} className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveExistingImage(idx)}
+                        title="Eliminar foto"
+                        className="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-600/90 hover:bg-red-700 text-white flex items-center justify-center shadow-md transition-transform hover:scale-105 cursor-pointer"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                  {newFiles.map((item, idx) => (
+                    <div key={`new-${idx}`} className="relative aspect-square rounded-lg overflow-hidden border-2 border-(--mv-blue)/60 shadow-sm group/img">
+                      <img src={item.previewUrl} alt={`Nueva ${idx + 1}`} className="w-full h-full object-cover" />
+                      <span className="absolute bottom-1 left-1 bg-(--mv-blue)/90 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">
+                        Nueva
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveNewFile(idx)}
+                        title="Quitar foto"
+                        className="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-600/90 hover:bg-red-700 text-white flex items-center justify-center shadow-md transition-transform hover:scale-105 cursor-pointer"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
                     </div>
                   ))}
                 </div>

@@ -23,6 +23,11 @@ export class CreateHabitacionDto {
   @IsOptional()
   imagen?: string;
 
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  imagenes?: string[];
+
   @IsString()
   ocupacion: string;
 

@@ -81,13 +81,45 @@ export class HabitacionesService {
     updateHabitacionDto: UpdateHabitacionDto,
   ): Promise<Habitacion> {
     const habitacion = await this.findOne(id);
+    const previousImages = Array.isArray(habitacion.imagenes)
+      ? [...habitacion.imagenes]
+      : [];
+
+    if (Array.isArray(updateHabitacionDto.imagenes)) {
+      const nextImages = updateHabitacionDto.imagenes;
+      const removedImages = previousImages.filter(
+        (url) => !nextImages.includes(url),
+      );
+      if (removedImages.length > 0) {
+        await Promise.allSettled(
+          removedImages.map((url) => this.cloudinaryService.deleteByUrl(url)),
+        );
+      }
+      if (habitacion.imagen && !nextImages.includes(habitacion.imagen)) {
+        habitacion.imagen = nextImages[0] ?? (null as any);
+      }
+    }
+
     Object.assign(habitacion, updateHabitacionDto);
     return this.habitacionRepository.save(habitacion);
   }
 
   async remove(id: string): Promise<void> {
     const habitacion = await this.findOne(id);
+    const urlsToDelete = new Set<string>(habitacion.imagenes || []);
+    if (habitacion.imagen) {
+      urlsToDelete.add(habitacion.imagen);
+    }
+
     await this.habitacionRepository.remove(habitacion);
+
+    if (urlsToDelete.size > 0) {
+      await Promise.allSettled(
+        Array.from(urlsToDelete).map((url) =>
+          this.cloudinaryService.deleteByUrl(url),
+        ),
+      );
+    }
   }
 
   async updateLimpieza(id: string, estadoLimpieza: any): Promise<Habitacion> {
@@ -107,7 +139,18 @@ export class HabitacionesService {
       );
     }
 
-    const uploadPromises = files.map((file) =>
+    const existingImages = Array.isArray(habitacion.imagenes)
+      ? habitacion.imagenes
+      : [];
+    const remainingSlots = Math.max(0, 5 - existingImages.length);
+    if (remainingSlots === 0) {
+      throw new BadRequestException(
+        'La habitación ya tiene el máximo de 5 imágenes. Elimina alguna antes de subir nuevas.',
+      );
+    }
+
+    const filesToUpload = files.slice(0, remainingSlots);
+    const uploadPromises = filesToUpload.map((file) =>
       this.cloudinaryService.uploadImage(file),
     );
     const results = await Promise.all(uploadPromises).catch((error) => {
@@ -116,9 +159,13 @@ export class HabitacionesService {
       );
     });
 
-    habitacion.imagenes = results.map(
+    const newUrls = results.map(
       (res: { secure_url: string }) => res.secure_url,
     );
+    habitacion.imagenes = [...existingImages, ...newUrls];
+    if (!habitacion.imagen && habitacion.imagenes.length > 0) {
+      habitacion.imagen = habitacion.imagenes[0];
+    }
     return this.habitacionRepository.save(habitacion);
   }
 }
