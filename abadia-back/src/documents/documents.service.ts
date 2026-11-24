@@ -1,20 +1,41 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import PDFDocument from 'pdfkit';
 import type { Response } from 'express';
+import * as fs from 'fs';
+import * as path from 'path';
 import { CotizacionesService } from '../cotizaciones/cotizaciones.service';
 import { FacturasService } from '../facturas/facturas.service';
 
 @Injectable()
 export class DocumentsService {
-  private readonly colorPrimario = '#3d342e'; // Dark ink
-  private readonly colorSecundario = '#7a6e5d'; // Sage / Accent
-  private readonly colorFondo = '#f4f1ea'; // Cream
-  private readonly colorGris = '#888888';
+  // Paleta alineada con el panel /admin (globals.css)
+  private readonly colorAzul = '#0f4c81'; // --mv-blue (corporativo)
+  private readonly colorAzulOscuro = '#0b3c66';
+  private readonly colorInk = '#2d2a27'; // --mv-ink
+  private readonly colorDorado = '#bea27a'; // --mv-gold
+  private readonly colorCrema = '#f4f0ea'; // --mv-cream
+  private readonly colorGris = '#64748b';
+  private readonly colorBlanco = '#ffffff';
 
   constructor(
     private readonly cotizacionesService: CotizacionesService,
     private readonly facturasService: FacturasService,
   ) {}
+
+  private resolveLogoPath(): string | null {
+    const candidates = [
+      path.join(__dirname, '..', 'assets', 'logo.png'),
+      path.join(process.cwd(), 'dist', 'assets', 'logo.png'),
+      path.join(process.cwd(), 'src', 'assets', 'logo.png'),
+      path.join(process.cwd(), '..', 'abadia-front', 'public', 'logo_color.png'),
+    ];
+    for (const candidate of candidates) {
+      if (fs.existsSync(candidate)) {
+        return candidate;
+      }
+    }
+    return null;
+  }
 
   async buildCotizacionPdf(id: string, res: Response): Promise<void> {
     const cotizacion = await this.cotizacionesService.findOne(id);
@@ -22,7 +43,6 @@ export class DocumentsService {
 
     const doc = new PDFDocument({ margin: 0, size: 'A4' });
 
-    // Pipe to response
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader(
       'Content-Disposition',
@@ -38,10 +58,11 @@ export class DocumentsService {
       doc,
       cotizacion.cliente,
       cotizacion.createdAt,
+      cotizacion.checkIn,
+      cotizacion.checkOut,
     );
 
-    // Table
-    const tableTop = 330;
+    const tableTop = 335;
     this.generateTableHeader(doc, tableTop, [
       'Descripción',
       'Habitación',
@@ -52,9 +73,9 @@ export class DocumentsService {
     const ocupacion = `${cotizacion.numeroAdultos} Ads, ${cotizacion.numeroNinos} Niñ`;
     this.generateTableRow(
       doc,
-      tableTop + 35,
-      'Estadía en Hotel Boutique',
-      cotizacion.habitacion.titulo,
+      tableTop + 36,
+      'Estadía en Abadía',
+      cotizacion.habitacion?.titulo || 'Habitación',
       ocupacion,
       `$${Number(cotizacion.total_estimado).toLocaleString('es-CO')}`,
     );
@@ -69,7 +90,6 @@ export class DocumentsService {
 
     const doc = new PDFDocument({ margin: 0, size: 'A4' });
 
-    // Pipe to response
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader(
       'Content-Disposition',
@@ -80,8 +100,7 @@ export class DocumentsService {
     this.generateHeader(doc, 'FACTURA', `${factura.numero_factura}`);
     this.generateCustomerInformation(doc, factura.cliente, factura.createdAt);
 
-    // Table
-    const tableTop = 330;
+    const tableTop = 335;
     this.generateTableHeader(doc, tableTop, [
       'Descripción',
       'Concepto',
@@ -91,8 +110,8 @@ export class DocumentsService {
 
     this.generateTableRow(
       doc,
-      tableTop + 35,
-      `Servicios de Alojamiento`,
+      tableTop + 36,
+      'Estadía en Abadía',
       'Reserva Confirmada',
       `#${factura.reserva_id ? factura.reserva_id.toString().substring(0, 8) : 'N/A'}`,
       `$${Number(factura.total).toLocaleString('es-CO')}`,
@@ -107,67 +126,113 @@ export class DocumentsService {
     docType: string,
     idText: string,
   ) {
-    // Fondo del Header
-    doc.rect(0, 0, 600, 150).fill(this.colorPrimario);
+    const pageWidth = doc.page.width;
 
-    // Texto La Abadía
-    doc
-      .fillColor(this.colorFondo)
-      .fontSize(28)
-      .text('LA ABADÍA', 50, 50, { characterSpacing: 4 })
-      .fontSize(10)
-      .fillColor(this.colorSecundario)
-      .text('H O T E L  B O U T I Q U E', 50, 85, { characterSpacing: 2 });
+    // Fondo azul corporativo igual al panel admin
+    doc.rect(0, 0, pageWidth, 138).fill(this.colorAzul);
+    // Franja inferior decorativa
+    doc.rect(0, 138, pageWidth, 4).fill(this.colorDorado);
 
-    // Tipo de Documento
+    // Logo oficial de Abadía
+    const logoPath = this.resolveLogoPath();
+    if (logoPath) {
+      doc.image(logoPath, 46, 16, { fit: [120, 106], align: 'left', valign: 'center' });
+    } else {
+      doc
+        .fillColor(this.colorBlanco)
+        .font('Helvetica-Bold')
+        .fontSize(28)
+        .text('ABADÍA', 50, 46, { characterSpacing: 4 })
+        .font('Helvetica')
+        .fontSize(10)
+        .fillColor(this.colorDorado)
+        .text('C A S A   H O T E L', 50, 82, { characterSpacing: 2 });
+    }
+
+    // Tipo de Documento y Referencia
     doc
-      .fillColor(this.colorFondo)
+      .fillColor(this.colorBlanco)
+      .font('Helvetica-Bold')
       .fontSize(20)
-      .text(docType, 350, 50, {
+      .text(docType, 340, 46, {
         align: 'right',
-        width: 200,
+        width: 205,
         characterSpacing: 2,
       })
-      .fontSize(12)
-      .fillColor(this.colorSecundario)
-      .text(idText, 350, 75, { align: 'right', width: 200 });
+      .font('Helvetica')
+      .fontSize(11)
+      .fillColor(this.colorCrema)
+      .text(idText, 340, 74, { align: 'right', width: 205 });
   }
 
   private generateCustomerInformation(
     doc: typeof PDFDocument,
-    cliente: { nombre?: string; documento?: string } | null,
+    cliente: { nombre?: string; documento?: string; correo?: string; telefono?: string } | null,
     date: Date,
+    checkIn?: Date,
+    checkOut?: Date,
   ) {
-    const top = 200;
+    const top = 185;
 
-    // Titulo Sección
     doc
-      .fillColor(this.colorPrimario)
-      .fontSize(14)
+      .fillColor(this.colorAzul)
+      .font('Helvetica-Bold')
+      .fontSize(13)
       .text('Información del Cliente', 50, top)
       .moveTo(50, top + 20)
-      .lineTo(550, top + 20)
-      .lineWidth(0.5)
-      .strokeColor(this.colorSecundario)
+      .lineTo(545, top + 20)
+      .lineWidth(1)
+      .strokeColor(this.colorAzul)
       .stroke();
 
-    // Datos
+    doc.font('Helvetica').fontSize(10);
+
+    // Columna izquierda
     doc
-      .fontSize(10)
       .fillColor(this.colorGris)
-      .text('Fecha de Emisión:', 50, top + 35)
-      .fillColor(this.colorPrimario)
-      .text(date.toLocaleDateString('es-CO'), 150, top + 35)
+      .text('Fecha de Emisión:', 50, top + 34)
+      .fillColor(this.colorInk)
+      .font('Helvetica-Bold')
+      .text(new Date(date).toLocaleDateString('es-CO'), 155, top + 34)
 
+      .font('Helvetica')
       .fillColor(this.colorGris)
-      .text('Nombre:', 50, top + 55)
-      .fillColor(this.colorPrimario)
-      .text(cliente?.nombre || 'Consumidor Final', 150, top + 55)
+      .text('Nombre:', 50, top + 54)
+      .fillColor(this.colorInk)
+      .font('Helvetica-Bold')
+      .text(cliente?.nombre || 'Consumidor Final', 155, top + 54)
 
+      .font('Helvetica')
       .fillColor(this.colorGris)
-      .text('Documento:', 50, top + 75)
-      .fillColor(this.colorPrimario)
-      .text(cliente?.documento || 'N/A', 150, top + 75);
+      .text('Documento:', 50, top + 74)
+      .fillColor(this.colorInk)
+      .text(cliente?.documento || 'N/A', 155, top + 74);
+
+    // Columna derecha (fechas de estadía si existen)
+    if (checkIn && checkOut) {
+      doc
+        .fillColor(this.colorGris)
+        .text('Check-in:', 345, top + 34)
+        .fillColor(this.colorInk)
+        .font('Helvetica-Bold')
+        .text(new Date(checkIn).toLocaleDateString('es-CO'), 420, top + 34)
+
+        .font('Helvetica')
+        .fillColor(this.colorGris)
+        .text('Check-out:', 345, top + 54)
+        .fillColor(this.colorInk)
+        .font('Helvetica-Bold')
+        .text(new Date(checkOut).toLocaleDateString('es-CO'), 420, top + 54);
+    }
+
+    if (cliente?.telefono) {
+      doc
+        .font('Helvetica')
+        .fillColor(this.colorGris)
+        .text('Teléfono:', 345, top + 74)
+        .fillColor(this.colorInk)
+        .text(cliente.telefono, 420, top + 74);
+    }
   }
 
   private generateTableHeader(
@@ -175,13 +240,13 @@ export class DocumentsService {
     y: number,
     headers: string[],
   ) {
-    doc.rect(50, y, 500, 25).fill(this.colorFondo);
+    doc.roundedRect(50, y, 495, 28, 6).fill(this.colorAzul);
 
-    doc.fillColor(this.colorPrimario).fontSize(10);
-    doc.text(headers[0], 60, y + 8);
-    doc.text(headers[1], 200, y + 8);
-    doc.text(headers[2], 350, y + 8);
-    doc.text(headers[3], 450, y + 8, { width: 90, align: 'right' });
+    doc.fillColor(this.colorBlanco).font('Helvetica-Bold').fontSize(9.5);
+    doc.text(headers[0], 62, y + 9);
+    doc.text(headers[1], 200, y + 9);
+    doc.text(headers[2], 350, y + 9);
+    doc.text(headers[3], 445, y + 9, { width: 88, align: 'right' });
   }
 
   private generateTableRow(
@@ -192,40 +257,46 @@ export class DocumentsService {
     col3: string,
     col4: string,
   ) {
-    doc.fillColor(this.colorPrimario).fontSize(10);
-    doc.text(col1, 60, y);
+    doc.fillColor(this.colorInk).font('Helvetica').fontSize(10);
+    doc.text(col1, 62, y);
     doc.text(col2, 200, y);
     doc.text(col3, 350, y);
-    doc.text(col4, 450, y, { width: 90, align: 'right' });
+    doc.font('Helvetica-Bold').fillColor(this.colorAzul);
+    doc.text(col4, 445, y, { width: 88, align: 'right' });
 
-    // Línea separadora
     doc
-      .moveTo(50, y + 20)
-      .lineTo(550, y + 20)
-      .lineWidth(0.5)
-      .strokeColor('#dddddd')
+      .moveTo(50, y + 22)
+      .lineTo(545, y + 22)
+      .lineWidth(0.75)
+      .strokeColor('#e2e8f0')
       .stroke();
   }
 
   private generateFooter(doc: typeof PDFDocument) {
-    doc.rect(0, 750, 600, 100).fill(this.colorFondo);
+    const pageWidth = doc.page.width;
+    const footerTop = doc.page.height - 92;
+
+    doc.rect(0, footerTop, pageWidth, 92).fill(this.colorCrema);
+    doc.rect(0, footerTop, pageWidth, 2).fill(this.colorAzulOscuro);
 
     doc
-      .fillColor(this.colorPrimario)
-      .fontSize(12)
-      .text('Gracias por elegir La Abadía', 50, 770, {
+      .fillColor(this.colorAzul)
+      .font('Helvetica-Bold')
+      .fontSize(11)
+      .text('Gracias por elegir Abadía', 50, footerTop + 22, {
         align: 'center',
-        width: 500,
+        width: pageWidth - 100,
       })
+      .font('Helvetica')
       .fontSize(9)
       .fillColor(this.colorGris)
-      .text('San Antero, Córdoba, Colombia', 50, 790, {
+      .text('Abadía Casa Hotel • Playa Blanca, San Antero, Córdoba, Colombia', 50, footerTop + 42, {
         align: 'center',
-        width: 500,
+        width: pageWidth - 100,
       })
-      .text('contacto@laabadia.com | +57 300 000 0000', 50, 805, {
+      .text('WhatsApp: +57 312 237 3415', 50, footerTop + 57, {
         align: 'center',
-        width: 500,
+        width: pageWidth - 100,
       });
   }
 }
