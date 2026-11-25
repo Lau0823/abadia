@@ -29,6 +29,7 @@ import {
 } from '@nestjs/swagger';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../common/enums/role.enum';
+import { UPLOAD_LIMITS } from '../common/upload/upload-size';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 interface RequestWithUser extends Request {
@@ -89,10 +90,7 @@ export class UsersController {
     @Req() req: RequestWithUser,
     @UploadedFile(
       new ParseFilePipeBuilder()
-        .addMaxSizeValidator({
-          maxSize: 5242880,
-          message: 'El archivo supera el límite de 5 MB',
-        })
+        .addMaxSizeValidator(UPLOAD_LIMITS.avatar)
         .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY }),
     )
     file: Express.Multer.File,

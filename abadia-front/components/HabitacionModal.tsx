@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { API_URL } from "@/lib/api";
 import { fetchApi } from "@/lib/api";
+import { validateUploadFile } from "@/lib/upload";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/Tooltip";
 
 interface HabitacionModalProps {
@@ -101,7 +102,14 @@ export default function HabitacionModal({ isOpen, onClose, onSuccess, habitacion
       setError("Máximo 5 imágenes por habitación. Elimina alguna para agregar nuevas.");
       return;
     }
-    const added = files.slice(0, availableSlots).map((file) => ({
+    const candidates = files.slice(0, availableSlots);
+    try {
+      candidates.forEach((file) => validateUploadFile(file, "image"));
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "No se pudo validar la imagen.");
+      return;
+    }
+    const added = candidates.map((file) => ({
       file,
       previewUrl: URL.createObjectURL(file),
     }));

@@ -20,6 +20,18 @@ cd abadia-front && npm ci && npm run dev
 
 El front llama a `/api/...` (proxy de nginx en producción, o `NEXT_PUBLIC_API_URL` en local).
 
+## Límites de subida
+
+| Destino | Límite | Definido en |
+| --- | --- | --- |
+| Multimedia / banner (imágenes y videos) | 30 MB | `UPLOAD_LIMITS.settings` y `lib/upload.ts` (`banner`) |
+| Imágenes de habitación | 10 MB por imagen | `UPLOAD_LIMITS.habitaciones` y `lib/upload.ts` (`image`) |
+| Avatar | 5 MB | `UPLOAD_LIMITS.avatar` y `lib/upload.ts` (`avatar`) |
+
+nginx admite hasta 30 MB (`client_max_body_size 30m`); un archivo más grande se corta con 413 antes de llegar al backend. El front valida antes de enviar y muestra el motivo; el backend devuelve 422 si se evita el front. Los videos del banner solo admiten MP4, MOV o M4V (el `<video>` del sitio no declara otros tipos).
+
+> `deploy/abadia1.nginx.conf` se copia a `/home/camilo/`, pero el workflow **no lo instala** en `/etc/nginx`. Cualquier cambio de nginx debe aplicarse a mano en el VPS y sin sobrescribir los bloques 443/certbot.
+
 ## Base de datos
 
 - En **desarrollo** TypeORM mantiene el esquema con `synchronize: true`.

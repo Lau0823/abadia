@@ -15,6 +15,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { SettingsService } from './settings.service';
 import { Public } from '../auth/decorators/public.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { UPLOAD_LIMITS } from '../common/upload/upload-size';
 import {
   ApiTags,
   ApiOperation,
@@ -74,10 +75,7 @@ export class SettingsController {
     @Param('key') key: string,
     @UploadedFile(
       new ParseFilePipeBuilder()
-        .addMaxSizeValidator({
-          maxSize: 31457280,
-          message: 'El archivo supera el límite de 30 MB',
-        })
+        .addMaxSizeValidator(UPLOAD_LIMITS.settings)
         .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY }),
     )
     file: Express.Multer.File,

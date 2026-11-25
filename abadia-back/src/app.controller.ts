@@ -13,7 +13,7 @@ export class AppController {
   checkHealth() {
     return {
       status: 'ok',
-      message: 'La API de Miles Visual está funcionando correctamente.',
+      message: 'La API de Abadía está funcionando correctamente.',
       timestamp: new Date().toISOString(),
     };
   }

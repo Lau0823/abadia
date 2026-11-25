@@ -20,6 +20,7 @@ import { UpdateHabitacionDto } from './dto/update-habitacion.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../common/enums/role.enum';
+import { UPLOAD_LIMITS } from '../common/upload/upload-size';
 import { Public } from '../auth/decorators/public.decorator';
 import {
   ApiTags,
@@ -106,10 +107,7 @@ export class HabitacionesController {
     @Param('id') id: string,
     @UploadedFiles(
       new ParseFilePipeBuilder()
-        .addMaxSizeValidator({
-          maxSize: 10485760,
-          message: 'El archivo supera el límite de 10 MB',
-        })
+        .addMaxSizeValidator(UPLOAD_LIMITS.habitaciones)
         .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY }),
     )
     files: Array<Express.Multer.File>,
