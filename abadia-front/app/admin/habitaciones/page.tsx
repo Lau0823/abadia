@@ -5,7 +5,8 @@ import { fetchApi } from "@/lib/api";
 import {
   PlusIcon,
   PencilIcon,
-  TrashIcon,
+  EyeSlashIcon,
+  ArrowUturnLeftIcon,
   SparklesIcon,
   UserGroupIcon,
   ClipboardDocumentCheckIcon,
@@ -18,6 +19,7 @@ import {
 } from "@heroicons/react/24/outline";
 import HabitacionModal from "@/components/HabitacionModal";
 import TareaModal from "@/components/TareaModal";
+import AdminDialog, { AdminDialogConfig } from "@/components/AdminDialog";
 
 interface Habitacion {
   id: string;
@@ -27,6 +29,7 @@ interface Habitacion {
   ocupacion: string;
   estado: string;
   estadoLimpieza: string;
+  activo: boolean;
   imagenes?: string[];
 }
 
@@ -39,15 +42,16 @@ export default function HabitacionesPage() {
   const [previewHabitacion, setPreviewHabitacion] = useState<Habitacion | null>(null);
   const [isTareaModalOpen, setIsTareaModalOpen] = useState(false);
   const [taskRoom, setTaskRoom] = useState<any>(null);
+  const [dialog, setDialog] = useState<AdminDialogConfig | null>(null);
 
-  const [filterTab, setFilterTab] = useState<"ALL" | "DISPONIBLE" | "LIMPIA" | "POR_ASEAR">("ALL");
+  const [filterTab, setFilterTab] = useState<"ALL" | "DISPONIBLE" | "LIMPIA" | "POR_ASEAR" | "INACTIVAS">("ALL");
   const [searchQuery, setSearchQuery] = useState("");
 
   const fetchData = async () => {
     setLoading(true);
     try {
       const [resHab, resTar] = await Promise.all([
-        fetchApi("/habitaciones"),
+        fetchApi("/habitaciones/admin"),
         fetchApi("/tareas").catch(() => []),
       ]);
       const listHab = Array.isArray(resHab) ? resHab : resHab?.data || [];
@@ -80,20 +84,47 @@ export default function HabitacionesPage() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (
-      confirm(
-        "¿Estás seguro de que deseas eliminar esta habitación? Se perderán las reservas asociadas a menos que tengan borrado en cascada configurado."
-      )
-    ) {
-      try {
-        await fetchApi(`/habitaciones/${id}`, { method: "DELETE" });
-        if (previewHabitacion?.id === id) setPreviewHabitacion(null);
-        fetchData();
-      } catch (error) {
-        alert("Error al eliminar la habitación. Puede que tenga reservas asociadas.");
-      }
-    }
+  const handleToggleActivo = (hab: Habitacion) => {
+    const activar = hab.activo === false;
+
+    setDialog({
+      title: activar ? "Reactivar habitación" : "Dar de baja habitación",
+      message: activar ? (
+        <>
+          ¿Volver a mostrar <strong>{hab.titulo}</strong> en la web?
+        </>
+      ) : (
+        <>
+          ¿Dar de baja <strong>{hab.titulo}</strong>? Dejará de mostrarse en la
+          web. Sus reservas y fotografías se conservan.
+        </>
+      ),
+      variant: activar ? "confirm" : "warning",
+      confirmLabel: activar ? "Reactivar" : "Dar de baja",
+      onConfirm: async () => {
+        try {
+          await fetchApi(`/habitaciones/${hab.id}/activo`, {
+            method: "PATCH",
+            body: JSON.stringify({ activo: activar }),
+          });
+          if (!activar && previewHabitacion?.id === hab.id) {
+            setPreviewHabitacion(null);
+          }
+          fetchData();
+          return true;
+        } catch (error) {
+          setDialog({
+            title: activar ? "No se pudo reactivar" : "No se pudo dar de baja",
+            message:
+              error instanceof Error
+                ? error.message
+                : "Inténtalo de nuevo en unos momentos.",
+            variant: "error",
+          });
+          return false;
+        }
+      },
+    });
   };
 
   const handleToggleLimpieza = async (hab: Habitacion) => {
@@ -104,13 +135,19 @@ export default function HabitacionesPage() {
         body: JSON.stringify({ estadoLimpieza: nuevoEstado }),
       });
       fetchData();
-    } catch (error) {
-      alert("Error al actualizar el estado de limpieza.");
+    } catch {
+      setDialog({
+        title: "No se pudo actualizar",
+        message: "No se pudo actualizar el estado de limpieza. Inténtalo de nuevo.",
+        variant: "error",
+      });
     }
   };
 
   const filteredHabitaciones = useMemo(() => {
     return habitaciones.filter((hab) => {
+      if (filterTab === "INACTIVAS" && hab.activo !== false) return false;
+      if (filterTab !== "INACTIVAS" && hab.activo === false) return false;
       if (filterTab === "DISPONIBLE" && hab.estado !== "DISPONIBLE") return false;
       if (filterTab === "LIMPIA" && hab.estadoLimpieza !== "LIMPIA") return false;
       if (filterTab === "POR_ASEAR" && hab.estadoLimpieza === "LIMPIA") return false;
@@ -130,7 +167,8 @@ export default function HabitacionesPage() {
     const disponibles = habitaciones.filter((h) => h.estado === "DISPONIBLE").length;
     const limpias = habitaciones.filter((h) => h.estadoLimpieza === "LIMPIA").length;
     const porAsear = habitaciones.filter((h) => h.estadoLimpieza !== "LIMPIA").length;
-    return { total, disponibles, limpias, porAsear };
+    const inactivas = habitaciones.filter((h) => h.activo === false).length;
+    return { total, disponibles, limpias, porAsear, inactivas };
   }, [habitaciones]);
 
   const getRoomTasks = (hab: Habitacion) => {
@@ -210,6 +248,7 @@ export default function HabitacionesPage() {
                 { key: "DISPONIBLE", label: `Disponibles (${stats.disponibles})` },
                 { key: "LIMPIA", label: `✨ Limpias (${stats.limpias})` },
                 { key: "POR_ASEAR", label: `🧹 Por Asear (${stats.porAsear})` },
+                { key: "INACTIVAS", label: `🙈 Inactivas (${stats.inactivas})` },
               ].map((tab) => (
                 <button
                   key={tab.key}
@@ -312,9 +351,15 @@ export default function HabitacionesPage() {
                           )}
                           {hab.estado}
                         </span>
+                        {hab.activo === false && (
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#1A2458] shadow-xs">
+                            <EyeSlashIcon className="h-3.5 w-3.5" />
+                            Dada de baja
+                          </span>
+                        )}
                       </div>
 
-                      {/* Acciones Editar / Eliminar */}
+                      {/* Acciones Editar / Dar de baja */}
                       <div
                         className="absolute top-3.5 right-3.5 flex items-center gap-1.5"
                         onClick={(e) => e.stopPropagation()}
@@ -329,11 +374,19 @@ export default function HabitacionesPage() {
                         </button>
                         <button
                           type="button"
-                          onClick={() => handleDelete(hab.id)}
-                          className="p-2 rounded-full bg-white/90 hover:bg-rose-600 text-[#1A2458] hover:text-white backdrop-blur-md transition-colors shadow-xs"
-                          title="Eliminar habitación"
+                          onClick={() => handleToggleActivo(hab)}
+                          className="p-2 rounded-full bg-white/90 hover:bg-[#1A2458] text-[#1A2458] hover:text-white backdrop-blur-md transition-colors shadow-xs"
+                          title={
+                            hab.activo === false
+                              ? "Reactivar habitación"
+                              : "Dar de baja habitación"
+                          }
                         >
-                          <TrashIcon className="w-3.5 h-3.5" />
+                          {hab.activo === false ? (
+                            <ArrowUturnLeftIcon className="w-3.5 h-3.5" />
+                          ) : (
+                            <EyeSlashIcon className="w-3.5 h-3.5" />
+                          )}
                         </button>
                       </div>
 
@@ -572,6 +625,8 @@ export default function HabitacionesPage() {
         habitacionPreseleccionada={taskRoom}
         onSuccess={() => fetchData()}
       />
+
+      <AdminDialog config={dialog} onClose={() => setDialog(null)} />
     </div>
   );
 }

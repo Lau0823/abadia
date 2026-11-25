@@ -26,7 +26,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/Tooltip";
 import { validateUploadFile } from "@/lib/upload";
-import UploadErrorModal from "@/components/UploadErrorModal";
+import AdminDialog, { AdminDialogConfig, dialogError } from "@/components/AdminDialog";
 
 interface Setting {
   key: string;
@@ -62,7 +62,7 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
-  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [dialog, setDialog] = useState<AdminDialogConfig | null>(null);
   const [activeTab, setActiveTab] = useState<'account' | 'contact' | 'social' | 'general' | 'integrations' | 'advanced'>('account');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [newKeyModal, setNewKeyModal] = useState(false);
@@ -254,7 +254,11 @@ export default function SettingsPage() {
       fetchSettings();
     } catch (error) {
       console.error("Error guardando settings", error);
-      alert("Hubo un error al guardar la configuración.");
+      setDialog({
+        title: "No se pudo guardar",
+        message: "Hubo un error al guardar la configuración. Inténtalo de nuevo.",
+        variant: "error",
+      });
     } finally {
       setSaving(false);
     }
@@ -264,7 +268,7 @@ export default function SettingsPage() {
     if (!file) return;
     setSaving(true);
     setSuccessMsg("");
-    setUploadError(null);
+    setDialog(null);
     try {
       validateUploadFile(file);
       const formData = new FormData();
@@ -278,9 +282,13 @@ export default function SettingsPage() {
       updateSettingValue(key, res.value);
       setSuccessMsg("Archivo multimedia subido con éxito");
       setTimeout(() => setSuccessMsg(""), 4000);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error subiendo archivo", error);
-      setUploadError(error.message || "Hubo un error al subir el archivo.");
+      setDialog({
+        title: "No se pudo subir el archivo",
+        message: dialogError(error, "Hubo un error al subir el archivo."),
+        variant: "error",
+      });
     } finally {
       setSaving(false);
     }
@@ -874,11 +882,7 @@ export default function SettingsPage() {
         </div>
       )}
 
-      <UploadErrorModal
-        isOpen={Boolean(uploadError)}
-        message={uploadError}
-        onClose={() => setUploadError(null)}
-      />
+      <AdminDialog config={dialog} onClose={() => setDialog(null)} />
     </div>
   );
 }

@@ -48,6 +48,14 @@ export class HabitacionesController {
     return this.habitacionesService.findAll();
   }
 
+  @Get('admin')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @Roles(Role.Admin, Role.SuperAdmin)
+  findAllAdmin() {
+    return this.habitacionesService.findAll(true);
+  }
+
   @Get('disponibles')
   @Public()
   findDisponibles(
@@ -88,12 +96,20 @@ export class HabitacionesController {
     return this.habitacionesService.updateLimpieza(id, estadoLimpieza);
   }
 
+  @Patch(':id/activo')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @Roles(Role.Admin, Role.SuperAdmin)
+  setActivo(@Param('id') id: string, @Body('activo') activo: boolean) {
+    return this.habitacionesService.setActivo(id, Boolean(activo));
+  }
+
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT-auth')
   @Roles(Role.Admin, Role.SuperAdmin)
-  remove(@Param('id') id: string) {
-    return this.habitacionesService.remove(id);
+  deactivate(@Param('id') id: string) {
+    return this.habitacionesService.deactivate(id);
   }
 
   @Post(':id/imagenes')

@@ -17,6 +17,7 @@ import {
   ChatBubbleLeftRightIcon,
 } from "@heroicons/react/24/outline";
 import ClienteModal from "@/components/ClienteModal";
+import AdminDialog, { AdminDialogConfig, dialogError } from "@/components/AdminDialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/Tooltip";
 
 // Variantes de tarjetas con la paleta "Indigo Infinity" y letra blanca
@@ -64,6 +65,7 @@ export default function ClientesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
   const [contactFilter, setContactFilter] = useState<"all" | "withPhone" | "withEmail">("all");
+  const [dialog, setDialog] = useState<AdminDialogConfig | null>(null);
 
   const fetchClientes = async (search = "") => {
     setLoading(true);
@@ -98,16 +100,36 @@ export default function ClientesPage() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm("¿Estás seguro de que deseas eliminar este cliente?")) {
-      try {
-        await fetchApi(`/clientes/${id}`, { method: "DELETE" });
-        if (previewCliente?.id === id) setPreviewCliente(null);
-        fetchClientes(searchTerm);
-      } catch (error) {
-        alert("Error al eliminar el cliente. Es posible que tenga reservas asociadas.");
-      }
-    }
+  const handleDelete = (cliente: any) => {
+    setDialog({
+      title: "Eliminar cliente",
+      message: (
+        <>
+          ¿Eliminar a <strong>{cliente?.nombre || "este cliente"}</strong> del
+          registro? Esta acción no se puede deshacer.
+        </>
+      ),
+      variant: "warning",
+      confirmLabel: "Eliminar",
+      onConfirm: async () => {
+        try {
+          await fetchApi(`/clientes/${cliente?.id}`, { method: "DELETE" });
+          if (previewCliente?.id === cliente?.id) setPreviewCliente(null);
+          fetchClientes(searchTerm);
+          return true;
+        } catch (error) {
+          setDialog({
+            title: "No se pudo eliminar",
+            message: dialogError(
+              error,
+              "No se pudo eliminar el cliente. Es posible que tenga reservas asociadas.",
+            ),
+            variant: "error",
+          });
+          return false;
+        }
+      },
+    });
   };
 
   // Filtrado rápido en cliente
@@ -414,7 +436,7 @@ export default function ClientesPage() {
                         <TooltipTrigger asChild>
                           <button
                             type="button"
-                            onClick={() => handleDelete(cliente.id)}
+                            onClick={() => handleDelete(cliente)}
                             className="p-2 rounded-full bg-white/10 hover:bg-rose-500 text-white transition-colors"
                           >
                             <TrashIcon className="w-4 h-4" />
@@ -528,7 +550,7 @@ export default function ClientesPage() {
                             <TooltipTrigger asChild>
                               <button
                                 type="button"
-                                onClick={() => handleDelete(cliente.id)}
+                                onClick={() => handleDelete(cliente)}
                                 className="p-2 text-[#4F67B5] hover:text-white hover:bg-rose-600 rounded-full transition-all"
                               >
                                 <TrashIcon className="w-4 h-4" />
@@ -656,6 +678,8 @@ export default function ClientesPage() {
         cliente={selectedCliente}
         onSuccess={() => fetchClientes(searchTerm)}
       />
+
+      <AdminDialog config={dialog} onClose={() => setDialog(null)} />
     </div>
   );
 }

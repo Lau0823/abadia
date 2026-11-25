@@ -57,6 +57,10 @@ export class Habitacion {
   })
   estadoLimpieza: EstadoLimpieza;
 
+  /** false = dada de baja: no se muestra en la web, pero se conserva. */
+  @Column({ type: 'boolean', default: true })
+  activo: boolean;
+
   @CreateDateColumn()
   createdAt: Date;
 

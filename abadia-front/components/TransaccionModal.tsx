@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { fetchApi } from "@/lib/api";
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import AdminDialog, { AdminDialogConfig, dialogError } from "@/components/AdminDialog";
 
 interface TransaccionModalProps {
   isOpen: boolean;
@@ -10,6 +11,7 @@ interface TransaccionModalProps {
 
 export default function TransaccionModal({ isOpen, onClose, onSuccess }: TransaccionModalProps) {
   const [loading, setLoading] = useState(false);
+  const [dialog, setDialog] = useState<AdminDialogConfig | null>(null);
   const [formData, setFormData] = useState({
     monto: "",
     tipo: "INGRESO",
@@ -48,16 +50,26 @@ export default function TransaccionModal({ isOpen, onClose, onSuccess }: Transac
 
       onSuccess();
       onClose();
-    } catch (error: any) {
-      alert(error.message || "Error al registrar la transacción. Verifica los datos.");
+    } catch (error) {
+      setDialog({
+        title: "No se pudo registrar",
+        message: dialogError(
+          error,
+          "No se pudo registrar la transacción. Verifica los datos.",
+        ),
+        variant: "error",
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return <AdminDialog config={dialog} onClose={() => setDialog(null)} />;
+  }
 
   return (
+    <>
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm">
       <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
@@ -168,5 +180,7 @@ export default function TransaccionModal({ isOpen, onClose, onSuccess }: Transac
         </form>
       </div>
     </div>
+    <AdminDialog config={dialog} onClose={() => setDialog(null)} />
+    </>
   );
 }

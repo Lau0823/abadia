@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { fetchApi } from "@/lib/api";
 import { XMarkIcon, ArrowsRightLeftIcon } from "@heroicons/react/24/outline";
+import AdminDialog, { AdminDialogConfig, dialogError } from "@/components/AdminDialog";
 
 interface TransferirReservaModalProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ export default function TransferirReservaModal({ isOpen, onClose, reservation, o
   const [loading, setLoading] = useState(false);
   const [habitaciones, setHabitaciones] = useState<any[]>([]);
   const [nuevaHabitacionId, setNuevaHabitacionId] = useState("");
+  const [dialog, setDialog] = useState<AdminDialogConfig | null>(null);
 
   useEffect(() => {
     if (isOpen && reservation) {
@@ -40,7 +42,11 @@ export default function TransferirReservaModal({ isOpen, onClose, reservation, o
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nuevaHabitacionId) {
-      alert("Por favor seleccione una nueva habitación.");
+      setDialog({
+        title: "Selecciona una habitación",
+        message: "Elige la habitación de destino antes de transferir la reserva.",
+        variant: "info",
+      });
       return;
     }
 
@@ -52,19 +58,34 @@ export default function TransferirReservaModal({ isOpen, onClose, reservation, o
         body: JSON.stringify({ habitacion_id: nuevaHabitacionId }),
       });
 
-      alert("Reserva transferida con éxito.");
-      onSuccess();
-      onClose();
-    } catch (error: any) {
-      alert("Error al transferir la reserva. Es posible que la habitación no esté disponible en esas fechas. (" + (error.message || "Error desconocido") + ")");
+      setDialog({
+        title: "Reserva transferida",
+        message: "La reserva ya está en la habitación seleccionada.",
+        variant: "success",
+        onConfirm: () => {
+          onSuccess();
+          onClose();
+        },
+      });
+    } catch (error) {
+      setDialog({
+        title: "No se pudo transferir",
+        message:
+          dialogError(error, "Error desconocido") +
+          ". Revisa que la habitación esté disponible en esas fechas.",
+        variant: "error",
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  if (!isOpen || !reservation) return null;
+  if (!isOpen || !reservation) {
+    return <AdminDialog config={dialog} onClose={() => setDialog(null)} />;
+  }
 
   return (
+    <>
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm overflow-y-auto">
       <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 my-auto">
         <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-blue-50/50">
@@ -134,5 +155,7 @@ export default function TransferirReservaModal({ isOpen, onClose, reservation, o
         </form>
       </div>
     </div>
+    <AdminDialog config={dialog} onClose={() => setDialog(null)} />
+    </>
   );
 }

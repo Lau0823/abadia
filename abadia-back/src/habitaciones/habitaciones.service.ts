@@ -23,8 +23,9 @@ export class HabitacionesService {
     return this.habitacionRepository.save(habitacion);
   }
 
-  async findAll(): Promise<Habitacion[]> {
+  async findAll(includeInactive = false): Promise<Habitacion[]> {
     return this.habitacionRepository.find({
+      where: includeInactive ? {} : { activo: true },
       order: { createdAt: 'DESC' },
     });
   }
@@ -47,6 +48,7 @@ export class HabitacionesService {
     const qb = this.habitacionRepository
       .createQueryBuilder('habitacion')
       .where("habitacion.estado = 'DISPONIBLE'")
+      .andWhere('habitacion.activo = true')
       .andWhere((qb) => {
         const subQuery = qb
           .subQuery()
@@ -66,9 +68,9 @@ export class HabitacionesService {
     return await qb.getMany();
   }
 
-  async findOne(id: string): Promise<Habitacion> {
+  async findOne(id: string, includeInactive = false): Promise<Habitacion> {
     const habitacion = await this.habitacionRepository.findOne({
-      where: { id },
+      where: includeInactive ? { id } : { id, activo: true },
     });
     if (!habitacion) {
       throw new NotFoundException(`Habitación con ID ${id} no encontrada`);
@@ -80,7 +82,7 @@ export class HabitacionesService {
     id: string,
     updateHabitacionDto: UpdateHabitacionDto,
   ): Promise<Habitacion> {
-    const habitacion = await this.findOne(id);
+    const habitacion = await this.findOne(id, true);
     const previousImages = Array.isArray(habitacion.imagenes)
       ? [...habitacion.imagenes]
       : [];
@@ -101,23 +103,22 @@ export class HabitacionesService {
     return this.habitacionRepository.save(habitacion);
   }
 
-  async remove(id: string): Promise<void> {
-    const habitacion = await this.findOne(id);
-    const urlsToDelete = Array.isArray(habitacion.imagenes)
-      ? [...habitacion.imagenes]
-      : [];
+  /**
+   * Baja lógica: la habitación deja de mostrarse en la web pero se conservan
+   * sus reservas y sus imágenes. Nunca se elimina el registro ni Cloudinary.
+   */
+  async setActivo(id: string, activo: boolean): Promise<Habitacion> {
+    const habitacion = await this.findOne(id, true);
+    habitacion.activo = activo;
+    return this.habitacionRepository.save(habitacion);
+  }
 
-    await this.habitacionRepository.remove(habitacion);
-
-    if (urlsToDelete.length > 0) {
-      await Promise.allSettled(
-        urlsToDelete.map((url) => this.cloudinaryService.deleteByUrl(url)),
-      );
-    }
+  async deactivate(id: string): Promise<Habitacion> {
+    return this.setActivo(id, false);
   }
 
   async updateLimpieza(id: string, estadoLimpieza: any): Promise<Habitacion> {
-    const habitacion = await this.findOne(id);
+    const habitacion = await this.findOne(id, true);
     habitacion.estadoLimpieza = estadoLimpieza as EstadoLimpieza;
     return this.habitacionRepository.save(habitacion);
   }
@@ -126,7 +127,7 @@ export class HabitacionesService {
     id: string,
     files: Express.Multer.File[],
   ): Promise<Habitacion> {
-    const habitacion = await this.findOne(id);
+    const habitacion = await this.findOne(id, true);
     if (!files || files.length === 0) {
       throw new BadRequestException(
         'Debe proporcionar al menos un archivo de imagen',

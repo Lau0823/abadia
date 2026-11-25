@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { fetchApi } from "@/lib/api";
 import { XMarkIcon, PlusIcon } from "@heroicons/react/24/outline";
 import ClienteModal from "./ClienteModal";
+import AdminDialog, { AdminDialogConfig, dialogError } from "@/components/AdminDialog";
 
 interface CotizacionModalProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface CotizacionModalProps {
 
 export default function CotizacionModal({ isOpen, onClose, onSuccess }: CotizacionModalProps) {
   const [loading, setLoading] = useState(false);
+  const [dialog, setDialog] = useState<AdminDialogConfig | null>(null);
   const [clientes, setClientes] = useState<any[]>([]);
   const [habitaciones, setHabitaciones] = useState<any[]>([]);
   const [isClienteModalOpen, setIsClienteModalOpen] = useState(false);
@@ -124,15 +126,25 @@ export default function CotizacionModal({ isOpen, onClose, onSuccess }: Cotizaci
       onSuccess();
       onClose();
     } catch (error) {
-      alert("Error al crear la cotización.");
+      setDialog({
+        title: "No se pudo crear",
+        message: dialogError(
+          error,
+          "No se pudo crear la cotización. Inténtalo de nuevo.",
+        ),
+        variant: "error",
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return <AdminDialog config={dialog} onClose={() => setDialog(null)} />;
+  }
 
   return (
+    <>
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm overflow-y-auto">
       <div className="bg-white rounded-3xl w-full max-w-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 my-auto">
         <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
@@ -278,6 +290,8 @@ export default function CotizacionModal({ isOpen, onClose, onSuccess }: Cotizaci
         onClose={() => setIsClienteModalOpen(false)}
         onSuccess={fetchClientes}
       />
+      <AdminDialog config={dialog} onClose={() => setDialog(null)} />
     </div>
+    </>
   );
 }

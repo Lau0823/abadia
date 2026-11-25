@@ -17,6 +17,7 @@ import {
   ChatBubbleLeftRightIcon,
 } from "@heroicons/react/24/outline";
 import EmpleadoModal from "@/components/EmpleadoModal";
+import AdminDialog, { AdminDialogConfig, dialogError } from "@/components/AdminDialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/Tooltip";
 
 // Asignación cromática por rol usando la paleta Indigo Infinity (letra blanca)
@@ -57,6 +58,7 @@ export default function EmpleadosPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
   const [roleFilter, setRoleFilter] = useState<string>("ALL");
+  const [dialog, setDialog] = useState<AdminDialogConfig | null>(null);
 
   const fetchEmpleados = async (search = "") => {
     setLoading(true);
@@ -91,15 +93,32 @@ export default function EmpleadosPage() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm("¿Estás seguro de que deseas eliminar este empleado?")) {
-      try {
-        await fetchApi(`/users/${id}`, { method: "DELETE" });
-        fetchEmpleados(searchTerm);
-      } catch (error) {
-        alert("Error al eliminar el empleado.");
-      }
-    }
+  const handleDelete = (empleado: any) => {
+    setDialog({
+      title: "Eliminar empleado",
+      message: (
+        <>
+          ¿Eliminar a <strong>{empleado?.nombre || "este empleado"}</strong> del
+          equipo? Esta acción no se puede deshacer.
+        </>
+      ),
+      variant: "warning",
+      confirmLabel: "Eliminar",
+      onConfirm: async () => {
+        try {
+          await fetchApi(`/users/${empleado?.id}`, { method: "DELETE" });
+          fetchEmpleados(searchTerm);
+          return true;
+        } catch (error) {
+          setDialog({
+            title: "No se pudo eliminar",
+            message: dialogError(error, "No se pudo eliminar el empleado."),
+            variant: "error",
+          });
+          return false;
+        }
+      },
+    });
   };
 
   // Roles únicos dinámicos para los filtros
@@ -399,7 +418,7 @@ export default function EmpleadosPage() {
                         <TooltipTrigger asChild>
                           <button
                             type="button"
-                            onClick={() => handleDelete(empleado.id)}
+                            onClick={() => handleDelete(empleado)}
                             className="p-2 rounded-full bg-white/10 hover:bg-rose-500 text-white transition-colors"
                           >
                             <TrashIcon className="w-4 h-4" />
@@ -518,7 +537,7 @@ export default function EmpleadosPage() {
                               <TooltipTrigger asChild>
                                 <button
                                   type="button"
-                                  onClick={() => handleDelete(empleado.id)}
+                                  onClick={() => handleDelete(empleado)}
                                   className="p-2 text-[#4F67B5] hover:text-white hover:bg-rose-600 rounded-full transition-all"
                                 >
                                   <TrashIcon className="w-4 h-4" />
@@ -545,6 +564,8 @@ export default function EmpleadosPage() {
         empleado={selectedEmpleado}
         onSuccess={() => fetchEmpleados(searchTerm)}
       />
+
+      <AdminDialog config={dialog} onClose={() => setDialog(null)} />
     </div>
   );
 }

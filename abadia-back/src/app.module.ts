@@ -35,6 +35,7 @@ import { Tarea } from './tareas/entities/tarea.entity';
 
 import { DataSource } from 'typeorm';
 import { AddInHouseReservationStatus1795230000000 } from './migrations/1795230000000-add-in-house-reservation-status';
+import { AddHabitacionesActivo1795310000000 } from './migrations/1795310000000-add-habitaciones-activo';
 
 @Module({
   imports: [
@@ -57,7 +58,10 @@ import { AddInHouseReservationStatus1795230000000 } from './migrations/179523000
         const isProduction = process.env.NODE_ENV === 'production';
         const synchronize =
           !isProduction || config.get<string>('DB_SYNCHRONIZE') === 'true';
-        const migrations = [AddInHouseReservationStatus1795230000000];
+        const migrations = [
+          AddInHouseReservationStatus1795230000000,
+          AddHabitacionesActivo1795310000000,
+        ];
         const migrationsTransactionMode = 'each' as const;
 
         const entities = [

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { fetchApi } from "@/lib/api";
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
+import AdminDialog, { AdminDialogConfig, dialogError } from "@/components/AdminDialog";
 
 interface HuespedesModalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ export default function HuespedesModal({ isOpen, onClose, onSuccess, reservation
   const [huespedes, setHuespedes] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [dialog, setDialog] = useState<AdminDialogConfig | null>(null);
 
   const [newHuesped, setNewHuesped] = useState({
     nombre: "",
@@ -51,28 +53,48 @@ export default function HuespedesModal({ isOpen, onClose, onSuccess, reservation
     }
   };
 
-  const handleRemoveHuesped = async (id: string) => {
-    if (!confirm("¿Eliminar a esta persona del registro?")) return;
-    
-    setLoading(true);
-    setError("");
-
-    try {
-      await fetchApi(`/reservations/huespedes/${id}`, {
-        method: "DELETE"
-      });
-      setHuespedes(huespedes.filter((h: any) => h.id !== id));
-      onSuccess();
-    } catch (err: any) {
-      setError(err.message || "Error al eliminar");
-    } finally {
-      setLoading(false);
-    }
+  const handleRemoveHuesped = (huesped: any) => {
+    setDialog({
+      title: "Quitar acompañante",
+      message: (
+        <>
+          ¿Quitar a <strong>{huesped?.nombre || "esta persona"}</strong> del
+          registro de la reserva?
+        </>
+      ),
+      variant: "warning",
+      confirmLabel: "Quitar",
+      onConfirm: async () => {
+        setLoading(true);
+        setError("");
+        try {
+          await fetchApi(`/reservations/huespedes/${huesped?.id}`, {
+            method: "DELETE",
+          });
+          setHuespedes((prev) => prev.filter((h: any) => h.id !== huesped?.id));
+          onSuccess();
+          return true;
+        } catch (err) {
+          setError(dialogError(err, "Error al eliminar"));
+          setDialog({
+            title: "No se pudo quitar",
+            message: dialogError(err, "No se pudo quitar del registro."),
+            variant: "error",
+          });
+          return false;
+        } finally {
+          setLoading(false);
+        }
+      },
+    });
   };
 
-  if (!isOpen || !reservation) return null;
+  if (!isOpen || !reservation) {
+    return <AdminDialog config={dialog} onClose={() => setDialog(null)} />;
+  }
 
   return (
+    <>
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <div className="bg-white rounded-3xl p-6 w-full max-w-lg shadow-2xl relative animate-in fade-in zoom-in duration-200">
         <button 
@@ -103,7 +125,7 @@ export default function HuespedesModal({ isOpen, onClose, onSuccess, reservation
                   <p className="text-xs text-gray-500">Doc: {huesped.documento}</p>
                 </div>
                 <button 
-                  onClick={() => handleRemoveHuesped(huesped.id)}
+                  onClick={() => handleRemoveHuesped(huesped)}
                   disabled={loading}
                   className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
                   title="Remover huésped"
@@ -163,5 +185,7 @@ export default function HuespedesModal({ isOpen, onClose, onSuccess, reservation
         </div>
       </div>
     </div>
+    <AdminDialog config={dialog} onClose={() => setDialog(null)} />
+    </>
   );
 }

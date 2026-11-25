@@ -16,6 +16,7 @@ import {
   SparklesIcon,
 } from "@heroicons/react/24/outline";
 import TareaModal from "@/components/TareaModal";
+import AdminDialog, { AdminDialogConfig } from "@/components/AdminDialog";
 import { useAuthStore } from "@/store/authStore";
 
 // Paleta "Indigo Infinity" aplicada a cada columna y estado del tablero
@@ -59,6 +60,7 @@ export default function TareasPage() {
   const [selectedTarea, setSelectedTarea] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [onlyMine, setOnlyMine] = useState(false);
+  const [dialog, setDialog] = useState<AdminDialogConfig | null>(null);
   const { user } = useAuthStore();
 
   const userRole = (user?.rol || "").toLowerCase().replace(/_/g, "");
@@ -131,8 +133,12 @@ export default function TareasPage() {
       }
 
       fetchTareas();
-    } catch (error) {
-      alert("Error al cambiar el estado de la tarea.");
+    } catch {
+      setDialog({
+        title: "No se pudo actualizar",
+        message: "No se pudo cambiar el estado de la tarea. Inténtalo de nuevo.",
+        variant: "error",
+      });
     }
   };
 
@@ -486,6 +492,8 @@ export default function TareasPage() {
         tarea={selectedTarea}
         onSuccess={fetchTareas}
       />
+
+      <AdminDialog config={dialog} onClose={() => setDialog(null)} />
     </div>
   );
 }

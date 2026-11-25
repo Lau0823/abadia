@@ -32,6 +32,12 @@ nginx admite hasta 30 MB (`client_max_body_size 30m`); un archivo más grande se
 
 > `deploy/abadia1.nginx.conf` se copia a `/home/camilo/`, pero el workflow **no lo instala** en `/etc/nginx`. Cualquier cambio de nginx debe aplicarse a mano en el VPS y sin sobrescribir los bloques 443/certbot.
 
+## Habitaciones dadas de baja
+
+Dar de baja una habitación **no la elimina**: pone `activo = false` (migración `1795310000000`), por lo que deja de aparecer en la web pero conserva sus reservas y sus fotos de Cloudinary. Se reactiva con `PATCH /habitaciones/:id/activo`. El panel usa `GET /habitaciones/admin` para ver también las inactivas; los endpoints públicos (`GET /habitaciones`, `GET /habitaciones/disponibles`) solo devuelven activas.
+
+Todos los avisos y confirmaciones del panel usan `components/AdminDialog.tsx`.
+
 ## Base de datos
 
 - En **desarrollo** TypeORM mantiene el esquema con `synchronize: true`.

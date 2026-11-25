@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useSettingsStore } from "@/store/settingsStore";
-import UploadErrorModal from "@/components/UploadErrorModal";
+import AdminDialog, { dialogError } from "@/components/AdminDialog";
 import {
   PhotoIcon,
   FilmIcon,
@@ -57,11 +57,13 @@ export default function MultimediaPage() {
         setSuccessKey(key);
         setTimeout(() => setSuccessKey(null), 2000);
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error al subir archivo", error);
       setUploadError(
-        error?.message ||
+        dialogError(
+          error,
           "No se pudo subir el archivo. Verifica que pese menos de 30 MB e inténtalo de nuevo."
+        )
       );
     } finally {
       e.target.value = "";
@@ -508,9 +510,16 @@ export default function MultimediaPage() {
         </div>
       )}
 
-      <UploadErrorModal
-        isOpen={Boolean(uploadError)}
-        message={uploadError}
+      <AdminDialog
+        config={
+          uploadError
+            ? {
+                title: "No se pudo subir el archivo",
+                message: uploadError,
+                variant: "error",
+              }
+            : null
+        }
         onClose={() => setUploadError(null)}
       />
     </div>

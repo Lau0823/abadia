@@ -24,6 +24,7 @@ import TransferirReservaModal from "@/components/TransferirReservaModal";
 import DetalleReservaModal from "@/components/DetalleReservaModal";
 import ConvertirReservaModal from "@/components/ConvertirReservaModal";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/Tooltip";
+import AdminDialog, { AdminDialogConfig, dialogError } from "@/components/AdminDialog";
 
 type FilterTab = "Todas" | "Cotizaciones" | "Pendientes" | "Realizadas" | "En Casa" | "Canceladas";
 
@@ -102,6 +103,7 @@ export default function CotizacionesReservasPage() {
   const [isDetalleModalOpen, setIsDetalleModalOpen] = useState(false);
   const [isConvertirModalOpen, setIsConvertirModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [dialog, setDialog] = useState<AdminDialogConfig | null>(null);
 
   const [search, setSearch] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -242,24 +244,54 @@ export default function CotizacionesReservasPage() {
     return match ? `Habitación ${match[0]}` : String(raw);
   };
 
-  const handleChangeStatus = async (
+  const STATUS_LABELS: Record<string, string> = {
+    PENDING: "Pendiente",
+    ACCEPTED: "Aceptada",
+    EXPIRED: "Vencida",
+    pending: "Pendiente",
+    confirmed: "Confirmada",
+    in_house: "En casa",
+    completed: "Completada",
+    cancelled: "Cancelada",
+  };
+
+  const handleChangeStatus = (
     id: string,
     type: "cotizacion" | "reserva",
     newStatus: string
   ) => {
-    if (confirm(`¿Estás seguro de cambiar el estado a ${newStatus}?`)) {
-      try {
-        const endpoint =
-          type === "cotizacion" ? `/cotizaciones/${id}/status` : `/reservations/${id}/status`;
-        await fetchApi(endpoint, {
-          method: "PATCH",
-          body: JSON.stringify({ status: newStatus }),
-        });
-        fetchData();
-      } catch (error: any) {
-        alert("Error al cambiar estado: " + (error.message || ""));
-      }
-    }
+    const label = STATUS_LABELS[newStatus] ?? newStatus;
+    setDialog({
+      title: "Cambiar estado",
+      message: (
+        <>
+          ¿Cambiar el estado a <strong>{label}</strong>?
+        </>
+      ),
+      variant: "confirm",
+      confirmLabel: "Cambiar estado",
+      onConfirm: async () => {
+        try {
+          const endpoint =
+            type === "cotizacion"
+              ? `/cotizaciones/${id}/status`
+              : `/reservations/${id}/status`;
+          await fetchApi(endpoint, {
+            method: "PATCH",
+            body: JSON.stringify({ status: newStatus }),
+          });
+          fetchData();
+          return true;
+        } catch (error) {
+          setDialog({
+            title: "No se pudo cambiar el estado",
+            message: dialogError(error, "Inténtalo de nuevo en unos momentos."),
+            variant: "error",
+          });
+          return false;
+        }
+      },
+    });
   };
 
   return (
@@ -947,6 +979,8 @@ export default function CotizacionesReservasPage() {
           />
         </>
       )}
+
+      <AdminDialog config={dialog} onClose={() => setDialog(null)} />
     </div>
   );
 }
