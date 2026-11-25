@@ -91,6 +91,7 @@ export default function CotizacionesReservasPage() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<FilterTab>("Todas");
+  const [dateRange, setDateRange] = useState<"3m" | "all">("3m");
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
 
   // Modals state
@@ -178,24 +179,35 @@ export default function CotizacionesReservasPage() {
     fetchData();
   }, [search]);
 
-  const filteredData = useMemo(() => {
+  const scopedData = useMemo(() => {
+    if (dateRange === "all") return data;
+    const threeMonthsAgo = new Date();
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+    threeMonthsAgo.setHours(0, 0, 0, 0);
     return data.filter((item) => {
+      const refDate = new Date(item.checkIn || item.createdAt || Date.now());
+      return refDate >= threeMonthsAgo;
+    });
+  }, [data, dateRange]);
+
+  const filteredData = useMemo(() => {
+    return scopedData.filter((item) => {
       if (activeTab === "Todas") return true;
       return item.uiStatus === activeTab;
     });
-  }, [data, activeTab]);
+  }, [scopedData, activeTab]);
 
   // Contadores por tab y métricas KPI
   const tabCounts = useMemo(() => {
     const counts: Record<FilterTab, number> = {
-      Todas: data.length,
+      Todas: scopedData.length,
       Cotizaciones: 0,
       Pendientes: 0,
       Realizadas: 0,
       "En Casa": 0,
       Canceladas: 0,
     };
-    data.forEach((item) => {
+    scopedData.forEach((item) => {
       const st = item.uiStatus as Exclude<FilterTab, "Todas">;
       if (counts[st] !== undefined) counts[st]++;
     });
@@ -373,34 +385,61 @@ export default function CotizacionesReservasPage() {
             </div>
           </div>
 
-          {/* Pills / Tabs con Contadores */}
-          <div className="flex overflow-x-auto gap-2 pb-1">
-            {tabs.map((tab) => {
-              const isActive = activeTab === tab;
-              return (
-                <button
-                  type="button"
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap border ${
-                    isActive
-                      ? "bg-[#1A2458] text-white border-[#1A2458] shadow-sm"
-                      : "bg-white text-[#4F67B5] border-[#A5C5E2]/40 hover:text-[#1A2458] hover:bg-[#A5C5E2]/20"
-                  }`}
-                >
-                  <span>{tab}</span>
-                  <span
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+          {/* Pills / Tabs con Contadores + Filtro de Rango */}
+          <div className="flex flex-wrap items-center justify-between gap-2 pb-1">
+            <div className="flex overflow-x-auto gap-2">
+              {tabs.map((tab) => {
+                const isActive = activeTab === tab;
+                return (
+                  <button
+                    type="button"
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap border ${
                       isActive
-                        ? "bg-[#A5C5E2] text-[#1A2458]"
-                        : "bg-[#F4F6FB] text-[#4F67B5]"
+                        ? "bg-[#1A2458] text-white border-[#1A2458] shadow-sm"
+                        : "bg-white text-[#4F67B5] border-[#A5C5E2]/40 hover:text-[#1A2458] hover:bg-[#A5C5E2]/20"
                     }`}
                   >
-                    {tabCounts[tab]}
-                  </span>
-                </button>
-              );
-            })}
+                    <span>{tab}</span>
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                        isActive
+                          ? "bg-[#A5C5E2] text-[#1A2458]"
+                          : "bg-[#F4F6FB] text-[#4F67B5]"
+                      }`}
+                    >
+                      {tabCounts[tab]}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="flex items-center bg-[#F4F6FB] p-1 rounded-full border border-[#A5C5E2]/50 shrink-0">
+              <button
+                type="button"
+                onClick={() => setDateRange("3m")}
+                className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-all ${
+                  dateRange === "3m"
+                    ? "bg-[#1A2458] text-white shadow-xs"
+                    : "text-[#4F67B5] hover:text-[#1A2458]"
+                }`}
+              >
+                Últimos 3 meses
+              </button>
+              <button
+                type="button"
+                onClick={() => setDateRange("all")}
+                className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-all ${
+                  dateRange === "all"
+                    ? "bg-[#1A2458] text-white shadow-xs"
+                    : "text-[#4F67B5] hover:text-[#1A2458]"
+                }`}
+              >
+                Todo el historial
+              </button>
+            </div>
           </div>
         </div>
 

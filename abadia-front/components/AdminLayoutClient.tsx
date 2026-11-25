@@ -270,15 +270,6 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
             </div>
 
             <div className="flex items-center gap-4">
-              <a
-                href={`${API_URL}/google-calendar/auth`}
-                className="hidden md:flex items-center gap-2 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-full text-sm font-medium transition-all shadow-sm"
-              >
-                <svg className="w-4 h-4" viewBox="0 0 24 24">
-                  <path fill="currentColor" d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1V11.1Z" />
-                </svg>
-                Vincular Calendario
-              </a>
               <div className="text-right hidden sm:block">
                 <p className="text-sm font-medium text-[var(--mv-ink)]">{user.username}</p>
                 <p className="text-xs text-gray-500 uppercase tracking-wider">{user.rol}</p>

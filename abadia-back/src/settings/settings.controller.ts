@@ -75,8 +75,8 @@ export class SettingsController {
     @UploadedFile(
       new ParseFilePipeBuilder()
         .addMaxSizeValidator({
-          maxSize: 10485760,
-          message: 'El archivo supera el límite de 10 MB',
+          maxSize: 104857600,
+          message: 'El archivo supera el límite de 100 MB',
         })
         .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY }),
     )

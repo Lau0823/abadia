@@ -23,6 +23,7 @@ export default function MultimediaPage() {
   const [activeTab, setActiveTab] = useState<MultimediaTab>("global");
   const [savingKey, setSavingKey] = useState<string | null>(null);
   const [successKey, setSuccessKey] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
 
   const [localTexts, setLocalTexts] = useState<Record<string, string>>({});
@@ -46,6 +47,7 @@ export default function MultimediaPage() {
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, key: string) => {
     if (!e.target.files || e.target.files.length === 0) return;
     const file = e.target.files[0];
+    setUploadError(null);
     setSavingKey(key);
     try {
       const url = await uploadFile(file);
@@ -54,10 +56,16 @@ export default function MultimediaPage() {
         setSuccessKey(key);
         setTimeout(() => setSuccessKey(null), 2000);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error al subir archivo", error);
+      setUploadError(
+        error?.message ||
+          "No se pudo subir el archivo. Verifica que pese menos de 100 MB e inténtalo de nuevo."
+      );
+    } finally {
+      e.target.value = "";
+      setSavingKey(null);
     }
-    setSavingKey(null);
   };
 
   const triggerFileInput = (key: string) => {
@@ -286,6 +294,19 @@ export default function MultimediaPage() {
 
   return (
     <div className="min-h-[calc(100vh-110px)] bg-[#F4F6FB] text-[#1A2458] rounded-[32px] p-5 md:p-8 pb-24 antialiased">
+      {uploadError && (
+        <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-5 py-3.5 rounded-2xl text-xs font-semibold flex items-center justify-between gap-4">
+          <span>{uploadError}</span>
+          <button
+            type="button"
+            onClick={() => setUploadError(null)}
+            className="text-red-500 hover:text-red-800 font-bold"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* HEADER EN ÍNDIGO PROFUNDO (#1A2458) */}
       <div className="bg-gradient-to-br from-[#1A2458] via-[#1A2458] to-[#2B377A] text-white rounded-[30px] p-6 md:p-8 shadow-xl mb-8 relative overflow-hidden">
         <div className="absolute -right-12 -top-12 w-60 h-60 rounded-full bg-[#473C8F]/35 pointer-events-none" />

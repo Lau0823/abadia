@@ -26,7 +26,9 @@ export class SettingsService {
   ) {}
 
   async uploadFile(key: string, file: Express.Multer.File) {
-    const isVideo = file.mimetype.includes('video');
+    const isVideo =
+      file.mimetype.includes('video') ||
+      /\.(mp4|mov|webm|m4v|ogg)$/i.test(file.originalname || '');
     const uploadResult = (
       isVideo
         ? await this.cloudinaryService.uploadVideo(file)
