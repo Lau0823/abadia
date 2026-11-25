@@ -60,7 +60,7 @@ export default function MultimediaPage() {
       console.error("Error al subir archivo", error);
       setUploadError(
         error?.message ||
-          "No se pudo subir el archivo. Verifica que pese menos de 100 MB e inténtalo de nuevo."
+          "No se pudo subir el archivo. Verifica que pese menos de 30 MB e inténtalo de nuevo."
       );
     } finally {
       e.target.value = "";
