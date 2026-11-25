@@ -30,11 +30,20 @@ export async function fetchApi(endpoint: string, options: FetchApiOptions = {}) 
   const response = await fetch(url, defaultOptions);
   
   if (!response.ok) {
-    let errorMessage = 'Error en la petición';
+    // nginx devuelve un 413 en HTML cuando el body supera client_max_body_size (30 MB).
+    let errorMessage =
+      response.status === 413
+        ? 'El archivo supera el límite de 30 MB. Comprime el archivo y vuelve a intentarlo.'
+        : 'Error en la petición';
     try {
       const errorData = await response.json();
-      errorMessage = errorData.message || errorMessage;
-    } catch (e) {
+      const message = errorData?.message;
+      if (Array.isArray(message)) {
+        errorMessage = message.join(' ');
+      } else if (typeof message === 'string' && message) {
+        errorMessage = message;
+      }
+    } catch {
       // Ignore if not JSON
     }
     throw new Error(errorMessage);

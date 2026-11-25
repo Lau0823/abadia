@@ -25,6 +25,8 @@ import {
   FilmIcon
 } from "@heroicons/react/24/outline";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/Tooltip";
+import { validateUploadFile } from "@/lib/upload";
+import UploadErrorModal from "@/components/UploadErrorModal";
 
 interface Setting {
   key: string;
@@ -60,6 +62,7 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'account' | 'contact' | 'social' | 'general' | 'integrations' | 'advanced'>('account');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [newKeyModal, setNewKeyModal] = useState(false);
@@ -261,7 +264,9 @@ export default function SettingsPage() {
     if (!file) return;
     setSaving(true);
     setSuccessMsg("");
+    setUploadError(null);
     try {
+      validateUploadFile(file);
       const formData = new FormData();
       formData.append('file', file);
       
@@ -275,7 +280,7 @@ export default function SettingsPage() {
       setTimeout(() => setSuccessMsg(""), 4000);
     } catch (error: any) {
       console.error("Error subiendo archivo", error);
-      alert(error.message || "Hubo un error al subir el archivo.");
+      setUploadError(error.message || "Hubo un error al subir el archivo.");
     } finally {
       setSaving(false);
     }
@@ -868,6 +873,12 @@ export default function SettingsPage() {
           </div>
         </div>
       )}
+
+      <UploadErrorModal
+        isOpen={Boolean(uploadError)}
+        message={uploadError}
+        onClose={() => setUploadError(null)}
+      />
     </div>
   );
 }

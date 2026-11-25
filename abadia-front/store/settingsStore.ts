@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { fetchApi } from '../lib/api';
+import { validateUploadFile } from '../lib/upload';
 
 export interface Setting {
   key: string;
@@ -57,6 +58,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     }
   },
   uploadFile: async (file: File) => {
+    validateUploadFile(file);
     const formData = new FormData();
     formData.append('file', file);
     

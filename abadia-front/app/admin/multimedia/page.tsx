@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useSettingsStore } from "@/store/settingsStore";
+import UploadErrorModal from "@/components/UploadErrorModal";
 import {
   PhotoIcon,
   FilmIcon,
@@ -294,19 +295,6 @@ export default function MultimediaPage() {
 
   return (
     <div className="min-h-[calc(100vh-110px)] bg-[#F4F6FB] text-[#1A2458] rounded-[32px] p-5 md:p-8 pb-24 antialiased">
-      {uploadError && (
-        <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-5 py-3.5 rounded-2xl text-xs font-semibold flex items-center justify-between gap-4">
-          <span>{uploadError}</span>
-          <button
-            type="button"
-            onClick={() => setUploadError(null)}
-            className="text-red-500 hover:text-red-800 font-bold"
-          >
-            ✕
-          </button>
-        </div>
-      )}
-
       {/* HEADER EN ÍNDIGO PROFUNDO (#1A2458) */}
       <div className="bg-gradient-to-br from-[#1A2458] via-[#1A2458] to-[#2B377A] text-white rounded-[30px] p-6 md:p-8 shadow-xl mb-8 relative overflow-hidden">
         <div className="absolute -right-12 -top-12 w-60 h-60 rounded-full bg-[#473C8F]/35 pointer-events-none" />
@@ -519,6 +507,12 @@ export default function MultimediaPage() {
           ])}
         </div>
       )}
+
+      <UploadErrorModal
+        isOpen={Boolean(uploadError)}
+        message={uploadError}
+        onClose={() => setUploadError(null)}
+      />
     </div>
   );
 }

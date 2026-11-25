@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -18,6 +19,20 @@ export class SettingsService {
     'google_access_token',
     'google_refresh_token',
   ]);
+  private static readonly ALLOWED_VIDEO_EXTENSIONS = ['mp4', 'mov', 'm4v'];
+  private static readonly ALLOWED_IMAGE_EXTENSIONS = [
+    'jpg',
+    'jpeg',
+    'png',
+    'webp',
+    'gif',
+    'avif',
+  ];
+  private static readonly KNOWN_VIDEO_EXTENSIONS = [
+    ...SettingsService.ALLOWED_VIDEO_EXTENSIONS,
+    'webm',
+    'ogg',
+  ];
 
   constructor(
     @InjectRepository(Setting)
@@ -26,9 +41,33 @@ export class SettingsService {
   ) {}
 
   async uploadFile(key: string, file: Express.Multer.File) {
+    const extension =
+      (file.originalname || '').split('.').pop()?.toLowerCase() || '';
     const isVideo =
       file.mimetype.includes('video') ||
-      /\.(mp4|mov|webm|m4v|ogg)$/i.test(file.originalname || '');
+      SettingsService.KNOWN_VIDEO_EXTENSIONS.includes(extension);
+    const isImage = file.mimetype.includes('image');
+
+    // El front ya valida antes de enviar; esto evita que un cliente directo guarde
+    // un formato que el banner no puede reproducir.
+    if (
+      isVideo &&
+      !SettingsService.ALLOWED_VIDEO_EXTENSIONS.includes(extension)
+    ) {
+      throw new UnprocessableEntityException(
+        'Formato de video no admitido. Usa MP4, MOV o M4V para el banner.',
+      );
+    }
+    if (
+      !isVideo &&
+      !isImage &&
+      !SettingsService.ALLOWED_IMAGE_EXTENSIONS.includes(extension)
+    ) {
+      throw new UnprocessableEntityException(
+        'Formato de archivo no admitido. Usa una imagen JPG, PNG, WEBP, GIF o AVIF, o un video MP4, MOV o M4V.',
+      );
+    }
+
     const uploadResult = (
       isVideo
         ? await this.cloudinaryService.uploadVideo(file)
